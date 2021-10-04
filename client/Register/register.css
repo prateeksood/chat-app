@@ -21,7 +21,7 @@ body{
     justify-content: center;
 }
 #form-holder{
-    height:80%;
+    /* height:80%; */
     width:50%;
     max-width: 400px;
     padding:50px 20px;
@@ -32,18 +32,25 @@ body{
     flex-direction: column;
     align-items: center;
 }
-#form-holder h2{
-    font-size:xx-large;
-    flex-basis: 20%;
-    color: #444;
-}
 #form-holder form{
     flex-basis:80%;
     width: 80%;
-    display: flex;
+    display: none;
     flex-direction: column;
 }
-
+#form-holder:not([active]) form#register-form:not(#login-form),
+#form-holder[active=login] form#login-form{
+    display:flex;
+}
+#form-holder[active=login] form:not(#login-form){
+    display:none;
+}
+#form-holder form h2{
+    align-self:center;
+    font-size:xx-large;
+    margin-bottom:20%;
+    color: #444;
+}
 #form-holder form input {
     height:40px;
     border-radius: 10px;
@@ -77,6 +84,7 @@ body{
     transform:scale(0.99)
 }
 .alread-reg-msg{
+    margin-top:1em;
     text-align:center;
     color: #444;
 }
