@@ -27,8 +27,16 @@ App.element.formLogin.addEventListener("submit",async event=>{
     method:"POST",
     body:new URLSearchParams(formData)
   }).catch(ex=>App.alert("ERROR: ",ex));
-  if(request)
-    App.alert(await request.text());
+  if(request){
+    if(request.ok){
+      const user=await request.json();
+      localStorage.setItem("token",user.token);
+      App.alert("Login successful!🙌");
+      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
+    }else{
+      App.alert(await request.text());
+    }
+  }
 });
 
 App.element.formRegister.addEventListener("submit",async event=>{
@@ -59,8 +67,16 @@ App.element.formRegister.addEventListener("submit",async event=>{
     method:"POST",
     body:new URLSearchParams(formData)
   }).catch(ex=>App.alert("Error: ",ex));
-  if(request)
-    App.alert(await request.text());
+  if(request){
+    if(request.ok){
+      const user=await request.json();
+      localStorage.setItem("token",user.token);
+      App.alert("Registration successful!😍");
+      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
+    }else{
+      App.alert(await request.text());
+    }
+  }
 });
 
 App.element.formLogin.addEventListener("reset",event=>{
