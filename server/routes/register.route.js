@@ -1,7 +1,7 @@
 const router=require("express").Router();
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const User = require("../models/User");
+const User = require("../models/User.model");
 const dataValidation=require ('../validations/register.validation')
 
 router.post("/", async function (request, response) {
@@ -32,12 +32,12 @@ router.post("/", async function (request, response) {
         username: username.toLowerCase(),
       });
       await newUser.save();
-      jwt.sign({ _id: newUser._id },process.env.JWT_SECRET,{ expiresIn: tokenExpiry },async (err, token) => {
+      newUser=newUser._doc;
+      delete newUser.password;
+      jwt.sign(newUser,process.env.JWT_SECRET,{ expiresIn: tokenExpiry },async (err, token) => {
           if (err)
             response.status(500).send(`Something went wrong : ${err.message}`);
           else {
-            newUser=newUser._doc;
-            delete newUser.password;
             newUser={...newUser,token}
             response.status(200).json(newUser);
           }

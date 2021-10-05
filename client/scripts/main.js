@@ -19,7 +19,22 @@ const App={
     App.element.holderResponse.innerHTML=messages.join("<br/>");
   }
 };
-
+window.addEventListener('load',async ()=>{
+  const token=localStorage.getItem('token');
+  const request=await fetch("/auth",{
+    method:"POST",
+    headers:{
+      "x-auth-token": token
+    }
+  }).catch(ex=>App.alert("ERROR: ",ex));
+  if(request){
+    if(request.ok){
+      const user=await request.json();
+      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
+      alert(`logged in as ${user.username}`);
+    }
+  }
+})
 App.element.formLogin.addEventListener("submit",async event=>{
   event.preventDefault();
   const formData=new FormData(event.target);
