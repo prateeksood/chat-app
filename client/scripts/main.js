@@ -6,6 +6,7 @@ const App={
     containerLogin:DOM.id("login-container"),
     formLogin:DOM.id("login-form"),
     formRegister:DOM.id("register-form"),
+    formMessage:DOM.id("message-form"),
     holderResponse:DOM.id("message-holder")
   },
   dataValidation:{
