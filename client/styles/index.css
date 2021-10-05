@@ -1,95 +1,212 @@
 *{
-    padding:0px;
-    margin:0px;
-    box-sizing: border-box;
+	padding:0px;
+	margin:0px;
+	box-sizing:border-box;
 }
+
+/* Customised scrollbar (IE & Firefox are not supported) */
+::-webkit-scrollbar{
+  width:13px;
+  height:12px;
+  background-color:transparent;
+}
+::-webkit-scrollbar-thumb{
+  min-width:24px;
+  min-height:24px;
+  border-radius:4px;
+  background-clip:content-box;
+  border:4px solid transparent;
+  background-color:#eee;
+}
+:hover::-webkit-scrollbar-thumb{
+  background-color:#ccc;
+}
+::-webkit-scrollbar-thumb:hover{
+  border-width:2.5px;
+  background-color:#444;
+}
+
 body{
-    height:100vh;
-    background:#FFFFFF;
-    padding:0;
-    margin:0;
-    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    /* overflow:hidden; */
+	height:100vh;
+	background:#FFFFFF;
+	padding:0;
+	margin:0;
+	font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	/* overflow:hidden; */
 }
 .container{
   display:flex;
+  width:100%;
   height:100%;
 }
 .container.absolute{
   position:absolute;
 }
 #left-section{
-    display:flex;
-    flex-direction:column;
-    width:400px;
-    border-right: 4px solid #FFFFFF;
+	display:flex;
+	flex-direction:column;
+  flex-shrink:0;
+	width:400px;
+  border-right:2px solid #eee;
+  z-index:2;
 }
 #left-top-bar{
-    flex-shrink:0;
-    width:100%;
-    height:70px;
-    background:#EDEDED;
-    border-bottom: 4px solid #FFFFFF;
+	flex-shrink:0;
+	width:100%;
+	height:70px;
+	background:#fff;
+  border-bottom:2px solid #eee;
 }
 #left-main{
-    background:#EDEDED;    
-    height:100%;
-    padding:10px;
-    overflow:auto;
+	/* background:#ededed; */
+	height:100%;
+	overflow:auto;
 }
 .chat-item{
-    width:100%;
-    height:60px;
-    background:#FFFFFF;
-    border-radius:10px;
-    display: flex;
-    align-items: center;
-    padding:5px;
-    margin-bottom:10px;
+	display:flex;
+	align-items:center;
+  position:relative;
+  /* margin:0.5em; */
+	padding:0.5em;
+	height:auto;
+	background:#fff;
+	/* border-radius:10px; */
+  /* border-bottom:0.05em solid #eee; */
+  user-select:none;
+  transition:all 100ms ease;
+}
+.chat-item:hover{
+  background-color:#fafafa;
+}
+.chat-item:active{
+  background-color:#f8f8f8;
+  transform:scale(0.95);
+}
+.chat-item::after{
+  content:"";
+  position:absolute;
+  bottom:0px;
+  left:20%;
+  width:80%;
+  /* height:1px; */
+  background-color:#eee;
+}
+
+.dp-holder,
+.name-holder,
+.other-info{
+	margin:0.5em;
+  height:3.25em;
+  font-weight:500;
 }
 .dp-holder{
-    height:50px;
-    width:50px;
-    background:#EDEDED;
-    border-radius:50%;
-    margin-right:20px;
+  flex-shrink:0;
+  width:3.25em;
+	background:#EDEDED;
+	border-radius:50%;
 }
 .name-holder{
-    display:flex;
-    flex-direction:column;
-    width:calc(100% - 120px);
+  display:flex;
+	flex-direction:column;
+  justify-content:space-between;
+	min-width:0px;
+  width:100%;
 }
-.user-name{
-    font-weight: 600;
-    margin-bottom: 5px;
-    font-size:medium;
-    color:#79B9EE;
+.name-holder .user-name,
+.name-holder .msg-preview{
+  width:100%;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  overflow:hidden;
+}
+.name-holder .user-name{
+  margin-top:0.25em;
+	font-weight:600;
+	font-size:1.1em;
+	color:#777;
+  font-weight:600;
+}
+.name-holder .msg-preview{
+  font-size:smaller;
+  color:#c7c7c7;
+  letter-spacing:0.01em;
 }
 .other-info{
-    width:60px;
+  display:flex;
+  align-items:flex-end;
 }
-.msg-preview{
-  font-size:smaller;
-}
-.msg-time{
-    font-size:0.8em;
+.other-info .msg-time{
+	font-size:0.8em;
+  white-space:nowrap;
+  word-break:keep-all;
+  color:#bbb;
+  word-spacing:-0.1em;
 }
 #messages-area{
-    display:flex;
-    flex-direction:column;
-    width:calc(100vw - 400px);
+	display:flex;
+	flex-direction:column;
+	width:100%;
 }
 #right-top-bar,
 #right-bottom-bar{
-    flex-shrink:0;
-    width:100%;
-    height:70px;
-    background:#EDEDED;
-    border-bottom:4px solid #FFFFFF;
+	flex-shrink:0;
+	width:100%;
+	height:70px;
+	border-bottom:4px solid #fff;
+  box-shadow:0.2em -0.1em 0.3em #2223;
+  z-index:1;
 }
+#right-top-bar{
+  display:flex;
+  padding:0.25em;
+  align-items:center;
+  box-shadow:0.2em 0.1em 0.3em #2223;
+}
+#right-top-bar .dp-holder{
+  margin:0.5em;
+  width:3em;
+  height:3em;
+}
+#right-top-bar .name-holder .user-name{
+  margin-top:0.4em;
+}
+#right-top-bar .name-holder .msg-preview{
+  margin-bottom:0.25em;
+  font-size:small;
+}
+#right-top-bar .icons{
+  display:flex;
+  align-items:center;
+  justify-self:flex-end;
+  height:100%;
+}
+#right-top-bar .icons .icon{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:0.5em;
+  width:2.5em;
+  height:2.5em;
+  border-radius:50%;
+  transition:all 0.1s ease-out;
+  color:#444;
+}
+#right-top-bar .icons .icon:hover{
+  background-color:#f8f8f8;
+  /* box-shadow:0.1em 0.1em 0.5em #2223; */
+}
+#right-top-bar .icons .icon svg{
+  width:1.5em;
+  height:1.5em;
+  user-select:none;
+}
+#right-top-bar .icons .icon:active svg{
+  transform:scale(0.9);
+}
+
 #right-main{
-    height:100%;
-    overflow:auto;
+	height:100%;
+	overflow:auto;
 }
 
 #right-main .message-container{
@@ -108,7 +225,12 @@ body{
   width:auto;
   max-width:50%;
   border-radius:10px;
-  background-color:#ddd;
+  background-color:#eee;
+  color:#444;
+}
+.message-container.sent .content{
+  background-color:#444;
+  color:#eee;
 }
 .message-container .content:not(:first-of-type){
   margin-top:0.1em;
@@ -140,10 +262,6 @@ body{
   border-top-left-radius:10px;
   border-bottom-left-radius:10px;
 }
-.message-container.sent .content{
-  background-color:#444;
-  color:#ddd;
-}
 
 #right-bottom-bar{
   border-bottom:none;
@@ -170,11 +288,12 @@ body{
   margin-left:1em;
   padding:0.8em 1.8em;
   width:auto;
-  background-color:#222;
-  color:#eee;
   letter-spacing:0.1em;
+  color:#eee;
+  background-color:#222;
+	box-shadow: 1px 1px 7px 0px rgba(34, 34, 34,0.3);
   cursor:pointer;
 }
 .send-area input:focus{
-  box-shadow:0px 0px 0.2em #0003 inset;
+  box-shadow:0px 0px 0.4em #2223 inset;
 }
