@@ -1,5 +1,8 @@
+/// <reference path="models.helper.ts"/>
+
 const mongoose = require("mongoose");
 
+/** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
 const UserSchema = new mongoose.Schema({
   name: {
     required: true,
@@ -12,6 +15,7 @@ const UserSchema = new mongoose.Schema({
   username: {
     required: true,
     type: "String",
+    unique: true
   },
   password: {
     required: true,
@@ -19,6 +23,4 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-/** @type {mongoose.Model<User>} */
-const User = mongoose.model("User", UserSchema);
-module.exports = User;
+module.exports = mongoose.model("User", UserSchema);

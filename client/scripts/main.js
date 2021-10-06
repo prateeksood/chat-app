@@ -4,6 +4,7 @@ const App={
   element:{
     containerChat:DOM.id("chat-container"),
     containerLogin:DOM.id("login-container"),
+    formHolder:DOM.id("form-holder"),
     formLogin:DOM.id("login-form"),
     formRegister:DOM.id("register-form"),
     formMessage:DOM.id("message-form"),
@@ -30,11 +31,12 @@ window.addEventListener('load',async ()=>{
   if(request){
     if(request.ok){
       const user=await request.json();
-      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
-      alert(`logged in as ${user.username}`);
+      DOM.style(App.element.containerLogin,{display:"none"});
+      App.alert(`logged in as ${user.username}`);
     }
   }
-})
+});
+
 App.element.formLogin.addEventListener("submit",async event=>{
   event.preventDefault();
   const formData=new FormData(event.target);
@@ -47,7 +49,7 @@ App.element.formLogin.addEventListener("submit",async event=>{
       const user=await request.json();
       localStorage.setItem("token",user.token);
       App.alert("Login successful!🙌");
-      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
+      DOM.style(App.element.containerLogin,{display:"none"});
     }else{
       App.alert(await request.text());
     }
@@ -87,7 +89,7 @@ App.element.formRegister.addEventListener("submit",async event=>{
       const user=await request.json();
       localStorage.setItem("token",user.token);
       App.alert("Registration successful!😍");
-      DOM.attr(App.element.containerLogin,{"style":"display: none;"});
+      DOM.style(App.element.containerLogin,{display:"none"});
     }else{
       App.alert(await request.text());
     }
@@ -96,9 +98,9 @@ App.element.formRegister.addEventListener("submit",async event=>{
 
 App.element.formLogin.addEventListener("reset",event=>{
   event.preventDefault();
-  event.target.closest("#form-holder").removeAttribute("active");
+  App.element.formHolder.removeAttribute("active");
 });
 App.element.formRegister.addEventListener("reset",event=>{
   event.preventDefault();
-  event.target.closest("#form-holder").setAttribute("active","login");
+  DOM.attr(App.element.formHolder,{active:"login"});
 });

@@ -34,15 +34,16 @@ router.post("/", async function (request, response) {
       await newUser.save();
       newUser=newUser._doc;
       delete newUser.password;
-      jwt.sign(newUser,process.env.JWT_SECRET,{ expiresIn: tokenExpiry },async (err, token) => {
-          if (err)
-            response.status(500).send(`Something went wrong : ${err.message}`);
-          else {
-            newUser={...newUser,token}
-            response.status(200).json(newUser);
-          }
+      jwt.sign(newUser,process.env.JWT_SECRET,{
+        expiresIn:tokenExpiry
+      },async (err,token)=>{
+        if(err)
+          response.status(500).send(`Something went wrong : ${err.message}`);
+        else{
+          newUser={...newUser,token};
+          response.status(200).json(newUser);
         }
-      );
+      });
     }
   } catch (err) {
     response.status(500).send(`Something went wrong : ${err.message}`);
