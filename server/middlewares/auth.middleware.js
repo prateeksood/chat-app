@@ -1,6 +1,11 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+/**
+ * @param {import("express").Request} request
+ * @param {import("express").Response} response
+ * @param {import("express").NextFunction} next
+*/
 const auth = (request, response, next) => {
   const token = request.header("x-auth-token");
   if (!token) response.status(401).send("Token not found, access denied");
