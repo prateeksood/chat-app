@@ -1,4 +1,4 @@
-import { Date,ObjectId } from "mongoose";
+import {ObjectId, Date} from "mongoose";
 
 interface User{
   username: string;
@@ -7,14 +7,13 @@ interface User{
   email: string;
 };
 
-interface Message{
-  participants:ObjectId[];
-  messages:{
+interface Chat{
+  participants: ObjectId[];
+  messages: {
     sender: ObjectId,
-    recipient: ObjectId,
-    message: string,
+    content: string,
     time: Date
   }[];
-
-
 };
+
+export {User, Chat};
