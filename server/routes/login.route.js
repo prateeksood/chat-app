@@ -17,7 +17,7 @@ router.post("/", async function (request, response) {
       username,
       password
     } = request.body;
-    const foundUser = await User.findOne({
+    let foundUser = await User.findOne({
       username
     });
     if (!foundUser)
@@ -27,7 +27,7 @@ router.post("/", async function (request, response) {
         response.status(401).send("Invalid password");
       else {
         // Method #1
-        const foundUser = foundUser._doc; // or foundUser.toObject()
+        foundUser = foundUser._doc; // or foundUser.toObject()
         delete foundUser.password;
 
         // Method #2
@@ -56,7 +56,7 @@ router.post("/", async function (request, response) {
       }
     }
   } catch (err) {
-    response.status(500).send(err);
+    response.status(500).send(err.message);
   }
 });
 
