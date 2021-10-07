@@ -11,6 +11,7 @@ const server = require("http").createServer(app);
 app.use(express.urlencoded({
   extended: true
 }));
+app.use(express.json());
 app.use("/", express.static(__dirname + "/../client"));
 
 app.get("/", function (request, response) {

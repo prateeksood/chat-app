@@ -1,35 +1,65 @@
-const router=require("express").Router();
-const mongoose=require("mongoose");
-const authMiddleware=require("../middlewares/auth.middleware");
-const User=require("../models/User.model");
-const Chat=require("../models/Message.model");
+const router = require("express").Router();
+const mongoose = require("mongoose");
+const authMiddleware = require("../middlewares/auth.middleware");
+const User = require("../models/User.model");
+const Chat = require("../models/Message.model");
 
-router.post("/",authMiddleware,async (request,response) => {
+
+router.post("/", authMiddleware, async (request, response) => {
   /** @type {mongoose.Document<any, any, User> & User & {_id: mongoose.Types.ObjectId}} */
-  const sender=request.user;
-  if(sender){
-    const {content, chatId} = request.body;
-    try{
-      const chat=await Chat.findById(chatId);
-      if(!chat)
-        response.status(401).send("Chat does not exist");
-      else if(!chat.participants.includes(sender._id))
-        response.status(401).send("You are not authorised")
-      else{
-        const message={sender,content};
-        chat.messages.push(message);
-        chat.save().then(()=>{
-          response.status(200).json(message);
-        }).catch(ex=>{
-          response.status(500).send("Something went wrong while sending the message: "+ex);
-        });
-      }
-    }catch(error){
-      response.status(500).send(`Something went wrong : ${error.message}`);
-    }
-  }else{
-    response.status(401).send("Invalid Token, Access Denied");
+  const {
+    content,
+    recipient,
+    sender
+  } = request.body;
+  try {
+    let foundChat = await Chat.findOne({
+      "participants": new mongoose.Types.ObjectId(recipient),
+      "participants": new mongoose.Types.ObjectId(sender)
+    });
+  } catch (err) {
+    response.status(500).send(`Something went wrong : ${err.message}`)
   }
-})
 
-module.exports=router;
+  if (foundChat) {
+    try {
+      let updatedChat = await Chat.findByIdAndUpdate(foundChat._id, {
+        $push: {
+          messages: {
+            sender: new mongoose.Types.ObjectId(sender),
+            recipient: new mongoose.Types.ObjectId(recipient),
+            content
+          }
+        }
+      }, {
+        new: true
+      });
+    } catch (err) {
+      response.status(500).send(`Something went wrong : ${err.message}`)
+    }
+  } else {
+    try {
+      const newChat = new Chat({
+        participants: [
+          new mongoose.Types.ObjectId(recipient),
+          new mongoose.Types.ObjectId(sender)
+        ],
+        messages: [{
+          sender: new mongoose.Types.ObjectId(sender),
+          recipient: new mongoose.Types.ObjectId(recipient),
+          content
+        }]
+
+      });
+      let savedChat = await newChat.save();
+    } catch (err) {
+      response.status(500).send(`Something went wrong : ${err.message}`)
+    }
+
+  }
+  response.status(200).json({
+    "message": "Message sent"
+  });
+});
+
+module.exports = router;
