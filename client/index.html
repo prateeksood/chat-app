@@ -8,6 +8,10 @@
 	<link rel="stylesheet" href="styles/index.css"/>
 	<link rel="stylesheet" href="styles/login.css"/>
 	<script type="text/javascript" src="scripts/dom.js"></script>
+	<script type="text/javascript" src="ui/listener.js"></script>
+	<script type="text/javascript" src="ui/ui-handler.js"></script>
+	<script type="text/javascript" src="ui/components.js"></script>
+  <script type="text/javascript" src="ui/main.js"></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="display:none;">
@@ -41,7 +45,7 @@
       <path d="M16,2A14,14,0,1,0,30,16,14.0158,14.0158,0,0,0,16,2Zm0,26A12,12,0,0,1,16,4V16l8.4812,8.4814A11.9625,11.9625,0,0,1,16,28Z"/>
     </g>
   </svg>
-  <div class="container">
+  <div class="container" c-id="main" c-type="container">
     <div class="container absolute" id="chat-container">
       <aside id="left-section">
         <div class="top-bar" id="left-top-bar">
@@ -309,10 +313,10 @@
         </div>
       </section>
     </div>
-    <div class="container absolute" id="login-container">
+    <div class="container absolute" id="login-container" c-id="login" c-type="container">
       <div id="message-holder"></div>
-      <div id="form-holder" active="login">
-        <form id="register-form" action="/register" method="post">
+      <div id="form-holder" active="login" c-id="holderForm" c-type="container">
+        <form id="register-form" action="/register" method="post" c-id="formRegister" c-type="container">
           <h2>Register</h2>
           <input type="text" name="fullName" placeholder="Full Name" required="required"/>
           <input type="email" name="email" placeholder="Email" required="required"/>
@@ -329,7 +333,7 @@
             <input type="reset" value="Login"/>
           </p>
         </form>
-        <form id="login-form"  action="/login" method="post">
+        <form id="login-form"  action="/login" method="post" c-id="formLogin" c-type="container">
           <h2>Sign In</h2>
           <input type="text" name="username" placeholder="Username" required="required"/>
           <input type="password" name="password" placeholder="Password" required="required"/>
@@ -346,6 +350,5 @@
       </div>
     </div>
   </div>
-  <script type="text/javascript" src="scripts/main.js"></script>
 </body>
 </html>
