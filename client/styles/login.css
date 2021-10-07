@@ -26,15 +26,16 @@ body {
 }
 #message-holder {
   position: absolute;
-  top: 0px;
+  top: 1em;
+  left: 1em;
   min-width: 400px;
   max-width: 80%;
   padding: 1em 1.5em;
-  background: #fff;
+  background: #FFF176;
   text-align: center;
-  border-radius: 0px 0px 20px 20px;
+  border-radius: 4px;
   word-break: break-word;
-  box-shadow: 1px 1px 15px 0px #2223 inset;
+  box-shadow: 1px 1px 15px 0px #2223;
   transition: opacity 0.15s linear;
 }
 #message-holder:empty {
@@ -85,22 +86,52 @@ body {
 #form-holder form input::placeholder {
   color: #bbb;
 }
-#form-holder form input:not([type="submit"]):focus {
+#form-holder form input:focus {
   box-shadow: 1px 1px 7px 0px rgba(34, 34, 34, 0.3);
 }
-#form-holder form input[type="submit"] {
+#form-holder form button {
   color: #fff;
   background-color: #222222;
   cursor: pointer;
   margin-top: 20px;
   margin-bottom: 10px;
+  /* padding:0px 1.2em; */
   letter-spacing: 0.1em;
 }
+#form-holder form button:disabled{
+  cursor:not-allowed;
+}
+#form-holder form button.icon {
+  display:flex;
+  /* justify-content:space-between; */
+  width:auto;
+  border-radius:10px;
+}
+#form-holder form button.icon svg{
+  /* margin-left:0.5em; */
+  display:none;
+}
 
-#form-holder form input[type="submit"]:focus {
+#form-holder form button:disabled svg{
+  display:initial;
+  animation:rotation 4s 1s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+@keyframes rotation {
+  from{
+    transform:rotate(0deg);
+  }
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+#form-holder form button:disabled span{
+  display:none;
+}
+#form-holder form button:focus {
   transform: scale(0.97);
 }
-#form-holder form input[type="submit"]:hover {
+#form-holder form button:hover {
   box-shadow: 1px 1px 7px 0px rgba(246, 246, 246, 0.3) inset;
   transform: scale(0.99);
 }

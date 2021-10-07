@@ -40,10 +40,12 @@ window.addEventListener('load',async ()=>{
 App.element.formLogin.addEventListener("submit",async event=>{
   event.preventDefault();
   const formData=new FormData(event.target);
+  event.target.elements.submit.disabled=true;
   const request=await fetch("/login",{
     method:"POST",
     body:new URLSearchParams(formData)
   }).catch(ex=>App.alert("ERROR: ",ex));
+  setTimeout(()=>event.target.elements.submit.disabled=false,1000);
   if(request){
     if(request.ok){
       const user=await request.json();
@@ -80,10 +82,12 @@ App.element.formRegister.addEventListener("submit",async event=>{
     App.alert("Invalid password. Requirements: Minimum 6 characters, maximum 50 characters, at least one letter, one number and one special character ( @ $ ! % * # ? & . _ )");
     return;
   }
+  event.target.elements.submit.disabled=true;
   const request=await fetch("/register",{
     method:"POST",
     body:new URLSearchParams(formData)
   }).catch(ex=>App.alert("Error: ",ex));
+  event.target.elements.submit.disabled=false;
   if(request){
     if(request.ok){
       const user=await request.json();

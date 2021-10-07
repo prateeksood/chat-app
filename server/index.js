@@ -3,6 +3,8 @@ const db = require("./db/db");
 const loginRoute = require("./routes/login.route");
 const registerRoute = require("./routes/register.route");
 const authRoute = require("./routes/auth.route");
+const messageRoute = require("./routes/message.route");
+
 const app = express();
 const server = require("http").createServer(app);
 
@@ -18,6 +20,7 @@ app.get("/", function (request, response) {
 app.use('/login', loginRoute)
 app.use('/register', registerRoute)
 app.use('/auth', authRoute);
+app.use('/message', messageRoute);
 
 db.connectToDB();
 
