@@ -1,0 +1,190 @@
+.container.prompt{
+  display:flex;
+  position:absolute;
+  top:0px;
+  width:100%;
+  height:100%;
+  /* background-color:#eeea; */
+  justify-content:center;
+  align-items:center;
+}
+.container.prompt[prompts=empty]{
+  display:none;
+}
+.container.prompt .prompt{
+  display:flex;
+  flex-direction:column;
+  padding:15px;
+  width:100%;
+  max-width:420px;
+  max-height:380px;
+  border-radius:10px;
+  background-color:var(--theme-white);
+  box-shadow:0.06em 0.06em 1em #2223;
+}
+.container.prompt .prompt fieldset{
+  margin-top:-10px;
+  margin-bottom:15px;
+  padding:5px 15px;
+  border:2px solid #0002;
+  background-color:transparent;
+  box-shadow:unset;
+}
+.container.prompt .prompt fieldset legend{
+  margin-left:-20px;
+  padding:10px 10px 10px 0px;
+}
+.container.prompt .prompt fieldset .title{
+  display:flex;
+  color:var(--theme-black);
+  align-items:center;
+}
+.container.prompt .prompt fieldset .title svg{
+  margin-right:7px;
+  width:18px;
+  height:18px;
+  fill:var(--theme-black);
+}
+.container.prompt .prompt fieldset .content{
+  display:flex;
+  margin:5px 0px 15px;
+  line-height:22px;
+  align-items:center;
+}
+.container.prompt .prompt .actions{
+  display:flex;
+  justify-content:flex-end;
+  width:100%;
+}
+.container.prompt .prompt .actions button{
+  margin-left:15px;
+  padding:9px 14px;
+  border-radius:2.5px;
+  letter-spacing:0.5px;
+  border:unset;
+  outline:none;
+  background-color:var(--theme-white);
+  color:var(--theme-darker);
+  transition:all 0.15s ease;
+}
+.container.prompt .prompt .actions button:hover{
+  background-color:var(--theme);
+  color:var(--theme-white);
+}
+.container.prompt .prompt .actions button:active{
+  opacity:0.9;
+}
+.container.prompt .prompt .actions button.cancel{
+  background-color:var(--danger-color);
+  color:var(--theme-white);
+  box-shadow:0.06em 0.06em 1em #2223;
+}
+
+.container.notification{
+  display:flex;
+  flex-direction:column;
+  position:absolute;
+  bottom:20px;
+  right:10px;
+  width:300px;
+  height:auto;
+  /* background-color:var(--theme-dark); */
+}
+.container.notification[hidden=true]{
+  display:none;
+}
+.container.notification .notification{
+  display:flex;
+  justify-content:space-between;
+  position:relative;
+  margin-bottom:10px;
+  padding:10px;
+  width:100%;
+  height:auto;
+  border-radius:4px;
+  font-size:smaller;
+  background-color:#fff;
+  box-shadow:0.06em 0.06em 1em #2223;
+  transition:padding 0.15s ease,margin 0.15s ease;
+}
+.container.notification .notification.error::before{
+  content:"";
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:3.5px;
+  height:100%;
+  background-color:var(--danger-color);
+  border-radius:4px 0px 0px 4px;
+}
+.container.notification .notification *{
+  opacity:1;
+  transition:0.1s ease opacity, 0.15s ease height;
+}
+.container.notification .notification .content{
+  display:flex;
+  padding:0px 5px;
+  /* width:100%; */
+  line-height:20px;
+  align-items:center;
+}
+.container.notification .notification.error .content{
+  padding-left:9px;
+}
+.container.notification .notification .actions{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-evenly;
+  align-items:center;
+  width:20px;
+  height:auto;
+}
+
+.container.notification .notification[hidden=true]{
+  margin:0px;
+  padding:0px;
+  overflow:hidden;
+}
+.container.notification .notification[hidden=true] *{
+  opacity:0;
+  height:0px;
+}
+.container.notification .notification .actions button{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:1.5em;
+  height:1.5em;
+  padding:0px;
+  border-radius:50%;
+  font-size:small;
+  border:unset;
+  outline:none;
+  background-color:transparent;
+  color:var(--theme-black);
+}
+.container.notification .notification .actions button.cancel{
+  color:var(--danger-color);
+}
+.container.notification .notification .actions button.cancel::before{
+  background-color:var(--danger-color);
+}
+.container.notification .notification .actions button.accept::before{
+  background-color:var(--theme);
+}
+.container.notification .notification .actions button:hover{
+  color:var(--theme-white);
+  background-color:var(--theme-black);
+}
+.container.notification .notification .actions button.cancel:hover{
+  background-color:var(--danger-color);
+}
+.container.notification .notification .actions button.processing svg{
+  width:1em;
+  height:1em;
+  animation:rotate 2.2s 0s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+@keyframes rotate{
+  from{transform:rotateZ(0deg);}
+  to{transform:rotateZ(360deg);}
+}

@@ -30,6 +30,25 @@ const DOM=new class DOM{
       }
     }
 	}
+  /**
+   * @param {Element} element
+   * @param {DOMAttributes} attributesData
+   */
+  attrNS(element,attributes={}){
+    Object.entries(attributes).forEach(function(attribute){
+      if(attribute[0]==="children"){
+        attribute[1].forEach(function(child){
+          element.appendChild(child);
+        });
+      }else{
+        element.setAttributeNS(
+          attribute[0].includes("xlink")?"http://www.w3.org/1999/xlink":null,
+          attribute[0].includes("xlink:href")?"href":attribute[0],
+          attribute[1]
+        );
+      }
+    });
+  }
   /** @param {string} className */
   class(className){
     return document.getElementsByClassName(className);
@@ -48,6 +67,18 @@ const DOM=new class DOM{
     this.style(element,styles,options.modifyStyles??true);
     this.event(element,events);
     return element;
+  }
+  /**
+   * Creates a new HTML NameSpace Element
+   * @param {keyof HTMLElementTagNameMap} qualifiedName
+   * @param {DOMAttributes} attributes
+   * @param {{namespaceURI:"http://www.w3.org/2000/svg"}} options
+   * @returns {Element}
+   */
+   createNS(qualifiedName,attributes,options={}){
+    let elm=document.createElementNS(options.namespaceURI??"http://www.w3.org/2000/svg",qualifiedName);
+    this.attrNS(elm,attributes);
+    return elm;
   }
   /**
    * Add event listeners to the element
