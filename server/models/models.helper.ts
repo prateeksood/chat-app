@@ -1,19 +1,21 @@
-import {ObjectId, Date} from "mongoose";
+import { ObjectId, Date } from "mongoose";
 
-interface User{
+interface User {
   username: string;
   name: string;
   password: string;
   email: string;
 };
 
-interface Chat{
+interface Chat {
   participants: ObjectId[];
-  messages: {
-    sender: ObjectId,
-    content: string,
-    time: Date
-  }[];
+}
+interface Message {
+  chatID: ObjectId;
+  sender: ObjectId;
+  recipient: ObjectId;
+  content: string;
+  time: Date;
 };
 
-export {User, Chat};
+export { User, Chat, Message };
