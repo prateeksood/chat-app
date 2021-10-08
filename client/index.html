@@ -337,8 +337,8 @@
           <h2>Register</h2>
           <input type="text" name="fullName" placeholder="Full Name" required="required"/>
           <input type="email" name="email" placeholder="Email" required="required"/>
-          <input type="text" name="username" placeholder="Username" required="required" minlength="4" maxlength="20"/>
-          <input type="password" name="password" placeholder="Password" required="required" minlength="6" maxlength="20"/>
+          <input type="text" name="username" placeholder="Username" required="required" minlength="4" maxlength="20" pattern="^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$" title="Minimum 4 characters, maximum 20 characters, numbers and letters are allowed, only special characters allowed are . (dot) and _ (underscore)"/>
+          <input type="password" name="password" placeholder="Password" required="required" minlength="6" maxlength="20" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._])[A-Za-z\d@$!%*#?&._]{6,50}$" title="Minimum 6 characters, maximum 50 characters, at least one letter, one number and one special character ( @ $ ! % * # ? & . _ )"/>
           <input type="password" name="confirmPassword" placeholder="Confirm Password" required="required" minlength="6" maxlength="20"/>
           <button class="icon" type="submit" name="submit">
             <span>Register</span>
