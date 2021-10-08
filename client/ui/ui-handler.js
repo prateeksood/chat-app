@@ -1,10 +1,15 @@
 /// <reference path="listener.js"/>
+/// <reference path="../scripts/dom.js"/>
 
 class UIHandler{
   #listener=new Listener();
-  /** @type {Object<string,UIHandler.Component>} */
+  /**
+   * All components are stored here
+   * @type {Object<string,UIHandler.Component>} */
   #components={};
-  /** @type {Object<string,UIHandler.Component>} */
+  /**
+   * All 'container' type components are stored here and can be accessed by their corresponding id
+   * @type {Object<string,UIHandler.Component>} */
   container={};
   init(){
     document.querySelectorAll("[c-id]").forEach(element=>{
@@ -20,40 +25,58 @@ class UIHandler{
   onInit(action){
     this.#listener.on(action);
   }
-  /** @param {HTMLElement} element */
+  /**
+   * Store and manage element as a component
+   * @param {HTMLElement} element */
   addComponent(element){
     const id=element.getAttribute("c-id");
-    const type=element.getAttribute("c-type");
+    const type=element.getAttribute("c-type")??"container";
     const component=new UIHandler.Component(id,element);
+  
     const parentComponentId=element.getAttribute("c-parent-id");
+    // Checks if a component with parentComponentId is already present
     if(this.#components[parentComponentId])
       this.#components[parentComponentId].addSub(component);
     else if(type in this)
       this[type][id]=component;
     // else
       // this.type[type][id]=component;
+
+    const unmount=element.getAttribute("c-unmount");
+    if(unmount==="true")
+      component.unmount();
+
     this.#components[id]=component;
     return element;
   }
 };
 
 UIHandler.Component=class Component{
-  /** @type {HTMLElement} */
+  /**
+   * Component's element
+   * @type {HTMLElement} */
   element=null;
-  /** @type {Component} */
+  /**
+   * Component's parent component
+   * @type {Component} */
   parent=null;
-  /** @type {Object<string,UIHandler.Component>} */
+  /**
+   * Consists of sub components. (usage eg. parentId.sub.childId)
+   * @type {Object<string,UIHandler.Component>} */
   sub={};
   /**
-   * @param {string} id
-   * @param {HTMLElement} element
+   * @param {string} id Component's ID
+   * @param {HTMLElement} element Component's element
    */
   constructor(id,element){
     this.id=id;
     this.element=element;
   }
-  /** @param {string} itemId*/
+  /**
+   * Component's ID
+   * @param {string} itemId*/
   id=null;
+  /** Remove/delete element from component */
   remove(){
     if(this.element){
       this.element.remove();
@@ -63,17 +86,19 @@ UIHandler.Component=class Component{
       return false;
     }
   }
+  /** Unmount element from HTML document */
   unmount(){
     if(this.element)
       this.element.remove();
   }
   /**
    * Inserts Component at the end of parent
-   * @param {Component} parent
-   */
+   * @param {Component} parent */
   mount(parent){
     parent.element.appendChild(this.element);
-  }/** @param {UIHandler.Component[]} components */
+  }
+  /** Add multiple components as sub components
+   * @param {UIHandler.Component[]} components */
   addChildren(components=[]){
     components.forEach(component=>{
       this.element.appendChild(component.element);
@@ -81,7 +106,9 @@ UIHandler.Component=class Component{
     });
     return this;
   }
-  /** @param {CSSStyleRule} styles*/
+  /**
+   * Apply CSS style to component's element
+   * @param {CSSStyleRule} styles*/
   style(styles){
     DOM.style(this.element,styles);
   }
@@ -89,7 +116,9 @@ UIHandler.Component=class Component{
   styleProperties(properties){
     DOM.styleProp(this.element,properties);
   }
-  /** @param {object} attributes*/
+  /**
+   * Set multiple attributes (usage eg. { class: "className", id: "element-id" })
+   * @param {DOMAttributes} attributes*/
   attr(attributes){
     DOM.attr(this.element,attributes);
   }
