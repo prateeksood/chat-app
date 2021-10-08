@@ -1,34 +1,30 @@
-/** @typedef {import("./models.helper").Chat} Chat */
+/** @typedef {import("./models.helper").Message} Message */
 const mongoose = require("mongoose");
 
-/** @type {mongoose.Schema<Chat, mongoose.Model<Chat,Chat,Chat,Chat>, Chat>} */
-const chatSchema = new mongoose.Schema({
-  participants: {
-    type: [mongoose.Schema.Types.ObjectId],
+/** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
+const messageSchema = new mongoose.Schema({
+  chatID: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Chat"
+  },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
   },
-  messages: [{
-    sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    recipient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    content: {
-      type: String,
-      required: true
-    },
-    time: {
-      type: Date,
-      default: Date.now()
-    }
-  }]
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  }
+}, {
+  timestamps: true
 });
 
 
-module.exports = mongoose.model("Chat", chatSchema);
+module.exports = mongoose.model("Message", messageSchema);
