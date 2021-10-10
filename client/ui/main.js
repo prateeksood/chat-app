@@ -11,6 +11,7 @@ const App=new class AppManager{
     username:/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/,
     password:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._])[A-Za-z\d@$!%*#?&._]{6,50}$/
   };
+
   async auth(){
     const token=localStorage.getItem('token');
     const request=await fetch("/auth",{
@@ -27,6 +28,44 @@ const App=new class AppManager{
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
     }
+  }
+
+  /** @param {HTMLFormElement} form */
+  async sendMessage(form){
+    const formData=new FormData(form);
+    App.request("/message",{
+      method:"POST",
+      body:new URLSearchParams(formData)
+    }).then(data=>{
+      // Message sent
+    });
+  }
+
+  /** @param {Component} chatArea */
+  async receiveMessage(chatArea){
+    App.request("/message",{
+      method:"GET",
+      body:new URLSearchParams({chatId:20})
+    }).then(data=>{
+      // Message sent
+    });
+  }
+
+  /**
+   * Make a fetch request
+   * @param {RequestInit} url
+   * @param {RequestInfo} object
+   * @returns {Promise<{}>}
+   */
+  async request(url,object=null){
+    return new Promise(async function(resolve,reject){
+      const request=await fetch(url,object).catch(ex=>{
+        App.popAlert(ex);
+        reject(ex);
+      });
+      if(request && request.ok)
+        resolve(await request.json());
+    });
   }
 
   popAlert(...content){

@@ -11,7 +11,7 @@ interface Chat {
   participants: ObjectId[];
 }
 interface Message {
-  chatID: ObjectId;
+  chatId: ObjectId;
   sender: ObjectId;
   recipient: ObjectId;
   content: string;

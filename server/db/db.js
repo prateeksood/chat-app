@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const connectToDB = async () => {
   const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xjyed.mongodb.net/chat-app?retryWrites=true&w=majority`;
+  // const url=`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@appcluster.shilt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
   try {
     await mongoose.connect(url, {
       useNewUrlParser: true,

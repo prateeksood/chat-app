@@ -4,26 +4,6 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const Chat = require("../models/Chat.model");
 const Message = require("../models/Message.model");
 
-
-
-router.get("/:chatID", authMiddleware, async (request, response) => {
-  const {
-    chatID
-  } = request.params;
-  try {
-    if (!mongoose.Types.ObjectId.isValid(chatID))
-      return response.status(400).send("Invalid chat ID");
-    const foundMessages = await Message.find({
-      "chatID": new mongoose.Types.ObjectId(chatID)
-    });
-    response.status(200).send(foundMessages);
-  } catch (err) {
-    response.status(500).send(`Something went wrong : ${err.message}`);
-  }
-
-
-})
-
 router.post("/", authMiddleware, async (request, response) => {
   const {
     content,

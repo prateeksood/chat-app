@@ -3,6 +3,7 @@ const db = require("./db/db");
 const loginRoute = require("./routes/login.route");
 const registerRoute = require("./routes/register.route");
 const authRoute = require("./routes/auth.route");
+const userRoute = require("./routes/user.route");
 const messageRoute = require("./routes/message.route");
 const chatRoute = require("./routes/chat.route");
 
@@ -21,6 +22,7 @@ app.get("/", function (request, response) {
 app.use('/login', loginRoute)
 app.use('/register', registerRoute)
 app.use('/auth', authRoute);
+app.use('/user', userRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);
 
