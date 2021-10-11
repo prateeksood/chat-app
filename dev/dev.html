@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+  <style>
+*{margin:0px;padding:0px;box-sizing:border-box;}
+body{
+  display:flex;
+  width:100vw;
+  height:100vh;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.display-data{
+  display:flex;
+  padding:1em;
+  width:50%;
+  line-height:1.5em;
+  border:1px solid #000;
+  overflow:auto;
+}
+  </style>
+  <script type="text/javascript" src="dev.js"></script>
+</head>
+<body>
+  <textarea class="display-data" id="input" spellcheck="false">
+Write HTML here:
+
+<div class="container" id="main">
+  <div class="container" c-id="auth"></div>
+  <div class="container" c-id="chat"></div>
+</div>
+  </textarea>
+  <div class="display-data" id="output" contenteditable="true" spellcheck="false" style="background-color:#222;color:#eee"></div>
+</body>
+</html>

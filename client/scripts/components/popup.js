@@ -1,6 +1,6 @@
-/// <reference path="listener.js"/>
-/// <reference path="../scripts/dom.js"/>
-/// <reference path="ui-handler.js"/>
+/// <reference path="../dom.js"/>
+/// <reference path="../listener.js"/>
+/// <reference path="../ui-handler.js"/>
 
 class Popup extends UIHandler.Component{
   #listener=new Listeners(["open","close"]);

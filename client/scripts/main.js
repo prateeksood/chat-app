@@ -87,7 +87,6 @@ UI.onInit(ui=>{
           localStorage.setItem("token",user.token);
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
-          container.chat.mount(UI.container.main);
         }else{
           App.popAlert(await request.text());
         }
@@ -139,7 +138,6 @@ UI.onInit(ui=>{
           localStorage.setItem("token",user.token);
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
-          container.chat.mount(UI.container.main);
         }else{
           App.popAlert(await request.text());
         }
