@@ -1,5 +1,5 @@
+/// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
-/// <reference path="../scripts/dom.js"/>
 
 class UIHandler{
   #listener=new Listener();
@@ -67,10 +67,12 @@ UIHandler.Component=class Component{
   /**
    * @param {string} id Component's ID
    * @param {HTMLElement} element Component's element
+   * @param {string} [type] Component's element
    */
-  constructor(id,element){
+  constructor(id,element,type){
     this.id=id;
     this.element=element;
+    this.attr({cId:id,cType:type});
   }
   /**
    * Component's ID

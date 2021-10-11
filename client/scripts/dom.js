@@ -70,12 +70,12 @@ const DOM=new class DOM{
   }
   /**
    * Creates a new HTML NameSpace Element
-   * @param {keyof HTMLElementTagNameMap} qualifiedName
+   * @param {keyof SVGElementTagNameMap} qualifiedName
    * @param {DOMAttributes} attributes
    * @param {{namespaceURI:"http://www.w3.org/2000/svg"}} options
    * @returns {Element}
    */
-   createNS(qualifiedName,attributes,options={}){
+  createNS(qualifiedName,attributes,options={}){
     let elm=document.createElementNS(options.namespaceURI??"http://www.w3.org/2000/svg",qualifiedName);
     this.attrNS(elm,attributes);
     return elm;

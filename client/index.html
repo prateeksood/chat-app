@@ -10,10 +10,11 @@
 	<link rel="stylesheet" href="styles/chat.css"/>
 	<link rel="stylesheet" href="styles/prompt.css"/>
 	<script type="text/javascript" src="scripts/dom.js"></script>
-	<script type="text/javascript" src="ui/listener.js"></script>
-	<script type="text/javascript" src="ui/ui-handler.js"></script>
-	<script type="text/javascript" src="ui/components.js"></script>
-  <script type="text/javascript" src="ui/main.js"></script>
+	<script type="text/javascript" src="scripts/listener.js"></script>
+	<script type="text/javascript" src="scripts/ui-handler.js"></script>
+	<script type="text/javascript" src="scripts/components/popup.js"></script>
+	<script type="text/javascript" src="scripts/components/chat-area.js"></script>
+  <script type="text/javascript" src="scripts/main.js"></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="display:none;">
@@ -63,7 +64,7 @@
     </g>
   </svg>
   <div class="container" c-id="main">
-    <div class="container absolute" c-id="chat" c-unmount="true">
+    <div class="container absolute" c-id="chat" c-unmount="false">
       <aside id="left-section">
         <div class="top-bar" id="left-top-bar">
           <div class="dp-holder"></div>
@@ -215,7 +216,7 @@
           <div class="line">Retrying to connect in 5s</div>
         </div>
       </aside>
-      <section id="messages-area">
+      <section id="messages-area" c-id="messagesArea" c-parent-id="chat">
         <div class="top-bar">
           <div class="dp-holder"></div>
           <div class="name-holder">
@@ -330,7 +331,7 @@
         </div>
       </section>
     </div>
-    <div class="container absolute auth" c-id="auth">
+    <div class="container absolute auth" c-id="auth" c-unmount="true">
       <div class="message-holder" c-id="messageHolder" c-parent-id="auth"></div>
       <div class="form-holder" active="login" c-id="formHolder" c-parent-id="auth">
         <form c-id="registerForm" c-parent-id="auth" c-unmount="true">
