@@ -5,7 +5,6 @@ const Chat = require("../models/Chat.model");
 const Message = require("../models/Message.model");
 
 
-
 router.get("/:chatID", authMiddleware, async (request, response) => {
   const {
     chatID
@@ -13,7 +12,9 @@ router.get("/:chatID", authMiddleware, async (request, response) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(chatID))
       return response.status(400).send("Invalid chat ID");
-    const foundMessages = await Message.find({
+    const foundMessages = await Message.find().sort([
+      ['createdAt', -1]
+    ]).exec({
       "chatID": new mongoose.Types.ObjectId(chatID)
     });
     response.status(200).send(foundMessages);
