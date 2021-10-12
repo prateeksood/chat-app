@@ -4,8 +4,8 @@
 
 
 const UI=new UIHandler();
-class friendsArea extends UIHandler.Component{
-  contructor(){
+class FriendsArea extends UIHandler.Component{
+  constructor(){
     const element=DOM.create("div",{
       class:"left-main",
       children:[
