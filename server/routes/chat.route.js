@@ -15,11 +15,11 @@ router.get("/", authMiddleware, async (request, response) => {
     });
     let updatedChats = [];
     for (let i = 0; i < foundChats.length; i++) {
-      let foundMessages = await Message.find().limit(20).sort([
-        ['createdAt', -1]
-      ]).exec({
+      let foundMessages = await Message.find({
         "chatID": new mongoose.Types.ObjectId(foundChats[i]._id)
-      });
+      }).limit(20).sort([
+        ['createdAt', -1]
+      ]).exec();
       updatedChats.push({
         ...foundChats[i]._doc,
         previewMessages: foundMessages

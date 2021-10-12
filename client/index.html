@@ -16,6 +16,8 @@
   <script type="text/javascript" src="scripts/ui-handler.js"></script>
   <script type="text/javascript" src="scripts/components/popup.js"></script>
   <script type="text/javascript" src="scripts/components/chat-area.js"></script>
+  <script type="text/javascript" src="scripts/components/message-container.js"></script>
+  <script type="text/javascript" src="scripts/components/friends-area.js"></script>
   <script type="text/javascript" src="scripts/main.js"></script>
 </head>
 
@@ -101,127 +103,8 @@
             </button>
           </div>
         </div>
-        <div id="left-main">
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"/> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg aldwoakdwad wdhwudhw duwhwdhuwd</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:56 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">This is a sample msg...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
-          <div class="chat-item">
-            <div class="dp-holder">
-              <!-- <img src="" alt="Profile Picture"> -->
-            </div>
-            <div class="name-holder">
-              <div class="user-name">Sample Name</div>
-              <div class="msg-preview">typing...</div>
-            </div>
-            <div class="other-info">
-              <div class="msg-time">10:59 pm</div>
-            </div>
-          </div>
+        <div id="left-main" c-id="friendsList" c-parent-id="main">
+
         </div>
         <div class="bottom-bar" id="info-area">
           <div class="line">Unable to connect to the server, please check your internet connection.</div>
@@ -232,7 +115,8 @@
         </div>
       </aside>
       <section id="messages-area" c-id="messagesArea" c-parent-id="chat">
-        <div class="top-bar">
+        <!-- @todo Create Some Place holder graphics -->
+        <!-- <div class="top-bar top-bar-right">
           <div class="dp-holder"></div>
           <div class="name-holder">
             <div class="user-name">Full Name</div>
@@ -334,7 +218,7 @@
             </div>
           </div>
         </div>
-        <div class="bottom-bar">
+        <div class="bottom-bar bottom-bar-right">
           <form class="send-area" action="#" method="dialog">
             <input type="text" name="message" placeholder="Type a message..." autocomplete="off" />
             <button type="submit" class="icon">
@@ -343,7 +227,7 @@
               </svg>
             </button>
           </form>
-        </div>
+        </div> -->
       </section>
     </div>
     <div class="container absolute auth" c-id="auth" c-unmount="true">

@@ -1,8 +1,9 @@
 /// <reference path="../scripts/dom.js"/>
 /// <reference path="ui-handler.js"/>
 /// <reference path="./sessions.js"/>
+/// <reference path="./components/friends-area.js"/>
 
-// const UI=new UIHandler();
+const UI=new UIHandler();
 const session=new Session();
 const App=new class AppManager{
 
@@ -12,7 +13,55 @@ const App=new class AppManager{
     username:/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/,
     password:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._])[A-Za-z\d@$!%*#?&._]{6,50}$/
   };
+  /**
+   * 
+   * @param {Date} date 
+   */
+  showFormatedTime(date){
+    const milliInDay=8.64e+7;
+    const milliInYear=3.154e+10;
+    const milliInMin=60000;
+    const istOffset=1.98e+7;
 
+    const monthname=["January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    date=(new Date(date)).getTime();
+    date=new Date(date+istOffset);
+    const today=new Date(Date.now()+istOffset);
+    if(today-date>milliInYear){
+      return `${date.getDate()} ${monthname[date.getMonth()]}, ${date.getFullYear()}`;
+    }
+    if(today-date>milliInDay){
+      return `${date.getDate()} ${monthname[date.getMonth()]}`;
+    }
+    if(today-date<milliInMin){
+      return `Few seconds ago`;
+    }
+    return `${date.getHours()>12?date.getHours()-12:date.getHours()}:${date.getMinutes()} ${date.getHours()>12?"pm":"am"}`
+  }
+  /**
+   * 
+   * @param {string} userID
+   */
+  async populateFriendsList(){
+    const token=localStorage.getItem('token');
+    App.request("/chat",{
+      method:"GET",
+      headers:{
+        "x-auth-token": token
+      }
+    }).then(data=>{
+      data.forEach(friend=>{
+        const component=new friendsArea(
+          friend._id,
+          friend.participants[0].userID===session.getCurrentUser()._id?friend.participants[1].userName:friend.participants[0].userName,
+          friend.previewMessages,
+          this.showFormatedTime(friend.previewMessages[0].updatedAt)
+        );
+        component.mount(UI.container.main.sub.friendsList);
+      })
+
+    });
+  }
   async auth(){
     const token=localStorage.getItem('token');
     if(!token){
@@ -36,6 +85,7 @@ const App=new class AppManager{
       session.setCurrentUser(user);
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
+      this.populateFriendsList();
     }
   }
   logout(){

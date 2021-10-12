@@ -2,51 +2,66 @@
 /// <reference path="../ui-handler.js"/>
 
 
-
-const UI=new UIHandler();
 class friendsArea extends UIHandler.Component{
-  contructor(){
+  /**
+   * 
+   * @param {string} _id
+   * @param {string} username 
+   * @param {string} previewMessage 
+   * @param {Date} lastMessageTime 
+   */
+  constructor(_id,username,previewMessages,lastMessageTime){
+    let events={};
+    events.click=event=>{
+        
+        if(document.querySelector(".top-bar-right"))document.querySelector(".top-bar-right").remove();
+        if(document.querySelector("#right-main"))document.querySelector("#right-main").remove();
+        if(document.querySelector(".bottom-bar-right"))document.querySelector(".bottom-bar-right").remove();
+        const topBar=new ChatArea.TopBar(username,_id);
+        topBar.mount(UI.container.chat.sub.messagesArea);
+        const chatArea= new ChatArea(this.element.id,previewMessages);
+        chatArea.mount(UI.container.chat.sub.messagesArea);
+        const bottomBar=new ChatArea.BottomBar(username,_id);
+        bottomBar.mount(UI.container.chat.sub.messagesArea);
+    }
     const element=DOM.create("div",{
-      class:"left-main",
+      class:"chat-item",
+      id:_id,
       children:[
-        DoM.create("div",{
-          class:"chat-item",
+        DOM.create("div",{
+          class:"dp-holder",
           children:[
-            DoM.create("div",{
-              class:"dp-holder",
-              children:[
-                DoM.create("img",{
-                  src:imgSrc,
-                  alt:"Profile Picture"
-                })//img
-              ]
-            }),//div.dp-holder
-            DOM.create("div",{
-              class:"name-holder",
-              children:[
-                DOM.create("div",{
-                  class:"user-name",
-                  html:"User Name",
-                }),//div.user-name
-                DOM.create("div",{
-                  class:"msg-preview",
-                  html:"Sample Message...."
-                })//div.msg-preview
-              ]
-            }),//div.name-holder
-            DOM.create("div",{
-              class:"other-info",
-              children:[
-                DoM.create("div",{
-                  class:"msg-time",
-                  html:"10:56"
-                })//div.msg-time
-              ]
-            })//div.other-info
+            DOM.create("img",{
+              src:"#",
+              alt:"DP"
+            })//img
           ]
-        })//div.chat-item
+        }),//div.dp-holder
+        DOM.create("div",{
+          class:"name-holder",
+          children:[
+            DOM.create("div",{
+              class:"user-name",
+              html:username,
+            }),//div.user-name
+            DOM.create("div",{
+              class:"msg-preview",
+              html:previewMessages[0].content
+            })//div.msg-preview
+          ]
+        }),//div.name-holder
+        DOM.create("div",{
+          class:"other-info",
+          children:[
+            DOM.create("div",{
+              class:"msg-time",
+              html:lastMessageTime
+            })//div.msg-time
+          ]
+        })//div.other-info
       ]
-    })//div.left-main
+    },{},events)//div.chat-item
+     
     super("friendsArea",element);
   }
 }

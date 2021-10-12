@@ -3,37 +3,38 @@
 /// <reference path="../ui-handler.js"/>
 /// <reference path="../sessions.js" />
 
-const UI=new UIHandler();
+// const session=new Session();
 class ChatArea extends UIHandler.Component{
-  
-  #messages;
+
   /**
    * 
-   * @param {{content: string, sender: string, time: Date}[] } messages 
+   * @param {string} chatID
+   * @param {{_id: string,chatID: string,sender: string,recipient:string,content:string,createdAt:Date,updatedAt:Date}[]} previewMessages
    */
-  constructor(messages){
-    messages.forEach(message=>{
-      this.#messages.push(new Message(message.content,message.time,Session.currentUserID===message.sender));
-    })
-    //  UI.container.messagesArea.addChildren([
+  constructor(chatID,previewMessages){
+    let messages = [];
+
     const element=DOM.create("div",{
-      class:"right-main",
-      children:[
-        ...messages
-      ]
+      id:"right-main"
     }) //div.right-main
-      
-    // ])
+    previewMessages.forEach(message=>{
+      element.appendChild(new Message(message.content,message.updatedAt,session.getCurrentUser()._id===message.sender).element);
+    });
     super("chatArea",element);
   }
 };
 
 ChatArea.TopBar=class TopBar extends UIHandler.Component{
 
-  constructor(){
+  /**
+   * 
+   * @param {string} username 
+   * @param {string} _id 
+   */
+  constructor(username,_id){
     const element=DOM.create("div",{
-      class:"top-bar",
-      childern:[
+      class:"top-bar top-bar-right",
+      children:[
         DOM.create("div",{
           class:"dp-holder"
         }), //div.dp-holder
@@ -42,7 +43,7 @@ ChatArea.TopBar=class TopBar extends UIHandler.Component{
           children:[
             DOM.create("div",{
               class:"user-name",
-              html:"Full Name"
+              html:`@${username}`
             }), // div.user-name
             DOM.create("div",{
               class:"message-preview",
@@ -79,7 +80,7 @@ ChatArea.TopBar=class TopBar extends UIHandler.Component{
 ChatArea.BottomBar = class BottomBar extends UIHandler.Component{
   constructor(){
     const element=DOM.create("div",{
-      class:"bottom-bar",
+      class:"bottom-bar bottom-bar-right",
       children:[
         DOM.create("form",{
           class:"send-area",
