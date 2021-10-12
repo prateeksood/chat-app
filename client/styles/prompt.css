@@ -1,3 +1,6 @@
+.container.absolute.notification{
+  z-index: 3;
+}
 .container.prompt{
   display:flex;
   position:absolute;
@@ -7,7 +10,6 @@
   /* background-color:#eeea; */
   justify-content:center;
   align-items:center;
-  z-index:2;
 }
 .container.prompt[prompts=empty]{
   display:none;

@@ -1,8 +1,9 @@
 /// <reference path="../scripts/dom.js"/>
 /// <reference path="ui-handler.js"/>
+/// <reference path="./sessions.js"/>
 
-const UI=new UIHandler();
-
+// const UI=new UIHandler();
+const session=new Session();
 const App=new class AppManager{
 
   popupCount=0;
@@ -14,22 +15,34 @@ const App=new class AppManager{
 
   async auth(){
     const token=localStorage.getItem('token');
+    if(!token){
+      UI.container.chat.unmount();
+      UI.container.auth.mount(UI.container.main);
+      return;
+    }
     const request=await fetch("/auth",{
       method:"POST",
       headers:{
         "x-auth-token": token
       }
     }).catch(ex=>{
+      UI.container.chat.unmount();
+      UI.container.auth.mount(UI.container.main);
       App.popAlert("ERROR: ",ex)
     });
 
     if(request && request.ok){
       const user=await request.json();
+      session.setCurrentUser(user);
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
     }
   }
-
+  logout(){
+    localStorage.removeItem("token");
+    session.removeCurrentUser();
+    window.location.reload();
+  }
   /** @param {HTMLFormElement} form */
   async sendMessage(form){
     const formData=new FormData(form);
