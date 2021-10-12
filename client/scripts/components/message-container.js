@@ -14,9 +14,9 @@ class Message extends UIHandler.Component{
    * @param {boolean} isSent 
    */
   constructor(messageContent,messageTime,isSent=false){
-    this.#messageContent=messageContent;
-    this.#recipient=recipient;
-    this.#sender=sender;
+    // this.#messageContent=messageContent;
+    // this.#recipient=recipient;
+    // this.#sender=sender;
     const element=DOM.create("div",{
       class:`message-group ${isSent ? " sent" : ""}` ,
       children: [
@@ -32,7 +32,7 @@ class Message extends UIHandler.Component{
               children:[
                 DOM.create("div",{
                   class:"time",
-                  html:messageTime
+                  html:Message.showFormatedTime(messageTime)
                 }), // div.time
                 DOM.create("div",{
                   class:"icon",
@@ -56,6 +56,27 @@ class Message extends UIHandler.Component{
     
    
     super("message",element);
+  }
+  static showFormatedTime(date){
+    const milliInDay=8.64e+7;
+    const milliInYear=3.154e+10;
+    const milliInMin=60000;
+    const istOffset=1.98e+7;
+
+    const monthname=["January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    date=(new Date(date)).getTime();
+    date=new Date(date+istOffset);
+    const today=new Date(Date.now()+istOffset);
+    if(today-date>milliInYear){
+      return `${date.getDate()} ${monthname[date.getMonth()]}, ${date.getFullYear()}`;
+    }
+    if(today-date>milliInDay){
+      return `${date.getDate()} ${monthname[date.getMonth()]}`;
+    }
+    if(today-date<milliInMin){
+      return `Few seconds ago`;
+    }
+    return `${date.getHours()>12?date.getHours()-12:date.getHours()}:${date.getMinutes()} ${date.getHours()>12?"pm":"am"}`
   }
   send(){
 
