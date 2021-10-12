@@ -1,7 +1,6 @@
 /// <reference path="../dom.js"/>
 /// <reference path="../ui-handler.js"/>
 
-
 class friendsArea extends UIHandler.Component{
   /**
    * 

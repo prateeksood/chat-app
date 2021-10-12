@@ -1,7 +1,7 @@
 
 class Session{
   /**@type {{name:string,email:string,username:string}} */
-  #currentUser
+  #currentUser=null;
   /**
    * Returns id of currently logged in user
    * @returns {string}
