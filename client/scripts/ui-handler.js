@@ -76,7 +76,7 @@ UIHandler.Component=class Component{
   }
   /**
    * Component's ID
-   * @param {string} itemId*/
+   * @type {string} */
   id=null;
   /** Remove/delete element from component */
   remove(){
@@ -145,3 +145,62 @@ UIHandler.Component=class Component{
     this.sub[component.id]=component;
   }
 };
+
+UIHandler.ComponentList=class ListComponent{
+  #listener=new Listeners(["insert","delete","select","update"]);
+  /** @type {Map<string,UIHandler.Component>} */
+  #list=new Map();
+  constructor(){}
+  /**
+   * Inserts a Component into the list
+   * @param {UIHandler.Component} component */
+  insert(component){
+    this.#list.set(component.id,component);
+    this.#listener.trigger("insert",component);
+    return this;
+  }
+  /**
+   * Deletes a Component into the list
+   * @param {string} componentId */
+  delete(componentId){
+    if(this.#list.has(componentId)){
+      this.#listener.trigger("delete",this.#list.get(componentId));
+      this.#list.delete(componentId);
+    }
+    return this;
+  }
+  /**
+   * Selects a Component components into the list
+   * @param {string} componentId */
+  select(componentId){
+    if(this.#list.has(componentId)){
+      this.#listener.trigger("select",this.#list.get(componentId));
+    }
+    return this;
+  }
+  /**
+   * @callback listAction
+   * @param {UIHandler.Component} component
+   * @returns {void}
+   * @param {"insert"|"delete"|"select"|"update"} eventName
+   * @param {listAction} action
+   */
+  on(eventName,action){
+    this.#listener.on(eventName,action);
+  }
+};
+
+const components=new UIHandler.ComponentList();
+components.on("insert",function(component){
+  console.log("inserted",component.id);
+});
+components.on("delete",function(component){
+  console.log("deleted",component.id);
+});
+[
+  new UIHandler.Component("divOne",DOM.create("div",{text:"DIV 1"})),
+  new UIHandler.Component("divTwo",DOM.create("div",{text:"DIV 2"})),
+  new UIHandler.Component("divThree",DOM.create("div",{text:"DIV 3"}))
+].forEach(component=>components.insert(component));
+
+components.delete("divOne").delete("divTwo");

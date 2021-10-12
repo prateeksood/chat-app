@@ -199,6 +199,35 @@ UI.onInit(ui=>{
     }
   });
 
+  const menu=new UIMenu("chat");
+  let itemCount=0;
+  menu.addItem("delete","Remove Last Item",()=>{
+    if(itemCount>0)
+      menu.removeItem("item"+--itemCount);
+  });
+  menu.addItem("insert","Add Item",()=>{
+    menu.addItem("item"+itemCount,"Item "+itemCount+" added",()=>{});
+    itemCount++;
+  });
+  menu.addItem("close","Close",()=>{
+    menu.unmount();
+  });
+  container.chat.sub.messagesArea.event({
+    /** @param {PointerEvent} event */
+    contextmenu(event){
+      event.preventDefault();
+      menu.mount(container.chat);
+      /** Preventing menu.element from displaying outside the container.chat.element */
+      const gap_at_end=16;
+      const width_diff=container.chat.element.clientWidth-menu.element.clientWidth-gap_at_end;
+      const height_diff=container.chat.element.clientHeight-menu.element.clientHeight-gap_at_end;
+      menu.style({
+        top:(event.y<height_diff?event.y:height_diff)+"px",
+        left:(event.x<width_diff?event.x:width_diff)+"px"
+      });
+    }
+  });
+
   container.prompts.style({display:"none"});
 });
 

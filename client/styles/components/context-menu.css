@@ -1,0 +1,21 @@
+menu.context-menu{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  padding:0.3em 0px;
+  border-radius:10px;
+  background-color:#fff;
+  box-shadow:0.06em 0.06em 1em #2224;
+  list-style:none;
+  user-select:none;
+  overflow:hidden;
+  z-index:3;
+}
+
+menu.context-menu li{
+  padding:0.7em 1.4em;
+  cursor:pointer;
+}
+menu.context-menu li:hover{
+  background-color:#f6f6f6;
+}

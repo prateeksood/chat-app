@@ -92,6 +92,7 @@
   width:300px;
   height:auto;
   /* background-color:var(--theme-dark); */
+  z-index:2;
 }
 .container.notification[hidden=true]{
   display:none;
