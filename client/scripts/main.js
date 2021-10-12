@@ -2,7 +2,7 @@
 /// <reference path="ui-handler.js"/>
 /// <reference path="./sessions.js"/>
 
-// const UI=new UIHandler();
+const UI=new UIHandler();
 const session=new Session();
 const App=new class AppManager{
 
