@@ -13,10 +13,7 @@ const App=new class AppManager{
     username:/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/,
     password:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._])[A-Za-z\d@$!%*#?&._]{6,50}$/
   };
-  /**
-   * 
-   * @param {Date} date 
-   */
+  /** @param {Date} date */
   showFormatedTime(date){
     const milliInDay=8.64e+7;
     const milliInYear=3.154e+10;
@@ -38,10 +35,6 @@ const App=new class AppManager{
     }
     return `${date.getHours()>12?date.getHours()-12:date.getHours()}:${date.getMinutes()} ${date.getHours()>12?"pm":"am"}`
   }
-  /**
-   * 
-   * @param {string} userID
-   */
   async populateFriendsList(){
     const token=localStorage.getItem('token');
     App.request("/chat",{
@@ -49,16 +42,20 @@ const App=new class AppManager{
       headers:{
         "x-auth-token": token
       }
-    }).then(data=>{
-      data.forEach(friend=>{
+    }).then(/** @param {ChatResponse[]} data */data=>{
+
+      data.forEach(chatResponse=>{
+        const chat=Chat.from(chatResponse);
         const component=new friendsArea(
-          friend._id,
-          friend.participants[0].userID===session.getCurrentUser()._id?friend.participants[1].userName:friend.participants[0].userName,
-          friend.previewMessages,
-          this.showFormatedTime(friend.previewMessages[0].updatedAt)
+          chat.id,
+          chat.participants[0].id===session.currentUser.id?
+            chat.participants[1].username:
+            chat.participants[0].username,
+          chat.messages,
+          this.showFormatedTime(chat.messages[0].updatedAt)
         );
         component.mount(UI.container.main.sub.friendsList);
-      })
+      });
 
     });
   }
@@ -152,12 +149,6 @@ const App=new class AppManager{
     component.mount(UI.container.prompts);
     this.popupCount++;
   }
-
-  Notification=class Notification{
-    constructor(message){
-      return 
-    }
-  };
 };
 
 UI.onInit(ui=>{

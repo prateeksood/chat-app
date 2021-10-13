@@ -3,16 +3,21 @@ const mongoose = require('mongoose');
 
 /** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
 const ChatSchema = new mongoose.Schema({
-  participants: {
-    type: [{
-      userID: mongoose.Schema.Types.ObjectId,
-      userName: String
-    }, {
-      userID: mongoose.Schema.Types.ObjectId,
-      userName: String
-    }],
-    required: true,
-  }
+  title: {
+    type: "string",
+    default: ""
+  },
+  participants: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: mongoose.Schema.Types.Date,
+      required: true
+    }
+  }]
 }, {
   timestamps: true
 });

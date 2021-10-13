@@ -92,6 +92,7 @@ UIHandler.Component=class Component{
   unmount(){
     if(this.element)
       this.element.remove();
+    console.trace();
   }
   /**
    * Inserts Component at the end of parent

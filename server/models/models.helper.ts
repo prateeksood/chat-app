@@ -2,20 +2,51 @@ import { ObjectId, Date } from "mongoose";
 
 interface User {
   username: string;
+  email: string;
   name: string;
   password: string;
-  email: string;
-};
+  image: string;
+  lastseen: Date;
+  contacts: {
+    userId: ObjectId, // User.id
+    since: Date
+  }[];
+  requestsId: {
+    userId: ObjectId, // User.id
+    since: Date
+  }[];
+  blockedId: {
+    userId: ObjectId, // User.id
+    since: Date
+  }[];
+}
 
 interface Chat {
-  participants: ObjectId[];
+  title: string; // In groups: Group Name, In personal chat: null
+  participants: {
+    userId: ObjectId, // User.id
+    since: Date
+  }[];
 }
+
 interface Message {
-  chatID: ObjectId;
-  sender: ObjectId;
-  recipient: ObjectId;
+  chatId: ObjectId; // Chat.id
+  senderId: ObjectId; // User.id
   content: string;
-  time: Date;
-};
+  referenceId: ObjectId; // Message.id (reference to the message when replied)
+  sentAt: Date;
+  receivedBy: {
+    userId: ObjectId, // User.id
+    time: Date
+  }[];
+  readBy: {
+    userId: ObjectId, // User.id
+    time: Date
+  }[];
+  deletedBy: {
+    userId: ObjectId, // User.id
+    time: Date
+  }[];
+}
 
 export { User, Chat, Message };

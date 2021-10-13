@@ -1,33 +1,30 @@
+/// <reference path="types/types.d.ts"/>
+/// <reference path="types/user.js"/>
 
 class Session{
-  /**@type {{name:string,email:string,username:string}} */
+  /**@type {User} */
   #currentUser=null;
-  /**
-   * Returns id of currently logged in user
-   * @returns {string}
-   */
+  /** Returns id of currently logged in user */
   static currentUserID(){
-      return localStorage.getItem("token");
+    return localStorage.getItem("token");
   }
-  /**
-   * 
-   * @param {{name:string,email:string,username:string}} user 
-   */
-  setCurrentUser(user){
-    this.#currentUser=user;
+  /** Returns currently logged in user */
+  get currentUser(){
+    return this.#currentUser;
   }
-  /**
-   * Sets currently logged in user to null
-   */
-   removeCurrentUser(){
+  /** @param {User} user */
+  set currentUser(user){
+    if(user instanceof User)
+      this.#currentUser=user;
+  }
+  /** Sets currently logged in user to null */
+  removeCurrentUser(){
     this.#currentUser=null;
   }
-
-  /**
-   * returns currently logged in user details
-   * @returns {{name:string,email:string,username:string}}
-   */
-  getCurrentUser(){
-    return this.#currentUser;
+  /** @param {string} id */
+  isCurrentUserId(id){
+    if(this.#currentUser)
+      return id===this.#currentUser.id;
+    return false
   }
 }

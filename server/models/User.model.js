@@ -3,23 +3,63 @@ const mongoose = require("mongoose");
 
 /** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
 const UserSchema = new mongoose.Schema({
-  name: {
-    required: true,
-    type: "String",
-  },
-  email: {
-    required: true,
-    type: "String",
-  },
   username: {
+    type: "string",
     required: true,
-    type: "String",
     unique: true
   },
-  password: {
-    required: true,
-    type: "String",
+  email: {
+    type: String,
+    required: true
   },
+  name: {
+    type: String,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  image: {
+    type: String,
+    default: null
+  },
+  lastSeen: {
+    type: String
+  },
+  contacts: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: mongoose.Schema.Types.Date,
+      required: true
+    }
+  }],
+  requests: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: mongoose.Schema.Types.Date,
+      required: true
+    }
+  }],
+  blocked: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: mongoose.Schema.Types.Date,
+      required: true
+    }
+  }]
 }, {
   timestamps: true
 });

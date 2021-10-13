@@ -1,16 +1,24 @@
+/// <reference path="types.d.ts"/>
+
 class Chat{
   /**
    * @param {String} id
+   * @param {User[]} participants
    * @param {Message[]} messages
    */
-  constructor(id,messages=[]){
+  constructor(id,participants=[],messages=[]){
     this.id=id;
+    this.participants=participants;
     this.messages=messages;
   }
-  /** @param {Chat} chatObject */
-  from(chatObject){
-    const {id,messages}=chatObject;
-    const chat=new Chat(id,messages.map(message=>Message.from(message)));
+  /** @param {ChatResponse} chatResponse */
+  static from(chatResponse){
+    const {id,participants,messages}=chatResponse;
+    const chat=new Chat(
+      id,
+      participants.map(user=>User.from(user)),
+      messages.map(message=>Message.from(message))
+    );
     return chat;
   }
 };
@@ -28,9 +36,9 @@ class Message{
     this.content=content;
     this.time=time;
   }
-  /** @param {Message} messageObject */
-  from(messageObject){
-    const {id,senderId,content,time}=messageObject;
+  /** @param {MessageResponse} messageResponse */
+  static from(messageResponse){
+    const {_id,_senderId,content,time}=messageResponse;
     const message=new Message(id,senderId,content,time);
     return message;
   }
