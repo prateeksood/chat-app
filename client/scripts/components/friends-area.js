@@ -1,27 +1,33 @@
 /// <reference path="../dom.js"/>
 /// <reference path="../ui-handler.js"/>
-/// <reference path="../types/chat.js"/>
 /// <reference path="chat-area.js"/>
 
 class friendsArea extends UIHandler.Component{
-  /** @param {Chat} chat*/
-  constructor(chat){
+  /**
+   * @param {string} _id
+   * @param {string} username 
+   * @param {string} previewMessage 
+   * @param {Date} lastMessageTime 
+   */
+  constructor(_id,username,previewMessages,lastMessageTime){
     let events={};
     events.click=event=>{
-        
+
+      const chatArea=new ChatArea(chat);
+
         if(document.querySelector(".top-bar-right"))document.querySelector(".top-bar-right").remove();
         if(document.querySelector("#right-main"))document.querySelector("#right-main").remove();
         if(document.querySelector(".bottom-bar-right"))document.querySelector(".bottom-bar-right").remove();
-        const topBar=new ChatArea.TopBar(chat.id);
+        const topBar=new ChatArea.TopBar(username,_id);
         topBar.mount(UI.container.chat.sub.messagesArea);
-        const chatArea= new ChatArea(this.element.id,chat.messages);
+        const chatArea= new ChatArea(this.element.id,previewMessages);
         chatArea.mount(UI.container.chat.sub.messagesArea);
-        const bottomBar=new ChatArea.BottomBar(chat);
+        const bottomBar=new ChatArea.BottomBar(username,_id);
         bottomBar.mount(UI.container.chat.sub.messagesArea);
     }
     const element=DOM.create("div",{
       class:"chat-item",
-      id:id,
+      id:_id,
       children:[
         DOM.create("div",{
           class:"dp-holder",
@@ -56,7 +62,7 @@ class friendsArea extends UIHandler.Component{
         })//div.other-info
       ]
     },{},events)//div.chat-item
-     
+
     super("friendsArea",element);
   }
 }

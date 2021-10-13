@@ -147,14 +147,15 @@ UIHandler.Component=class Component{
   }
 };
 
+/** @template T */
 UIHandler.ComponentList=class ListComponent{
   #listener=new Listeners(["insert","delete","select","update"]);
-  /** @type {Map<string,UIHandler.Component>} */
+  /** @type {Map<string,T>} */
   #list=new Map();
   constructor(){}
   /**
    * Inserts a Component into the list
-   * @param {UIHandler.Component} component */
+   * @param {T} component */
   insert(component){
     this.#list.set(component.id,component);
     this.#listener.trigger("insert",component);
@@ -181,7 +182,7 @@ UIHandler.ComponentList=class ListComponent{
   }
   /**
    * @callback listAction
-   * @param {UIHandler.Component} component
+   * @param {T} component
    * @returns {void}
    * @param {"insert"|"delete"|"select"|"update"} eventName
    * @param {listAction} action
@@ -190,6 +191,8 @@ UIHandler.ComponentList=class ListComponent{
     this.#listener.on(eventName,action);
   }
 };
+
+// Example
 
 const components=new UIHandler.ComponentList();
 components.on("insert",function(component){
