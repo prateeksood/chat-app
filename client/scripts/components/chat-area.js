@@ -18,7 +18,7 @@ class ChatArea extends UIHandler.Component{
       id:"right-main"
     }) //div.right-main
     previewMessages.forEach(message=>{
-      element.appendChild(new Message(message.content,message.updatedAt,session.getCurrentUser()._id===message.sender).element);
+      element.appendChild(new Message(message.content,message.updatedAt,App.session.getCurrentUser()._id===message.sender).element);
     });
     super("chatArea",element);
   }

@@ -1,11 +1,16 @@
-/// <reference path="../scripts/dom.js"/>
+/// <reference path="dom.js"/>
 /// <reference path="ui-handler.js"/>
-/// <reference path="./sessions.js"/>
-/// <reference path="./components/friends-area.js"/>
+/// <reference path="sessions.js"/>
+/// <reference path="types/types.d.ts"/>
+/// <reference path="types/user.js"/>
+/// <reference path="types/chat.js"/>
+/// <reference path="components/context-menu.js"/>
+/// <reference path="components/friends-area.js"/>
+/// <reference path="components/message-container.js"/>
 
 const UI=new UIHandler();
-const session=new Session();
 const App=new class AppManager{
+  session=new Session();
 
   popupCount=0;
   dataValidation={
@@ -48,7 +53,7 @@ const App=new class AppManager{
         const chat=Chat.from(chatResponse);
         const component=new friendsArea(
           chat.id,
-          chat.participants[0].id===session.currentUser.id?
+          chat.participants[0].id===App.session.currentUser.id?
             chat.participants[1].username:
             chat.participants[0].username,
           chat.messages,
@@ -79,7 +84,7 @@ const App=new class AppManager{
 
     if(request && request.ok){
       const user=await request.json();
-      session.setCurrentUser(user);
+      App.session.currentUser=user;
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
       App.populateFriendsList();
@@ -87,7 +92,7 @@ const App=new class AppManager{
   }
   logout(){
     localStorage.removeItem("token");
-    session.removeCurrentUser();
+    App.session.removeCurrentUser();
     window.location.reload();
   }
   /** @param {HTMLFormElement} form */
@@ -181,7 +186,7 @@ UI.onInit(ui=>{
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          session.setCurrentUser(user);
+          App.session.currentUser=user;
           App.populateFriendsList();
         }else{
           App.popAlert(await request.text());
@@ -235,7 +240,7 @@ UI.onInit(ui=>{
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          session.setCurrentUser(user);
+          App.session.currentUser=user;
           App.populateFriendsList();
         }else{
           App.popAlert(await request.text());
@@ -244,6 +249,7 @@ UI.onInit(ui=>{
     }
   });
 
+  // demo code
   const menu=new UIMenu("chat");
   let itemCount=0;
   menu.addItem("delete","Remove Last Item",()=>{
@@ -257,6 +263,7 @@ UI.onInit(ui=>{
   menu.addItem("close","Close",()=>{
     menu.unmount();
   });
+
   container.chat.sub.messagesArea.event({
     /** @param {PointerEvent} event */
     contextmenu(event){
@@ -272,6 +279,19 @@ UI.onInit(ui=>{
       });
     }
   });
+
+  /** @type {UIHandler.ComponentList<ChatArea>} */
+  const chatAreas=new UIHandler.ComponentList();
+  /** @type {UIHandler.ComponentList<friendsArea>} */
+  const chatItems=new UIHandler.ComponentList();
+
+  chatAreas.on("select",function(chatArea){
+    chatArea.mount(container.chat);
+  });
+  chatItems.on("select",function(chatItem){
+    chatAreas.select(chatItem.id);
+  });
+  // chatItems.select("chat_id");
 
   container.prompts.style({display:"none"});
 });
