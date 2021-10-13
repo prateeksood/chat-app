@@ -82,7 +82,7 @@ const App=new class AppManager{
       session.setCurrentUser(user);
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
-      this.populateFriendsList();
+      App.populateFriendsList();
     }
   }
   logout(){
@@ -181,6 +181,8 @@ UI.onInit(ui=>{
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
+          session.setCurrentUser(user);
+          App.populateFriendsList();
         }else{
           App.popAlert(await request.text());
         }
@@ -233,6 +235,8 @@ UI.onInit(ui=>{
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
+          session.setCurrentUser(user);
+          App.populateFriendsList();
         }else{
           App.popAlert(await request.text());
         }
