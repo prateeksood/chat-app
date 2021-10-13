@@ -188,6 +188,9 @@ button.icon:active svg{
 #right-main{
 	height:100%;
 	overflow:auto;
+  display: flex;
+  flex-direction:column-reverse;
+
 }
 
 #right-main .message-group{
