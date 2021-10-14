@@ -1,11 +1,15 @@
-/** @typedef {import("./models.helper").Chat} Chat */
+// /** @typedef {import("./models.helper.temp").Chat} Chat */
 const mongoose = require('mongoose');
 
-/** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
+// /** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
 const ChatSchema = new mongoose.Schema({
   title: {
-    type: "string",
+    type: String,
     default: ""
+  },
+  isGroupChat: {
+    type: Boolean,
+    default: false
   },
   participants: [{
     userId: {
@@ -14,7 +18,8 @@ const ChatSchema = new mongoose.Schema({
       required: true
     },
     since: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }]

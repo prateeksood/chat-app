@@ -1,7 +1,7 @@
-/** @typedef {import("./models.helper").Message} Message */
+// /** @typedef {import("./models.helper.ts").Message} Message */
 const mongoose = require("mongoose");
 
-/** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
+// /** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
 const messageSchema = new mongoose.Schema({
   chatId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -19,10 +19,12 @@ const messageSchema = new mongoose.Schema({
   },
   referenceId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Message"
+    ref: "Message",
+    default: null
   },
   sentAt: {
     type: Date,
+    default: Date.now,
     required: true
   },
   receivedBy: [{
@@ -32,7 +34,8 @@ const messageSchema = new mongoose.Schema({
       required: true
     },
     time: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }],
@@ -43,7 +46,8 @@ const messageSchema = new mongoose.Schema({
       required: true
     },
     time: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }],
@@ -54,7 +58,8 @@ const messageSchema = new mongoose.Schema({
       required: true
     },
     time: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }]
