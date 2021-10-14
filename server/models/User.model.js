@@ -41,7 +41,19 @@ const UserSchema = new mongoose.Schema({
       required: true
     }
   }],
-  requests: [{
+  sentRequests: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: Date,
+      default: Date.now,
+      required: true
+    }
+  }],
+  recievedRequests: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
