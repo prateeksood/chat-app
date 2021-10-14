@@ -5,6 +5,7 @@ const registerRoute = require("./routes/register.route");
 const authRoute = require("./routes/auth.route");
 const messageRoute = require("./routes/message.route");
 const chatRoute = require("./routes/chat.route");
+const userRoute = require("./routes/user.route");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/register', registerRoute)
 app.use('/auth', authRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);
+app.use('/user', userRoute);
 
 db.connectToDB();
 

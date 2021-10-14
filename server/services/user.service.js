@@ -6,8 +6,8 @@ module.exports = class UserService {
 
   static async getAllUsers() {
     try {
-      let allUsers = await User.find().select({ password: false });
-      if (allUsers) return allUsers.toObject();
+      let allUsers = await User.find().select({ password: false }).lean();
+      if (allUsers) return allUsers
       return null;
     } catch (ex) {
       throw ex;
@@ -18,7 +18,7 @@ module.exports = class UserService {
    * @param {string} key 
    * @returns {User []}
    */
-  static async searchUser(key) {
+  static async searchUsers(key) {
     try {
       let foundUsers = await User.find({
         $or: [{
@@ -31,9 +31,26 @@ module.exports = class UserService {
           "email": new RegExp(key, "i")
         }
         ]
-      }).select({ password: false });;
-      if (foundUsers) return foundUsers.toObject();
+      }).select({ password: false }).lean();
+      console.log(foundUsers)
+      if (foundUsers) return foundUsers;
       return null;
+    } catch (ex) {
+      throw ex;
+    }
+  }
+  /**
+   * @param {string|mongoose.Types.ObjectId} userId _id of user
+   * @param {string} arrayName Name of array in which we want to search
+   * @param {string} key Key of object in the array we are using to search
+   * @param {string} value Value for the key (value to search)
+   * @returns {Number} 
+   */
+  static async searchInArray(userId, arrayName, key, value) {
+    try {
+      const foundUser = await User.findById(userId).lean();
+      const index = await foundUser[arrayName].map(item => item[key].toString()).indexOf(value);
+      return index;
     } catch (ex) {
       throw ex;
     }
@@ -45,8 +62,8 @@ module.exports = class UserService {
    */
   static async getUserByID(id) {
     try {
-      let foundUser = await User.findById(id).select({ password: false });;
-      if (foundUser) return foundUser.toObject();
+      let foundUser = await User.findById(id).select({ password: false }).lean();;
+      if (foundUser) return foundUser;
       return null;
     } catch (ex) {
       throw ex;
@@ -59,8 +76,8 @@ module.exports = class UserService {
    */
   static async getUsersByParams(params) {
     try {
-      let foundUsers = await User.find(params).select({ password: false });;
-      if (foundUsers) return foundUsers.toObject();
+      let foundUsers = await User.find(params).select({ password: false }).lean();;
+      if (foundUsers) return foundUsers;
       return null;
     } catch (ex) {
       throw ex;
@@ -68,13 +85,19 @@ module.exports = class UserService {
   }
   /**
    * 
-   * @param {{}} params 
+   * @param {{}} params
+   * @param {Boolean} returnPassword
    * @returns {User }
    */
-  static async getSingleUserByParams(params) {
+  static async getSingleUserByParams(params, returnPassword = false) {
     try {
-      let foundUser = await User.findOne(params).select({ password: false });;
-      if (foundUser) return foundUser.toObject();
+      let foundUser;
+      console.log(returnPassword)
+      if (!returnPassword)
+        foundUser = await User.findOne(params).select({ password: false }).lean();
+      else
+        foundUser = await User.findOne(params).lean();
+      if (foundUser) return foundUser;
       return null;
     } catch (ex) {
       throw ex;
@@ -103,16 +126,24 @@ module.exports = class UserService {
    * 
    * @param {string|mongoose.Types.ObjectId} id 
    * @param {{}} data 
+   * @param {"push"|"pull"|none} method
    * @returns {User }
    */
-  static async findUserByIdAndUpdate(id, data) {
+  static async findUserByIdAndUpdate(id, data, method = null) {
     try {
-      let updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
+      let updatedUser
+      if (method === "push")
+        updatedUser = await User.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
+      else if (method === "pull") {
+        updatedUser = await User.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
+      }
+      else
+        updatedUser = await User.findByIdAndUpdate(id, data, { new: true }).lean();
       if (updatedUser) {
-        updatedUser = updatedUser.toObject();
         delete updatedUser.password;
         return updatedUser;
       }
+      return null;
     } catch (ex) {
       throw ex;
     }
