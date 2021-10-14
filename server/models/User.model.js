@@ -1,7 +1,7 @@
-/** @typedef {import("./models.helper").User} User */
+// /** @typedef {import("./models.helper.ts").User} User */
 const mongoose = require("mongoose");
 
-/** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
+// /** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
 const UserSchema = new mongoose.Schema({
   username: {
     type: "string",
@@ -10,7 +10,8 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   name: {
     type: String,
@@ -25,7 +26,8 @@ const UserSchema = new mongoose.Schema({
     default: null
   },
   lastSeen: {
-    type: String
+    type: Date,
+    default: Date.now
   },
   contacts: [{
     userId: {
@@ -34,7 +36,8 @@ const UserSchema = new mongoose.Schema({
       required: true
     },
     since: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }],
@@ -45,7 +48,8 @@ const UserSchema = new mongoose.Schema({
       required: true
     },
     since: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }],
@@ -56,7 +60,8 @@ const UserSchema = new mongoose.Schema({
       required: true
     },
     since: {
-      type: mongoose.Schema.Types.Date,
+      type: Date,
+      default: Date.now,
       required: true
     }
   }]
