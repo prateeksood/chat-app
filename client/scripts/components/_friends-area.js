@@ -6,17 +6,16 @@
 
 class ChatItem extends UIHandler.Component{
   /** @type {ChatArea} */
-  #chatArea=null;
+  chatArea=null;
   /** @param {Chat} chat */
   constructor(chat){
     const events={};
     events.click=event=>{
-      if(!this.#chatArea)
-        this.#chatArea=new ChatArea(chat);
+      App.data.chats.select(chat.id);
     };
     const element=DOM.create("div",{
       class:"chat-item",
-      id:_id,
+      id:chat.id,
       children:[
         DOM.create("div",{
           class:"dp-holder",
@@ -32,11 +31,11 @@ class ChatItem extends UIHandler.Component{
           children:[
             DOM.create("div",{
               class:"user-name",
-              html:username,
+              html:chat.title,
             }),//div.user-name
             DOM.create("div",{
               class:"msg-preview",
-              html:previewMessages[0].content
+              html:chat.messages[0]?.content
             })  //div.msg-preview
           ]
         }),  //div.name-holder
@@ -45,12 +44,13 @@ class ChatItem extends UIHandler.Component{
           children:[
             DOM.create("div",{
               class:"msg-time",
-              html:lastMessageTime
+              html:chat.messages[0]?.time
             })  //div.msg-time
           ]
         })  //div.other-info
       ]
     },{},events);  //div.chat-item
     super(chat.id,element);
+    this.chatArea=new ChatArea(chat);
   }
 };

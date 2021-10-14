@@ -1,16 +1,25 @@
 /// <reference path="dom.js"/>
-/// <reference path="ui-handler.js"/>
+/// <reference path="listener.js"/>
 /// <reference path="sessions.js"/>
+/// <reference path="ui-handler.js"/>
+/// <reference path="data-manager.js"/>
 /// <reference path="types/types.d.ts"/>
 /// <reference path="types/user.js"/>
 /// <reference path="types/chat.js"/>
 /// <reference path="components/context-menu.js"/>
 /// <reference path="components/friends-area.js"/>
 /// <reference path="components/message-container.js"/>
+/// <reference path="components/_friends-area.js"/>
+/// <reference path="components/_chat-area.js"/>
 
 const UI=new UIHandler();
 const App=new class AppManager{
-  session=new Session();
+  session=new Session();  // session.js
+
+  data={
+    /** @type {DataManager<Chat>} */
+    chats:new DataManager()  // data-manager.js
+  };
 
   popupCount=0;
   dataValidation={
@@ -67,8 +76,8 @@ const App=new class AppManager{
   async auth(){
     const token=localStorage.getItem('token');
     if(!token){
-      UI.container.chat.unmount();
-      UI.container.auth.mount(UI.container.main);
+      // UI.container.chat.unmount();
+      // UI.container.auth.mount(UI.container.main);
       return;
     }
     const request=await fetch("/auth",{
@@ -280,19 +289,59 @@ UI.onInit(ui=>{
     }
   });
 
-  /** @type {UIHandler.ComponentList<ChatArea>} */
-  const chatAreas=new UIHandler.ComponentList();
-  /** @type {UIHandler.ComponentList<friendsArea>} */
+  /** @type {UIHandler.ComponentList<ChatItem>} */
   const chatItems=new UIHandler.ComponentList();
 
-  chatAreas.on("select",function(chatArea){
-    chatArea.mount(container.chat);
+  chatItems.on("insert",function(chatItem){
+    chatItem.mount(container.chat.sub.friendsList);
+  });
+  chatItems.on("delete",function(chatItem){
+    chatItem.remove();
+  });
+  chatItems.on("deselect",function(chatItem){
+    chatItem.chatArea.unmount();
   });
   chatItems.on("select",function(chatItem){
-    chatAreas.select(chatItem.id);
+    chatItem.chatArea.mount(container.chat.sub.messagesArea);
   });
-  // chatItems.select("chat_id");
 
+  App.data.chats.on("insert",function(chat){
+    chatItems.insert(new ChatItem(chat));
+  });
+  App.data.chats.on("delete",function(chat){
+    chatItems.delete(chat.id);
+  });
+  App.data.chats.on("select",function(chat){
+    chatItems.select(chat.id);
+  });
+
+  const users=[
+    new User("0","sir.tim","Tim Berners Lee"),
+    new User("1","ms.windows","Bill Gates"),
+    new User("2","man.iron","Tony Stark"),
+    new User("3","winter.soldier","Bucky Barnes"),
+    new User("4","mark","Mark Zuckerberg"),
+    new User("5","sherlock","Sherlock Holmes")
+  ];
+  const demoChats=[
+    new Chat("1",[users[0],users[1]],[
+      new Message("1",users[0],"hello",Date.now()),
+      new Message("2",users[1],"haan",Date.now()+60000),
+      new Message("3",users[1],"bolo",Date.now()+60000*3)
+    ]),
+    new Chat("2",[users[0],users[2]],[
+      new Message("4",users[0],"hello",Date.now()-60000*30),
+      new Message("5",users[1],"hi",Date.now()-60000*20),
+      new Message("6",users[0],"bye",Date.now()+60000*3),
+    ]),
+    new Chat("3",[users[0],users[3],users[4]],[
+      new Message("7",users[0],"hello",Date.now()-60000*10),
+      new Message("8",users[1],"hello 2",Date.now()-60000*3),
+      new Message("9",users[2],"hello 3",Date.now()),
+    ])
+  ];
+
+  demoChats.forEach(chat=>App.data.chats.insert(chat.id,chat));
   container.prompts.style({display:"none"});
 });
 

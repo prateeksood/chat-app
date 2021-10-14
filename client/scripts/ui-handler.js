@@ -53,6 +53,10 @@ class UIHandler{
 
 UIHandler.Component=class Component{
   /**
+   * Component's ID
+   * @type {string} */
+  id=null;
+  /**
    * Component's element
    * @type {HTMLElement} */
   element=null;
@@ -74,10 +78,6 @@ UIHandler.Component=class Component{
     this.element=element;
     this.attr({cId:id,cType:type});
   }
-  /**
-   * Component's ID
-   * @type {string} */
-  id=null;
   /** Remove/delete element from component */
   remove(){
     if(this.element){
@@ -92,7 +92,6 @@ UIHandler.Component=class Component{
   unmount(){
     if(this.element)
       this.element.remove();
-    console.trace();
   }
   /**
    * Inserts Component at the end of parent
@@ -148,10 +147,12 @@ UIHandler.Component=class Component{
 };
 
 /** @template T */
-UIHandler.ComponentList=class ListComponent{
-  #listener=new Listeners(["insert","delete","select","update"]);
+UIHandler.ComponentList=class ComponentList{
+  #listener=new Listeners(["insert","delete","update","select","deselect"]);
   /** @type {Map<string,T>} */
   #list=new Map();
+  /** @type {T} */
+  #selected=null;
   constructor(){}
   /**
    * Inserts a Component into the list
@@ -176,7 +177,10 @@ UIHandler.ComponentList=class ListComponent{
    * @param {string} componentId */
   select(componentId){
     if(this.#list.has(componentId)){
-      this.#listener.trigger("select",this.#list.get(componentId));
+      if(this.#selected)
+        this.#listener.trigger("deselect",this.#selected);
+      this.#selected=this.#list.get(componentId);
+      this.#listener.trigger("select",this.#selected);
     }
     return this;
   }
@@ -184,7 +188,7 @@ UIHandler.ComponentList=class ListComponent{
    * @callback listAction
    * @param {T} component
    * @returns {void}
-   * @param {"insert"|"delete"|"select"|"update"} eventName
+   * @param {"insert"|"delete"|"update"|"select"|"deselect"} eventName
    * @param {listAction} action
    */
   on(eventName,action){
@@ -194,6 +198,7 @@ UIHandler.ComponentList=class ListComponent{
 
 // Example
 
+/** @type {UIHandler.ComponentList<UIHandler.Component>} */
 const components=new UIHandler.ComponentList();
 components.on("insert",function(component){
   console.log("inserted",component.id);

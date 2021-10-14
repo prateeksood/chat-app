@@ -6,29 +6,34 @@
 class ChatArea extends UIHandler.Component{
   /**
    * To manage message components
-   * @type {UIHandler.ComponentList<Message>}
+   * @type {UIHandler.ComponentList<MessageComponent>}
   */
   #messages=new UIHandler.ComponentList();
 
   /** @param {Chat} chat */
   constructor(chat){
 
+    const rightMain=new UIHandler.Component(
+      "rightMain",
+      DOM.create("div",{
+        class:"right-main"
+      })  // div.right-main
+    );
     const element=DOM.create("div",{
       class:"chat-area",
       children:[
         ChatArea.createTopBar(chat),
-        DOM.create("div",{
-          class:"right-main"
-        }),  // div.right-main
+        rightMain.element,
         ChatArea.createBottomBar()
       ]
     });  // div.chat-area
 
+    super("chatArea",element);
+    this.addSub(rightMain);
+
     // Whenever a Message component is inserted into the this.#messages using this.#messages.insert method
     this.#messages.on("insert",component=>{
-      element.appendChild(component.element);
-      // or
-      // component.mount(this);
+      component.mount(rightMain);
     });
     // Whenever a Message component is deleted from the this.#messages using this.#messages.delete method
     this.#messages.on("delete",component=>{
@@ -36,10 +41,14 @@ class ChatArea extends UIHandler.Component{
     });
 
     chat.messages.forEach(message=>{
-      const component=new Message(message);
+      const component=new MessageComponent(
+        message.content,
+        message.time,
+        Math.floor(Math.random()*2)===0
+      );
       this.#messages.insert(component);
     });
-    super("chatArea",element);
+
   }
   /** @param {Chat} chat */
   static createTopBar(chat){

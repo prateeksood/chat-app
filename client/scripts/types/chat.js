@@ -1,6 +1,8 @@
 /// <reference path="types.d.ts"/>
 
 class Chat{
+  /** @type {string} */
+  title=null;
   /**
    * @param {String} id
    * @param {User[]} participants

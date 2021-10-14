@@ -3,7 +3,7 @@
 /// <reference path="../ui-handler.js"/>
 
 
-class Message extends UIHandler.Component{
+class MessageComponent extends UIHandler.Component{
   #messageContent="";
   #recipient;
   #sender;
@@ -32,7 +32,7 @@ class Message extends UIHandler.Component{
               children:[
                 DOM.create("div",{
                   class:"time",
-                  html:Message.showFormatedTime(messageTime)
+                  html:MessageComponent.showFormatedTime(messageTime)
                 }), // div.time
                 DOM.create("div",{
                   class:"icon",

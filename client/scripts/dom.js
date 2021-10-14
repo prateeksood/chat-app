@@ -7,7 +7,7 @@ const DOM=new class DOM{
 	/**
    * Sets the attributes
    * @param {Element} element
-   * @param {DOMAttributes} attributesData
+   * @param {HTMLElementA} attributesData
    * @param {boolean} modify
    */
 	attr(element,attributesData={},modify=true){
@@ -55,11 +55,12 @@ const DOM=new class DOM{
   }
   /**
    * Creates a new HTML Element
-   * @param {keyof HTMLElementTagNameMap} tagName
+   * @type {<tagName extends keyof HTMLElementTagNameMap>(tagName:tagName)}
    * @param {DOMAttributes} attributes
    * @param {CSSStyleDeclaration} styles
    * @param {DOMEvents} events
    * @param {{modifyAttributes:true,modifyStyles:true}} options
+   * @returns {HTMLElementTagNameMap[tagName]}
    */
   create(tagName,attributes={},styles={},events={},options={}){
     const element=document.createElement(tagName);
@@ -70,10 +71,10 @@ const DOM=new class DOM{
   }
   /**
    * Creates a new HTML NameSpace Element
-   * @param {keyof SVGElementTagNameMap} qualifiedName
+   * @type {<qualifiedName extends keyof SVGElementTagNameMap>(qualifiedName:qualifiedName)}
    * @param {DOMAttributes} attributes
    * @param {{namespaceURI:"http://www.w3.org/2000/svg"}} options
-   * @returns {Element}
+   * @returns {SVGElementTagNameMap[qualifiedName]}
    */
   createNS(qualifiedName,attributes,options={}){
     let elm=document.createElementNS(options.namespaceURI??"http://www.w3.org/2000/svg",qualifiedName);
