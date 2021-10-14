@@ -4,7 +4,7 @@ class Chat{
   /** @type {string} */
   title=null;
   /**
-   * @param {String} id
+   * @param {string} id
    * @param {User[]} participants
    * @param {Message[]} messages
    */
@@ -21,27 +21,41 @@ class Chat{
       participants.map(user=>User.from(user)),
       messages.map(message=>Message.from(message))
     );
+    chat.title=chatResponse.title??null;
     return chat;
   }
 };
 
 class Message{
+  /** @type {{userId:string,time:Date}[]} */
+  receivedBy=[];
+  /** @type {{userId:string,time:Date}[]} */
+  readBy=[];
+  /** @type {{userId:string,time:Date}[]} */
+  deletedBy=[];
   /**
    * @param {string} id
+   * @param {string} chatId
    * @param {string} senderId
    * @param {string} content
-   * @param {Date} time
+   * @param {Date} sendAt
+   * @param {string} [referenceId]
    */
-  constructor(id,senderId,content,time){
+  constructor(id,chatId,senderId,content,sendAt,referenceId=null){
     this.id=id;
+    this.chatId=chatId;
     this.senderId=senderId;
     this.content=content;
-    this.time=time;
+    this.sendAt=sendAt;
+    this.referenceId=referenceId;
   }
   /** @param {MessageResponse} messageResponse */
   static from(messageResponse){
-    const {_id,_senderId,content,time}=messageResponse;
-    const message=new Message(id,senderId,content,time);
+    const {id,chatId,senderId,content,sendAt,referenceId}=messageResponse;
+    const message=new Message(id,chatId,senderId,content,sendAt,referenceId??null);
+    message.receivedBy=messageResponse.receivedBy??[];
+    message.deletedBy=messageResponse.deletedBy??[];
+    message.readBy=messageResponse.readBy??[];
     return message;
   }
 };

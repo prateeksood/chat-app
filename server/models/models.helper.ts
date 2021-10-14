@@ -11,11 +11,11 @@ interface User {
     userId: ObjectId, // User.id
     since: Date
   }[];
-  requestsId: {
+  requests: {
     userId: ObjectId, // User.id
     since: Date
   }[];
-  blockedId: {
+  blocked: {
     userId: ObjectId, // User.id
     since: Date
   }[];
