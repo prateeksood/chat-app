@@ -1,13 +1,13 @@
-/** @typedef {import("../models/models.helper.ts").User} User */
-const User = require("../models/User.model");
+/** @typedef {import("../models/models.helper").User} User */
+const UserModel = require("../models/User.model");
 const mongoose = require("mongoose");
 
 module.exports = class UserService {
 
   static async getAllUsers() {
     try {
-      let allUsers = await User.find().select({ password: false });
-      if (allUsers) return allUsers.toObject();
+      let allUsers = await UserModel.find().select({ password: false });
+      if (allUsers) return allUsers.map(user=>user.toObject());
       return null;
     } catch (ex) {
       throw ex;
@@ -20,7 +20,7 @@ module.exports = class UserService {
    */
   static async searchUser(key) {
     try {
-      let foundUsers = await User.find({
+      let foundUsers = await UserModel.find({
         $or: [{
           "username": new RegExp(key, "i")
         },
@@ -31,7 +31,7 @@ module.exports = class UserService {
           "email": new RegExp(key, "i")
         }
         ]
-      }).select({ password: false });;
+      }).select({ password: false });
       if (foundUsers) return foundUsers.toObject();
       return null;
     } catch (ex) {
@@ -45,7 +45,7 @@ module.exports = class UserService {
    */
   static async getUserByID(id) {
     try {
-      let foundUser = await User.findById(id).select({ password: false });;
+      let foundUser = await UserModel.findById(id).select({ password: false });;
       if (foundUser) return foundUser.toObject();
       return null;
     } catch (ex) {
@@ -59,7 +59,7 @@ module.exports = class UserService {
    */
   static async getUsersByParams(params) {
     try {
-      let foundUsers = await User.find(params).select({ password: false });;
+      let foundUsers = await UserModel.find(params).select({ password: false });;
       if (foundUsers) return foundUsers.toObject();
       return null;
     } catch (ex) {
@@ -73,7 +73,7 @@ module.exports = class UserService {
    */
   static async getSingleUserByParams(params) {
     try {
-      let foundUser = await User.findOne(params).select({ password: false });;
+      let foundUser = await UserModel.findOne(params).select({ password: false });;
       if (foundUser) return foundUser.toObject();
       return null;
     } catch (ex) {
@@ -87,7 +87,7 @@ module.exports = class UserService {
    */
   static async saveNewUser(data) {
     try {
-      const newUser = new User(data);
+      const newUser = new UserModel(data);
       let savedUser = await newUser.save();
       if (savedUser) {
         savedUser = savedUser.toObject();
@@ -107,7 +107,7 @@ module.exports = class UserService {
    */
   static async findUserByIdAndUpdate(id, data) {
     try {
-      let updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
+      let updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true });
       if (updatedUser) {
         updatedUser = updatedUser.toObject();
         delete updatedUser.password;
