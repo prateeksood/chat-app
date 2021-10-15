@@ -1,14 +1,14 @@
-// /** @typedef {import("./models.helper.ts").Message} Message */
+/** @typedef {import("./models.helper").Message} Message */
 const mongoose = require("mongoose");
 
-// /** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
+/** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
 const messageSchema = new mongoose.Schema({
-  chatId: {
+  chat: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Chat",
     required: true
   },
-  senderId: {
+  sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  referenceId: {
+  reference: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Message",
     default: null
@@ -28,7 +28,7 @@ const messageSchema = new mongoose.Schema({
     required: true
   },
   receivedBy: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -40,7 +40,7 @@ const messageSchema = new mongoose.Schema({
     }
   }],
   readBy: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -52,7 +52,7 @@ const messageSchema = new mongoose.Schema({
     }
   }],
   deletedBy: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -67,5 +67,12 @@ const messageSchema = new mongoose.Schema({
   timestamps: true
 });
 
+messageSchema.set("toObject",{
+  virtuals:true,
+  versionKey:false,
+  transform(doc,ret,options){
+    delete ret._id;
+  }
+});
 
 module.exports = mongoose.model("Message", messageSchema);

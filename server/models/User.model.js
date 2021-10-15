@@ -1,8 +1,8 @@
-// /** @typedef {import("./models.helper.ts").User} User */
+/** @typedef {import("./models.helper.ts").User} User */
 const mongoose = require("mongoose");
 
-// /** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
-const UserSchema = new mongoose.Schema({
+/** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */
+const userSchema = new mongoose.Schema({
   username: {
     type: "string",
     required: true,
@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
     default: Date.now
   },
   contacts: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -41,20 +41,8 @@ const UserSchema = new mongoose.Schema({
       required: true
     }
   }],
-  sentRequests: [{
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-    since: {
-      type: Date,
-      default: Date.now,
-      required: true
-    }
-  }],
-  recievedRequests: [{
-    userId: {
+  requests: [{
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -66,7 +54,7 @@ const UserSchema = new mongoose.Schema({
     }
   }],
   blocked: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -81,4 +69,12 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model("User", UserSchema);
+userSchema.set("toObject",{
+  virtuals:true,
+  versionKey:false,
+  transform(doc,ret,options){
+    delete ret._id;
+  }
+});
+
+module.exports = mongoose.model("User", userSchema);

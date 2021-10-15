@@ -1,8 +1,8 @@
-// /** @typedef {import("./models.helper.temp").Chat} Chat */
+/** @typedef {import("./models.helper").Chat} Chat */
 const mongoose = require('mongoose');
 
-// /** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
-const ChatSchema = new mongoose.Schema({
+/** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
+const chatSchema = new mongoose.Schema({
   title: {
     type: String,
     default: ""
@@ -12,7 +12,7 @@ const ChatSchema = new mongoose.Schema({
     default: false
   },
   participants: [{
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -27,4 +27,12 @@ const ChatSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('Chat', ChatSchema);
+chatSchema.set("toObject",{
+  virtuals:true,
+  versionKey:false,
+  transform(doc,ret,options){
+    delete ret._id;
+  }
+});
+
+module.exports = mongoose.model('Chat', chatSchema);

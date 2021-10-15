@@ -1,5 +1,5 @@
-/** @typedef {import("../models/models.helper.ts").User} User */
-const User = require("../models/User.model");
+/** @typedef {import("../models/models.helper").User} User */
+const UserModel = require("../models/User.model");
 const mongoose = require("mongoose");
 
 module.exports = class UserService {
@@ -20,7 +20,7 @@ module.exports = class UserService {
    */
   static async searchUsers(key) {
     try {
-      let foundUsers = await User.find({
+      let foundUsers = await UserModel.find({
         $or: [{
           "username": new RegExp(key, "i")
         },
@@ -62,7 +62,7 @@ module.exports = class UserService {
    */
   static async getUserByID(id) {
     try {
-      let foundUser = await User.findById(id).select({ password: false }).lean();;
+      let foundUser = await User.findById(id).select({ password: false }).lean();
       if (foundUser) return foundUser;
       return null;
     } catch (ex) {
@@ -110,7 +110,7 @@ module.exports = class UserService {
    */
   static async saveNewUser(data) {
     try {
-      const newUser = new User(data);
+      const newUser = new UserModel(data);
       let savedUser = await newUser.save();
       if (savedUser) {
         savedUser = savedUser.toObject();
@@ -131,7 +131,7 @@ module.exports = class UserService {
    */
   static async findUserByIdAndUpdate(id, data, method = null) {
     try {
-      let updatedUser
+      let updatedUser;
       if (method === "push")
         updatedUser = await User.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
       else if (method === "pull") {

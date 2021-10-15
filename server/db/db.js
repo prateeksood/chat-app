@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const connectToDB = async () => {
-  const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xjyed.mongodb.net/chat-app?retryWrites=true&w=majority`;
+  // const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xjyed.mongodb.net/chat-app?retryWrites=true&w=majority`;
+  const url="mongodb://127.0.0.1:27017/foo";
   try {
     await mongoose.connect(url, {
       useNewUrlParser: true,
