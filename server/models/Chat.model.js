@@ -11,6 +11,10 @@ const chatSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  groupAdmins: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
+  },
   participants: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,17 +26,14 @@ const chatSchema = new mongoose.Schema({
       default: Date.now,
       required: true
     }
-  }]
+  }],
+  messages: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Message"
+  }
 }, {
   timestamps: true
 });
 
-chatSchema.set("toObject",{
-  virtuals:true,
-  versionKey:false,
-  transform(doc,ret,options){
-    delete ret._id;
-  }
-});
 
 module.exports = mongoose.model('Chat', chatSchema);

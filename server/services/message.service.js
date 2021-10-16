@@ -2,7 +2,7 @@
 
 
 const mongoose = require("mongoose");
-const Message = require("../models/Message.model");
+const MessageModel = require("../models/Message.model");
 
 
 module.exports = class MessageService {
@@ -14,9 +14,8 @@ module.exports = class MessageService {
    */
   static async getMessageById(id) {
     try {
-      let foundMessage = await Message.findById(id);
-      if (foundMessage) return foundMessage.toObject();
-      return null;
+      let foundMessage = await MessageModel.findById(id).lean();
+      return foundMessage;
     } catch (ex) {
       throw ex;
     }
@@ -29,31 +28,31 @@ module.exports = class MessageService {
    * @param {Number} pageSize 
    * @returns {Message[]}
    */
-  static async getMessagesByChatId(chatId, pageSize = 20, skips = 0) {
+  static async getMessagesByChatId(chatId, pageSize = 30, skips = 0) {
     try {
-      const foundMessages = await Message
+      const foundMessages = await MessageModel
         .find({ chat: chatId })
         .skip(skips).limit(pageSize)
         .sort([['createdAt', -1]])
         .populate([
           {
             path: "sender",
-            select: { _id: true, username: true, name: true }
+            select: "_id username name"
           }, {
             path: "receivedBy.user",
-            select: { _id: true, username: true, name: true }
+            select: "_id username name "
           }, {
             path: "readBy.user",
-            select: { _id: true, username: true, name: true }
+            select: " _id  username name "
           }, {
             path: "deletedBy.user",
-            select: { _id: true, username: true, name: true }
+            select: "_id username name}"
           }, {
             path: "reference",
             populate: [
               {
                 path: "sender",
-                select: { _id: true, username: true, name: true }
+                select: "_id  username  name"
               }
             ]
           }
@@ -63,7 +62,19 @@ module.exports = class MessageService {
       throw ex;
     }
   }
-
+  /**
+   * 
+   * @param {string} key 
+   * @returns {Message []}
+   */
+  static async searchMessage(key, chatID = null) {
+    try {
+      let foundMessages = await MessageModel.find({ "content": new RegExp(key, "i"), "chat": chatID }).lean();
+      return foundMessages;
+    } catch (ex) {
+      throw ex;
+    }
+  }
   /**
    * 
    * @param {{}} data 
@@ -71,8 +82,8 @@ module.exports = class MessageService {
    */
   static async saveNewMessage(data) {
     try {
-      const newMessage = new Message(data);
-      let savedMessage = newMessage.save();
+      const newMessage = new MessageModel(data);
+      let savedMessage = await newMessage.save();
       if (savedMessage) return savedMessage.toObject();
       return null;
     } catch (ex) {

@@ -9,11 +9,14 @@ module.exports = class MessageController {
    */
   static async getMessagesByChatId(request, response, next) {
     try {
-      const { chatId, pageNumber = 1, pageSize = 20 } = request.body;
-      if (!MessageService.isValidId(chatId))
-        throw "Invalid chat id";
+      const { pageNumber = 1, pageSize = 30 } = request.body;
+      const { chatID } = request.params;
+      if (!MessageService.isValidId(chatID)) {
+        response.status(400).json({ message: "Invalid chat id" });
+        return
+      }
       const skips = pageSize * (pageNumber - 1);
-      const foundMessages = await MessageService.getMessagesByChatId(chatId, pageNumber, skips);
+      const foundMessages = await MessageService.getMessagesByChatId(chatID, pageSize, skips);
       response.status(200).json(foundMessages);
     } catch (ex) {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
@@ -29,15 +32,18 @@ module.exports = class MessageController {
     try {
       const {
         content,
-        sender,
         reference
       } = request.body;
-      const { chatId } = request.params;
-      if (!reference)
-        reference = null;
-      if (!MessageService.isValidId(chatId))
+      const { _id: sender } = request.user;
+      const { chatID } = request.params;
+      if (!MessageService.isValidId(chatID))
         throw "Invalid chat id";
-      await MessageService.saveNewMessage({ content, sender, reference, chat: chatId });
+
+      const savedMessage = await MessageService.saveNewMessage({ content, sender, reference, chat: chatID });
+      if (!savedMessage)
+        throw "Unable to save message";
+      await ChatService.findChatByIdAndUpdate(chatID, { messages: savedMessage._id }, "push");
+
       response.status(200).json({ message: "Message sent successfully" });
     } catch (ex) {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });

@@ -7,8 +7,7 @@ module.exports = class UserService {
   static async getAllUsers() {
     try {
       let allUsers = await UserModel.find().select({ password: false }).lean();
-      if (allUsers) return allUsers
-      return null;
+      return allUsers
     } catch (ex) {
       throw ex;
     }
@@ -32,8 +31,7 @@ module.exports = class UserService {
         }
         ]
       }).select({ password: false }).lean();
-      if (foundUsers) return foundUsers;
-      return null;
+      return foundUsers;
     } catch (ex) {
       throw ex;
     }
@@ -62,8 +60,23 @@ module.exports = class UserService {
   static async getUserByID(id) {
     try {
       let foundUser = await UserModel.findById(id).select({ password: false }).lean();
-      if (foundUser) return foundUser;
-      return null;
+      return foundUser;
+    } catch (ex) {
+      throw ex;
+    }
+  }
+
+  /**
+   * 
+   * @param {string [] |mongoose.Types.ObjectId []} id 
+   * @returns {User []}
+   */
+  static async getUsersByIDs(id, method = null) {
+    try {
+      let foundUsers;
+      if (method === "in")
+        foundUsers = await UserModel.find({ _id: { "$in": id } }).select({ password: false }).lean();
+      return foundUsers;
     } catch (ex) {
       throw ex;
     }
@@ -75,9 +88,8 @@ module.exports = class UserService {
    */
   static async getUsersByParams(params) {
     try {
-      let foundUsers = await UserModel.find(params).select({ password: false }).lean();;
-      if (foundUsers) return foundUsers;
-      return null;
+      let foundUsers = await UserModel.find(params).select({ password: false }).lean();
+      return foundUsers;
     } catch (ex) {
       throw ex;
     }
@@ -95,8 +107,7 @@ module.exports = class UserService {
         foundUser = await UserModel.findOne(params).select({ password: false }).lean();
       else
         foundUser = await UserModel.findOne(params).lean();
-      if (foundUser) return foundUser;
-      return null;
+      return foundUser;
     } catch (ex) {
       throw ex;
     }
@@ -139,9 +150,8 @@ module.exports = class UserService {
         updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true }).lean();
       if (updatedUser) {
         delete updatedUser.password;
-        return updatedUser;
       }
-      return null;
+      return updatedUser;
     } catch (ex) {
       throw ex;
     }

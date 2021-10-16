@@ -81,12 +81,5 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// userSchema.set("toObject", {
-//   virtuals: true,
-//   versionKey: false,
-//   transform(doc, ret, options) {
-//     delete ret._id;
-//   }
-// });
 
 module.exports = mongoose.model("User", userSchema);
