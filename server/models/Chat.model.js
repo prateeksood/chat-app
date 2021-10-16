@@ -35,12 +35,5 @@ const chatSchema = new mongoose.Schema({
   timestamps: true
 });
 
-chatSchema.set("toObject", {
-  virtuals: true,
-  versionKey: false,
-  transform(doc, ret, options) {
-    delete ret._id;
-  }
-});
 
 module.exports = mongoose.model('Chat', chatSchema);
