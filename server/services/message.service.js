@@ -31,7 +31,25 @@ module.exports = class MessageService {
    */
   static async getMessagesByChatId(chatId, pageSize = 20, skips = 0) {
     try {
-      const foundMessages = await Message.find({ chatId }).skip(skips).limit(pageSize).sort([['createdAt', -1]]);
+      const foundMessages = await Message
+        .find({ chat: chatId })
+        .skip(skips).limit(pageSize)
+        .sort([['createdAt', -1]])
+        .populate([
+          {
+            path: "sender",
+            select: { _id: true, username: true, name: true }
+          }, {
+            path: "receivedBy.user",
+            select: { _id: true, username: true, name: true }
+          }, {
+            path: "readBy.user",
+            select: { _id: true, username: true, name: true }
+          }, {
+            path: "deletedBy.user",
+            select: { _id: true, username: true, name: true }
+          }
+        ])
       return foundMessages;
     } catch (ex) {
       throw ex;
@@ -52,5 +70,9 @@ module.exports = class MessageService {
     } catch (ex) {
       throw ex;
     }
+  }
+
+  static isValidId(id) {
+    return mongoose.isValidObjectId(id);
   }
 }

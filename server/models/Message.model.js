@@ -22,11 +22,6 @@ const messageSchema = new mongoose.Schema({
     ref: "Message",
     default: null
   },
-  sentAt: {
-    type: Date,
-    default: Date.now,
-    required: true
-  },
   receivedBy: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -65,14 +60,6 @@ const messageSchema = new mongoose.Schema({
   }]
 }, {
   timestamps: true
-});
-
-messageSchema.set("toObject",{
-  virtuals:true,
-  versionKey:false,
-  transform(doc,ret,options){
-    delete ret._id;
-  }
 });
 
 module.exports = mongoose.model("Message", messageSchema);
