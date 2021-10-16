@@ -14,6 +14,7 @@ module.exports = class ChatService {
       throw ex;
     }
   }
+
   static async getChatById(chatId) {
     try {
       if (mongoose.isValidObjectId(chatId)) {
@@ -29,88 +30,17 @@ module.exports = class ChatService {
       throw ex.message;
     }
   }
-  static async getMessagesByChatIds(chatIds = [], timeAfter = 0) {
+
+  static async createChat(data) {
     try {
-      if (chatIds.every(id => mongoose.isValidObjectId(id))) {
-        const query = MessageModel.find({
-          $or: chatIds.map(chatId => {
-            return { chatId };
-          }),
-          $where: "sentAt>" + timeAfter
-        }).sort({ sentAt: "desc" })
-          .populate([
-            {
-              path: "chat",
-              populate: {
-                path: "participants.user",
-                select: { _id: true, username: true, name: true }
-              }
-            }, {
-              path: "receivedBy.user",
-              select: { _id: true, username: true, name: true }
-            }, {
-              path: "readBy.user",
-              select: { _id: true, username: true, name: true }
-            }, {
-              path: "deletedBy.user",
-              select: { _id: true, username: true, name: true }
-            }
-          ]);
-        const foundMessages = await query;
-        if (foundMessages.length > 0) {
-          return foundMessages.map(messageDoc => messageDoc.toObject());
-        }
-        return [];
-      } else {
-        throw "Invalid Chat ID";
-      }
+      const chatDocument = new ChatModel(data);
+      return await chatDocument.save();
     } catch (ex) {
       throw ex.message;
     }
   }
-  static async createChat(participantsId = [], title = null) {
-    try {
-      const foundUsers = await UserModel.find({
-        $or: participantsId.map(userId => {
-          return { _id: userId }
-        })
-      }).select({ _id: true });
-      if (participantsId.length !== foundUsers.length)
-        throw "There were invalid user IDs present in your request";
-      if (foundUsers.length > 1) {
-        const since = Date.now();
-        const chatDocument = new ChatModel({
-          title,
-          participants: foundUsers.map(userDoc => {
-            return {
-              user: userDoc._id,
-              since
-            };
-          })
-        });
-        return await chatDocument.save();
-      }
-      throw "A chat with less than 2 participants can not be created";
-    } catch (ex) {
-      throw ex.message;
-    }
-  }
-  /**
-   * @returns {Promise<mongoose.LeanDocument<*,*,Chat>>}
-   */
-  static testFunction() {
-    return new Promise(async function (resolve, reject) {
-      try {
-        const found = await ChatModel.findById("id");
-        if (found)
-          resolve(found.toObject());
-        else
-          reject("Reason");
-      } catch (ex) {
-        reject(ex);
-      }
-    });
-  }
+
+
   /**
    * 
    * @param {{}} params 
@@ -118,7 +48,20 @@ module.exports = class ChatService {
    */
   static async getChatsByParams(params) {
     try {
-      let foundChats = await ChatModel.find(params).lean();
+      let foundChats = await ChatModel
+        .find(params)
+        .populate([{
+          path: "messages",
+          select: "-chat",
+          perDocumentLimit: 30
+        }, {
+          path: "participants.user",
+          select: "_id name username"
+        }])
+        .sort([
+          ["updatedAt", -1]
+        ])
+        .lean();
       if (foundChats) return foundChats;
       return null;
     } catch (ex) {
@@ -126,6 +69,32 @@ module.exports = class ChatService {
     }
 
   }
+
+  /**
+   * 
+   * @param {string|mongoose.Types.ObjectId} id 
+   * @param {{}} data 
+   * @param {"push"|"pull"|none} method
+   * @returns {Chat }
+   */
+  static async findChatByIdAndUpdate(id, data, method = null) {
+    try {
+      let updatedChat;
+      if (method === "push")
+        updatedChat = await ChatModel.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
+      else if (method === "pull") {
+        updatedChat = await ChatModel.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
+      }
+      else
+        updatedChat = await ChatModel.findByIdAndUpdate(id, data, { new: true }).lean();
+
+      return updatedChat;
+
+    } catch (ex) {
+      throw ex;
+    }
+  }
+
   static isValidId(id) {
     return mongoose.isValidObjectId(id);
   }

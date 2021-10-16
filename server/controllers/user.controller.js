@@ -247,4 +247,24 @@ module.exports = class UserController {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
     }
   }
+
+  /**
+   * @param {import("express").Request} request
+   * @param {import("express").Response} response
+   * @param {import("express").NextFunction} next
+   */
+  static async uploadProfilePicture(request, response, next) {
+    try {
+      if (!request.file) {
+        response.status(400).json({ message: "No file found! Kindly provide a file to upload" });
+        return;
+      }
+      const { filename } = request.file;
+      const { _id: currentUserId } = request.user;
+      const updatedUser = await UserService.findUserByIdAndUpdate(currentUserId, { image: filename });
+      response.status(200).json(updatedUser);
+    } catch (ex) {
+      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+    }
+  }
 }

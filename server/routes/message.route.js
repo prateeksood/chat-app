@@ -7,6 +7,6 @@ const MessageController = require("../controllers/message.controller");
 
 router.get("/:chatID", authMiddleware, MessageController.getMessagesByChatId)
 
-router.post("/:chatID", MessageController.createNewMessage);
+router.post("/:chatID", authMiddleware, MessageController.createNewMessage);
 
 module.exports = router;
