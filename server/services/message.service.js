@@ -48,6 +48,14 @@ module.exports = class MessageService {
           }, {
             path: "deletedBy.user",
             select: { _id: true, username: true, name: true }
+          }, {
+            path: "reference",
+            populate: [
+              {
+                path: "sender",
+                select: { _id: true, username: true, name: true }
+              }
+            ]
           }
         ])
       return foundMessages;
