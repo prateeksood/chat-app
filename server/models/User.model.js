@@ -41,7 +41,19 @@ const userSchema = new mongoose.Schema({
       required: true
     }
   }],
-  requests: [{
+  sentRequests: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    since: {
+      type: Date,
+      default: Date.now,
+      required: true
+    }
+  }],
+  recievedRequests: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -69,12 +81,12 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-userSchema.set("toObject",{
-  virtuals:true,
-  versionKey:false,
-  transform(doc,ret,options){
-    delete ret._id;
-  }
-});
+// userSchema.set("toObject", {
+//   virtuals: true,
+//   versionKey: false,
+//   transform(doc, ret, options) {
+//     delete ret._id;
+//   }
+// });
 
 module.exports = mongoose.model("User", userSchema);

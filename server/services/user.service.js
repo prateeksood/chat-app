@@ -6,7 +6,7 @@ module.exports = class UserService {
 
   static async getAllUsers() {
     try {
-      let allUsers = await User.find().select({ password: false }).lean();
+      let allUsers = await UserModel.find().select({ password: false }).lean();
       if (allUsers) return allUsers
       return null;
     } catch (ex) {
@@ -32,7 +32,6 @@ module.exports = class UserService {
         }
         ]
       }).select({ password: false }).lean();
-      console.log(foundUsers)
       if (foundUsers) return foundUsers;
       return null;
     } catch (ex) {
@@ -48,7 +47,7 @@ module.exports = class UserService {
    */
   static async searchInArray(userId, arrayName, key, value) {
     try {
-      const foundUser = await User.findById(userId).lean();
+      const foundUser = await UserModel.findById(userId).lean();
       const index = await foundUser[arrayName].map(item => item[key].toString()).indexOf(value);
       return index;
     } catch (ex) {
@@ -62,7 +61,7 @@ module.exports = class UserService {
    */
   static async getUserByID(id) {
     try {
-      let foundUser = await User.findById(id).select({ password: false }).lean();
+      let foundUser = await UserModel.findById(id).select({ password: false }).lean();
       if (foundUser) return foundUser;
       return null;
     } catch (ex) {
@@ -76,7 +75,7 @@ module.exports = class UserService {
    */
   static async getUsersByParams(params) {
     try {
-      let foundUsers = await User.find(params).select({ password: false }).lean();;
+      let foundUsers = await UserModel.find(params).select({ password: false }).lean();;
       if (foundUsers) return foundUsers;
       return null;
     } catch (ex) {
@@ -87,16 +86,15 @@ module.exports = class UserService {
    * 
    * @param {{}} params
    * @param {Boolean} returnPassword
-   * @returns {User }
+   * @returns {UserModel }
    */
   static async getSingleUserByParams(params, returnPassword = false) {
     try {
       let foundUser;
-      console.log(returnPassword)
       if (!returnPassword)
-        foundUser = await User.findOne(params).select({ password: false }).lean();
+        foundUser = await UserModel.findOne(params).select({ password: false }).lean();
       else
-        foundUser = await User.findOne(params).lean();
+        foundUser = await UserModel.findOne(params).lean();
       if (foundUser) return foundUser;
       return null;
     } catch (ex) {
@@ -133,12 +131,12 @@ module.exports = class UserService {
     try {
       let updatedUser;
       if (method === "push")
-        updatedUser = await User.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
+        updatedUser = await UserModel.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
       else if (method === "pull") {
-        updatedUser = await User.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
+        updatedUser = await UserModel.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
       }
       else
-        updatedUser = await User.findByIdAndUpdate(id, data, { new: true }).lean();
+        updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true }).lean();
       if (updatedUser) {
         delete updatedUser.password;
         return updatedUser;
@@ -147,5 +145,8 @@ module.exports = class UserService {
     } catch (ex) {
       throw ex;
     }
+  }
+  static isValidId(id) {
+    return mongoose.isValidObjectId(id);
   }
 }

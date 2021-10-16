@@ -10,14 +10,15 @@ module.exports = class UserController {
    * @param {import("express").Response} response
    * @param {import("express").NextFunction} next
    */
-
   static async registerUser(request, response, next) {
+    let image = request.file ? request.file.filename : null;
+
     const {
       name,
       email,
       username,
       password,
-      confirmPassword
+      confirmPassword,
     } = request.body;
     const tokenExpiry = 2592000;
     const hashRounds = 10;
@@ -53,20 +54,17 @@ module.exports = class UserController {
         name,
         email,
         username,
-        password: hashedPassword
+        password: hashedPassword,
+        image
       });
       jwt.sign(savedUser, process.env.JWT_SECRET, { expiresIn: tokenExpiry }, async (ex, token) => {
         if (ex)
-          response.status(500).json({
-            message: `Something went wrong : ${ex.message}`
-          });
-        else {
-          savedUser = {
-            ...savedUser,
-            token
-          };
-          response.status(200).json(savedUser);
-        }
+          throw ex;
+        savedUser = {
+          ...savedUser,
+          token
+        };
+        response.status(200).json(savedUser);
       });
 
 
@@ -92,8 +90,6 @@ module.exports = class UserController {
         response.status(401).json({ message: "User not found" });
 
       else {
-
-        console.log("here", foundUser);
         const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
         delete foundUser.password;
         if (!isPasswordMatch)
@@ -142,21 +138,22 @@ module.exports = class UserController {
     try {
       const { _id: requestSenderId } = request.user;
       const { requestRecieverId } = request.params;
-
-      const isRequestAlreadySent = await UserService.searchInArray(requestSenderId, "sentRequests", "userId", requestRecieverId) > -1;
+      if (!UserService.isValidId(requestRecieverId))
+        throw "Invalid user Id";
+      const isRequestAlreadySent = await UserService.searchInArray(requestSenderId, "sentRequests", "user", requestRecieverId) > -1;
       if (isRequestAlreadySent) {
         response.status(400).json({ message: "You have already sent a request to this user" });
         return;
       }
-      const isAlreadyContact = await UserService.searchInArray(requestSenderId, "contacts", "userId", requestRecieverId) > -1;
+      const isAlreadyContact = await UserService.searchInArray(requestSenderId, "contacts", "user", requestRecieverId) > -1;
       if (isAlreadyContact) {
         response.status(400).json({ message: "You are already connected to this user" });
         return;
       }
       let [updatedSender, updatedReciever] = await Promise.all(
         [
-          UserService.findUserByIdAndUpdate(requestSenderId, { sentRequests: { userId: requestRecieverId } }, "push"),
-          UserService.findUserByIdAndUpdate(requestRecieverId, { recievedRequests: { userId: requestSenderId } }, "push")
+          UserService.findUserByIdAndUpdate(requestSenderId, { sentRequests: { user: requestRecieverId } }, "push"),
+          UserService.findUserByIdAndUpdate(requestRecieverId, { recievedRequests: { user: requestSenderId } }, "push")
         ]
       )
       if (updatedSender && updatedReciever) {
@@ -179,21 +176,21 @@ module.exports = class UserController {
     try {
       const { _id: requestSenderId } = request.user;
       const { requestRecieverId } = request.params;
+      if (!UserService.isValidId(requestRecieverId))
+        throw "Invalid user Id";
       let [updatedSender, updatedReciever] = await Promise.all(
         [
-          UserService.findUserByIdAndUpdate(requestSenderId, { contacts: { userId: requestRecieverId } }, "push"),
-          UserService.findUserByIdAndUpdate(requestRecieverId, { contacts: { userId: requestSenderId } }, "push")
-
+          UserService.findUserByIdAndUpdate(requestSenderId, { contacts: { user: requestRecieverId } }, "push"),
+          UserService.findUserByIdAndUpdate(requestRecieverId, { contacts: { user: requestSenderId } }, "push")
         ]
-      )
+      );
       if (updatedSender && updatedReciever) {
         [updatedSender, updatedReciever] = await Promise.all(
           [
-            UserService.findUserByIdAndUpdate(requestSenderId, { sentRequests: { userId: requestRecieverId } }, "pull"),
-            UserService.findUserByIdAndUpdate(requestRecieverId, { recievedRequests: { userId: requestSenderId } }, "pull")
-
+            UserService.findUserByIdAndUpdate(requestSenderId, { sentRequests: { user: requestRecieverId } }, "pull"),
+            UserService.findUserByIdAndUpdate(requestRecieverId, { recievedRequests: { user: requestSenderId } }, "pull")
           ]
-        )
+        );
         if (updatedSender && updatedReciever) {
           response.status(200).json({ message: "Request successfully accepted" });
           return;
@@ -212,9 +209,40 @@ module.exports = class UserController {
    */
   static async blockUser(request, response, next) {
     try {
-      const { _id: userId } = request.user;
+      const { _id: blockerId } = request.user;
       const { userToBeBlockedId } = request.params;
+      if (!UserService.isValidId(userToBeBlockedId))
+        throw "Invalid user Id";
+      const isAlreadyBlocked = await UserService.searchInArray(blockerId, "blocked", "user", userToBeBlockedId) > -1;
+      if (isAlreadyBlocked) {
+        response.status(400).json({ message: "User already blocked" });
+        return;
+      }
+      await UserService.findUserByIdAndUpdate(blockerId, { blocked: { user: userToBeBlockedId } }, "push");
+      response.status(200).json({ message: "User successfully blocked" });
+    } catch (ex) {
+      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+    }
+  }
 
+  /**
+   * @param {import("express").Request} request
+   * @param {import("express").Response} response
+   * @param {import("express").NextFunction} next
+   */
+  static async unblockUser(request, response, next) {
+    try {
+      const { _id: unblockerId } = request.user;
+      const { userToBeUnblockedId } = request.params;
+      if (!UserService.isValidId(userToBeUnblockedId))
+        throw "Invalid user Id";
+      const isAlreadyUnblocked = await UserService.searchInArray(unblockerId, "blocked", "user", userToBeUnblockedId) === -1;
+      if (isAlreadyUnblocked) {
+        response.status(400).json({ message: "User already unblocked" });
+        return;
+      }
+      await UserService.findUserByIdAndUpdate(unblockerId, { blocked: { user: userToBeUnblockedId } }, "pull");
+      response.status(200).json({ message: "User successfully unblocked" });
     } catch (ex) {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
     }
