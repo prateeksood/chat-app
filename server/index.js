@@ -1,4 +1,5 @@
 const express = require("express");
+const {WebSocketServer} = require("ws");
 const db = require("./db/db");
 const loginRoute = require("./routes/login.route");
 const registerRoute = require("./routes/register.route");
@@ -8,6 +9,7 @@ const chatRoute = require("./routes/chat.route");
 const userRoute = require("./routes/user.route");
 
 const app = express();
+
 app.use(express.urlencoded({
   extended: true
 }));
@@ -25,10 +27,30 @@ app.use('/auth', authRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);
 app.use('/user', userRoute);
+app.post("/upload",function(request,response){
+  console.log(request.body.naam,request.body.file);
+  request.on("data",data=>data);
+  response.send({status:"ok"});
+});
 
 db.connectToDB();
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, function () {
+const server=app.listen(PORT, function () {
   console.log("Listening on Port: " + PORT);
 });
+
+
+const socketServer = new WebSocketServer({server});
+socketServer.on("connection",function(socket){
+  socket.on("message",function(rawData){
+    console.log(rawData);
+    socket.send("nice");
+  });
+});
+
+// server.on("socket",function(request,socket,head){
+//   socketServer.handleUpgrade(request,socket,head,soc=>{
+//     soc.emit("connection",socket,request);
+//   });
+// });
