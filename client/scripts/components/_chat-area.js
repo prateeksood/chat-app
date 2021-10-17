@@ -24,7 +24,7 @@ class ChatArea extends UIHandler.Component{
       children:[
         ChatArea.createTopBar(chat),
         rightMain.element,
-        ChatArea.createBottomBar()
+        ChatArea.createBottomBar(chat)
       ]
     });  // div.chat-area
 
@@ -43,7 +43,7 @@ class ChatArea extends UIHandler.Component{
     chat.messages.forEach(message=>{
       const component=new MessageComponent(
         message.content,
-        message.time,
+        message.sendAt,
         Math.floor(Math.random()*2)===0
       );
       this.#messages.insert(component);
@@ -56,7 +56,13 @@ class ChatArea extends UIHandler.Component{
       class:"top-bar top-bar-right",
       children:[
         DOM.create("div",{
-          class:"dp-holder"
+          class:"dp-holder",
+          children:[
+            DOM.create("img",{
+              src:chat.image,
+              alt:"DP"
+            })  //img
+          ]
         }), //div.dp-holder
         DOM.create("div",{
           class:"name-holder",
@@ -66,8 +72,8 @@ class ChatArea extends UIHandler.Component{
               html:chat.title
             }), // div.user-name
             DOM.create("div",{
-              class:"message-preview",
-              html:"typing...."
+              class:"msg-preview",
+              html:"active now"
             })//div.message-preview
           ]
         }),// div.name-holder
@@ -100,12 +106,12 @@ class ChatArea extends UIHandler.Component{
       children:[
         DOM.create("form",{
           class:"send-area",
-          action:"#",
-          method:"dialog",
+          action:"/"+chat.id+"/send",
+          method:"POST",
           children:[
             DOM.create("input",{
               type:"text",
-              name:"message",
+              name:"content",
               placeholder:"Type a message...",
               autocomplete:"off"
             }),//input
@@ -124,6 +130,11 @@ class ChatArea extends UIHandler.Component{
               ]
             })//div.icon
           ]
+        },{/* No styles */},{
+          submit(event){
+            event.preventDefault();
+            App.sendMessage(event.currentTarget);
+          } // onsubmit
         }), // div.send-area
       ]
     }); //div.bottom-bar

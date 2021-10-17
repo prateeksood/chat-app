@@ -7,6 +7,6 @@ router.post("/",authMiddleware,(request,response) => {
   }else{
     response.status(401).send("Invalid Token, Access Denied");
   }
-})
+});
 
 module.exports=router;

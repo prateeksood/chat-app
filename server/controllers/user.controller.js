@@ -1,3 +1,9 @@
+/**
+ * @typedef {import("express").Request} Request
+ * @typedef {import("express").Response} Response
+ * @typedef {import("express").NextFunction} NextFunction
+*/
+
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
@@ -6,9 +12,9 @@ const dataValidation = require('../validations/register.validation');
 
 module.exports = class UserController {
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async registerUser(request, response, next) {
     let image = request.file ? request.file.filename : null;
@@ -74,9 +80,9 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async loginUser(request, response, next) {
     const {
@@ -115,9 +121,9 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async searchUsers(request, response, next) {
     try {
@@ -130,9 +136,9 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async sendRequest(request, response, next) {
     try {
@@ -168,9 +174,9 @@ module.exports = class UserController {
 
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async acceptRequest(request, response, next) {
     try {
@@ -203,9 +209,34 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
+   */
+   static async deleteRequest(request, response, next) {
+    try {
+      const { _id: requestSenderId } = request.user;
+      const { requestRecieverId } = request.params;
+      if (!UserService.isValidId(requestRecieverId))
+        throw "Invalid user Id";
+      let [updatedSender, updatedReciever] = await Promise.all([
+        UserService.findUserByIdAndUpdate(requestSenderId, { contacts: { user: requestRecieverId } }, "pop"),
+        UserService.findUserByIdAndUpdate(requestRecieverId, { contacts: { user: requestSenderId } }, "pop")
+      ]);
+      if (updatedSender && updatedReciever) {
+        response.status(200).json({ message: "Request deleted" });
+        return;
+      }
+      response.status(400).json({ message: "Unable to accept request" });
+    } catch (ex) {
+      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+    }
+  }
+
+  /**
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async blockUser(request, response, next) {
     try {
@@ -226,9 +257,9 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async unblockUser(request, response, next) {
     try {
@@ -249,9 +280,9 @@ module.exports = class UserController {
   }
 
   /**
-   * @param {import("express").Request} request
-   * @param {import("express").Response} response
-   * @param {import("express").NextFunction} next
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
    */
   static async uploadProfilePicture(request, response, next) {
     try {

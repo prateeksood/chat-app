@@ -3,6 +3,7 @@
 /// <reference path="../ui-handler.js"/>
 
 class UIMenu extends UIHandler.Component{
+  static #gap_at_end=16;
   constructor(id=""){
     const element=DOM.create("menu",{class:"context-menu"});
     super("menu"+id,element);
@@ -21,12 +22,18 @@ class UIMenu extends UIHandler.Component{
    * @callback menuItemAction
    * @param {MouseEvent} event
    * @returns
-   * @param {string} name
-   * @param {string} text
-   * @param {menuItemAction} action
+   * @param {string} name Name/ID for the item
+   * @param {string} text Content of the Item
+   * @param {menuItemAction} action A callback for click event
    */
   addItem(name,text,action){
     this.element.appendChild(DOM.create("li",{text,name},{/** No CSS style */},{click:action}));
+  }
+  /** @param {{name:string,text:string,action:menuItemAction}[]} items */
+  addItems(items=[]){
+    items.forEach(({name,text,action})=>{
+      this.element.appendChild(DOM.create("li",{text,name},{/** No CSS style */},{click:action}));
+    });
   }
   /**
    * Add a list item to the menu
@@ -38,5 +45,19 @@ class UIMenu extends UIHandler.Component{
   clearItems(){
     for(const child of this.element.children)
       child.remove();
+  }
+  /** Inserts Component at the end of parent
+   * @param {UIHandler.Component} parent
+   * @param {PointerEvent} event
+   */
+  mount(parent,event){
+    super.mount(parent);
+    /** Preventing this.element from displaying outside the parent.element */
+    const width_diff=parent.element.clientWidth-this.element.clientWidth-UIMenu.#gap_at_end;
+    const height_diff=parent.element.clientHeight-this.element.clientHeight-UIMenu.#gap_at_end;
+    this.style({
+      top:(event.y<height_diff?event.y:height_diff)+"px",
+      left:(event.x<width_diff?event.x:width_diff)+"px"
+    });
   }
 };

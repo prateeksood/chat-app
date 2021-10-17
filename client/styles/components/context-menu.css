@@ -5,7 +5,7 @@ menu.context-menu{
   padding:0.3em 0px;
   border-radius:10px;
   background-color:#fff;
-  box-shadow:0.06em 0.06em 1em #2224;
+  box-shadow:0.06em 0.06em 0.5em #2224;
   list-style:none;
   user-select:none;
   overflow:hidden;

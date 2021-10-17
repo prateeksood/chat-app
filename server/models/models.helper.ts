@@ -11,7 +11,11 @@ interface User {
     user: ObjectId, // User.id
     since: Date
   }[];
-  requests: {
+  receivedRequests: {
+    user: ObjectId, // User.id
+    since: Date
+  }[];
+  sentRequests: {
     user: ObjectId, // User.id
     since: Date
   }[];
@@ -27,6 +31,10 @@ interface Chat {
     user: ObjectId, // User.id
     since: Date
   }[];
+  messages: {
+    message: ObjectId, // Message.id
+    updatedAt: Date
+  }
 }
 
 interface Message {

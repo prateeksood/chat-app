@@ -21,7 +21,7 @@ class ChatItem extends UIHandler.Component{
           class:"dp-holder",
           children:[
             DOM.create("img",{
-              src:"#",
+              src:chat.image,
               alt:"DP"
             })  //img
           ]
@@ -44,7 +44,7 @@ class ChatItem extends UIHandler.Component{
           children:[
             DOM.create("div",{
               class:"msg-time",
-              html:chat.messages[0]?.time
+              html:App.date.stringify(chat.messages[0]?.sendAt)
             })  //div.msg-time
           ]
         })  //div.other-info

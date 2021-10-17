@@ -64,6 +64,8 @@ UIHandler.Component=class Component{
    * Component's parent component
    * @type {Component} */
   parent=null;
+  /** Whether the component is mounted or not */
+  mounted=false;
   /**
    * Consists of sub components. (usage eg. parentId.sub.childId)
    * @type {Object<string,UIHandler.Component>} */
@@ -77,6 +79,8 @@ UIHandler.Component=class Component{
     this.id=id;
     this.element=element;
     this.attr({cId:id,cType:type});
+    if(element.parentElement)
+      this.mounted=true;
   }
   /** Remove/delete element from component */
   remove(){
@@ -92,12 +96,14 @@ UIHandler.Component=class Component{
   unmount(){
     if(this.element)
       this.element.remove();
+    this.mounted=false;
   }
   /**
    * Inserts Component at the end of parent
    * @param {Component} parent */
   mount(parent){
     parent.element.appendChild(this.element);
+    this.mounted=true;
   }
   /** Add multiple components as sub components
    * @param {UIHandler.Component[]} components */
