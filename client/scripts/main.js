@@ -21,6 +21,19 @@ const App=new class AppManager{
     chats:new DataManager()  // data-manager.js
   };
 
+  socket=new class{
+    /** @type {WebSocket} */
+    #socket=null;
+    open(){
+      this.#socket=new WebSocket("ws://localhost:3000");
+      this.#socket.onmessage=event=>this.onmessage(event);
+    }
+    send(data){
+      this.#socket.send(data);
+    }
+    onmessage(event){}
+  }
+
   popupCount=0;
   dataValidation={
     email:/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,

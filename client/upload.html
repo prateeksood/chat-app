@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+</head>
+<body>
+  <form id="upload-form">
+    <input type="file" name="file"/>
+    <input type="submit"/>
+  </form>
+  <script>
+const uploadForm=document.getElementById("upload-form");
+uploadForm.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const formData=new FormData(uploadForm);
+  console.log(formData.get("file"));
+  const reader=new FileReader();
+  reader.onloadend=async x=>{
+    formData.set("file",reader.result);
+    formData.set("naam","kuch naam");
+    const request=await fetch("/upload",{
+      method:"POST",
+      body:new URLSearchParams(formData)
+    });
+    // console.log(reader.result);
+  };
+  // reader.readAsText(formData.get("file"));
+  const file=formData.get("file");
+  const url=URL.createObjectURL(new Blob([file],{type:file.type}));
+  formData.set("naam",url);
+    const request=await fetch("/upload",{
+      method:"POST",
+      body:new URLSearchParams(formData)
+    });
+});
+  </script>
+</body>
+</html>
