@@ -22,6 +22,8 @@ class User{
     this.id=id;
     this.username=username;
     this.name=name;
+    const femaleString=Math.floor(Math.random()*2)===0?"fe":"";
+    this.image="resources/illustrations/"+femaleString+"male_avatar.svg";
   }
   /** @param {UserResponse} userResponse */
   static from(userResponse){

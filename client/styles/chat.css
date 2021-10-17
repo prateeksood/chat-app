@@ -5,6 +5,7 @@
 	width:400px;
   border-right:2px solid #eee;
   z-index:2;
+  transition:width 100ms 1s ease-out;
 }
 .top-bar,
 .bottom-bar{
@@ -13,6 +14,7 @@
 	height:70px;
   box-shadow:0.2em -0.1em 0.3em #2223;
   z-index:1;
+  overflow:hidden;
 }
 .top-bar{
   display:flex;
@@ -23,20 +25,30 @@
 .top-bar#left-top-bar{
   box-shadow:-0.1em 0.1em 0.3em #2223;
 }
-.bottom-bar#info-area{
+.bottom-bar.info-area{
 	padding:0.5em;
+  min-width:20em;
   height:auto;
 	background:var(--warn-color);
-  transition:all 100ms ease;
   box-shadow:-0.1em -0.1em 0.3em #2223;
+  transition:all 100s ease-out;
 }
-.bottom-bar#info-area .line{
+.bottom-bar.info-area .line{
   display:flex;
   justify-content:center;
   margin:1em;
 }
-.bottom-bar#info-area .line button{
-  margin-top:0.5em;
+.bottom-bar.info-area .line.illustration{
+  margin:2em 0px;
+  width:100%;
+  height:15em;
+  background-image:url("../resources/illustrations/injured.svg");
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.bottom-bar.info-area .line button{
+  margin:0.5em 0px;
   padding:0.8em 1em;
   border:none;
   border-radius:0.5em;
@@ -87,12 +99,17 @@
 	margin:0.5em;
   height:3.25em;
   font-weight:500;
+  overflow:hidden;
+  transition:width 100ms 1s ease-in;
 }
 .dp-holder{
   flex-shrink:0;
   width:3.25em;
 	background:#EDEDED;
 	border-radius:50%;
+}
+.dp-holder img{
+  width:100%;
 }
 .name-holder{
   display:flex;
@@ -123,6 +140,8 @@
 .other-info{
   display:flex;
   align-items:flex-end;
+  /* width:4em; */
+  flex-shrink:0;
 }
 .other-info .msg-time{
 	font-size:0.8em;
@@ -134,12 +153,55 @@
 .messages-area{
 	width:100%;
   height:100%;
+  overflow:hidden;
 }
-.chat-area{
+.chat-area, .list-area{
 	display:flex;
 	flex-direction:column;
 	width:100%;
   height:100%;
+}
+.empty-container{
+	display:flex;
+	flex-direction:column;
+  position:relative;
+  align-items:center;
+  justify-content:center;
+	width:100%;
+  height:100%;
+}
+.empty-container .illustration{
+  width:26.25em;
+  max-width:100%;
+  height:26.25em;
+  background-image:url("../resources/illustrations/chat.svg");
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.list-area .empty-container .illustration{
+  margin-bottom:2em;
+  width:18em;
+  height:18em;
+  background-image:url("../resources/illustrations/begin_chat.svg");
+}
+.empty-container p{
+  margin-bottom:3em;
+  max-width:26.25em;
+  font-size:1em;
+  line-height:1.6em;
+  font-weight:500;
+  letter-spacing:0.01em;
+  color:#bbb;
+  text-align:center;
+}
+.list-area .empty-container p{
+  max-width:18em;
+}
+.empty-container button.link{
+  position:absolute;
+  bottom:1.5em;
+  margin-top:auto;
 }
 
 .top-bar .dp-holder{
@@ -193,8 +255,7 @@ button.icon:active svg{
 .right-main{
 	height:100%;
 	overflow:auto;
-  display: flex;
-  flex-direction:column-reverse;
+  padding:0.5em;
 }
 
 .right-main .message-group{
@@ -316,4 +377,25 @@ button.icon:active svg{
 }
 .send-area input:focus{
   box-shadow:0px 0px 0.4em #2223 inset;
+}
+
+@media screen and (max-width:800px) {
+  #left-section{
+    position:absolute;
+    height:100%;
+    background-color:#fff;
+    border-right:none;
+    box-shadow:0em 0.1em 0.3em #2223;
+  }
+  .messages-area{
+    position:absolute;
+    left:5.25em;
+    width:calc(100% - 5.25em);
+  }
+  #left-section:not(:hover){
+    width:5.25em;
+  }
+  #left-section:not(:hover) :is(.name-holder, .other-info){
+    width:0px;
+  }
 }

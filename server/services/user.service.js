@@ -145,8 +145,9 @@ module.exports = class UserService {
         updatedUser = await UserModel.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
       else if (method === "pull") {
         updatedUser = await UserModel.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
-      }
-      else
+      }else if (method === "pop") {
+        updatedUser = await UserModel.findByIdAndUpdate(id, { $pop: data }, { new: true }).lean();
+      }else
         updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true }).lean();
       if (updatedUser) {
         delete updatedUser.password;

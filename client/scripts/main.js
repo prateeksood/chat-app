@@ -6,6 +6,7 @@
 /// <reference path="types/types.d.ts"/>
 /// <reference path="types/user.js"/>
 /// <reference path="types/chat.js"/>
+/// <reference path="components/popup.js"/>
 /// <reference path="components/context-menu.js"/>
 /// <reference path="components/friends-area.js"/>
 /// <reference path="components/message-container.js"/>
@@ -26,19 +27,91 @@ const App=new class AppManager{
     #socket=null;
     open(){
       this.#socket=new WebSocket("ws://localhost:3000");
-      this.#socket.onmessage=event=>this.onmessage(event);
+      this.#socket.onmessage=event=>{
+        const response=JSON.parse(event.data);
+        if(response.error)
+          this.onerror(response.error);
+        else
+          this.onmessage(data.data);
+      };
     }
     send(data){
-      this.#socket.send(data);
+      this.#socket.send(JSON.stringify(data));
     }
-    onmessage(event){}
-  }
+    onmessage(data){}
+    onerror(error){}
+  };
 
   popupCount=0;
   dataValidation={
     email:/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
     username:/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/,
     password:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&._])[A-Za-z\d@$!%*#?&._]{6,50}$/
+  };
+  date={
+    /**
+     * @param {Date|number} date
+     * @param {boolean} keepTime Keep time for date more that a month
+    */
+    stringify(date, keepTime=false){
+      date=new Date(date);
+      const date_now=new Date();
+      let deltaDate=date_now-date;
+      /** @type {Intl.DateTimeFormatOptions} */
+      const options={};
+      // seconds
+      deltaDate=Math.floor(deltaDate/1000);
+      options.second="numeric";
+      if(deltaDate<60)
+        return "just now";
+      else if(deltaDate>=60){
+        // minutes
+        deltaDate=Math.floor(deltaDate/60);
+        options.minute="2-digit";
+        if(deltaDate>=60){
+          delete options.second;
+          // hours
+          deltaDate=Math.floor(deltaDate/60);
+          options.hour="2-digit";
+          if(deltaDate>=24){
+            // days
+            deltaDate=Math.floor(deltaDate/24);
+            if(Math.floor(deltaDate/7)<1)
+              options.weekday="short";
+            else{
+              options.day="numeric";
+              options.month="short";
+              if(!keepTime){
+                delete options.hour;
+                delete options.minute;
+              }
+              if(date.getFullYear()!==date_now.getFullYear())
+                options.year="numeric";
+            }
+          }
+        }
+      }
+      return date.toLocaleString(navigator.language, options);
+    },
+    /** @param {Date|number} date*/
+    format(date){
+      let deltaDate=Date.now()-date;
+      deltaDate=Math.floor(deltaDate/1000);
+      if(deltaDate<10)
+        return "just now";
+      else if(deltaDate<=60)
+        return "few seconds ago";
+      deltaDate=Math.floor(deltaDate/60);
+      if(deltaDate<60)
+        return deltaDate+" min ago";
+      deltaDate=Math.floor(deltaDate/60);
+      if(deltaDate<24)
+        return deltaDate+" hr ago";
+      deltaDate=Math.floor(deltaDate/24);
+      if(deltaDate<28)
+        return deltaDate+" d ago";
+      return App.date.stringify(date);
+    }
   };
   /** @param {Date} date */
   showFormatedTime(date){
@@ -81,7 +154,7 @@ const App=new class AppManager{
           chat.messages,
           this.showFormatedTime(chat.messages[0].updatedAt)
         );
-        component.mount(UI.container.main.sub.friendsList);
+        component.mount(UI.container.main.sub.chatList);
       });
 
     });
@@ -120,11 +193,14 @@ const App=new class AppManager{
   /** @param {HTMLFormElement} form */
   async sendMessage(form){
     const formData=new FormData(form);
-    App.request("/message",{
-      method:"POST",
+    App.request(form.action,{
+      method:form.method??"POST",
       body:new URLSearchParams(formData)
     }).then(data=>{
       // Message sent
+    }).catch(ex=>{
+      let n=new UINotification("failed to send message",null,"error");
+      n.mount(UI.container.notifications);
     });
   }
 
@@ -282,23 +358,26 @@ UI.onInit(ui=>{
     menu.addItem("item"+itemCount,"Item "+itemCount+" added",()=>{});
     itemCount++;
   });
-  menu.addItem("close","Close",()=>{
-    menu.unmount();
-  });
+  // or
+  menu.addItems([{
+    name:"close",
+    text:"Close",
+    action(){
+      menu.unmount();
+    }
+  },{
+    name:"delete",
+    text:"Delete Menu",
+    action(){
+      menu.remove();
+    }
+  }]);
 
   container.chat.sub.messagesArea.event({
     /** @param {PointerEvent} event */
     contextmenu(event){
       event.preventDefault();
-      menu.mount(container.chat);
-      /** Preventing menu.element from displaying outside the container.chat.element */
-      const gap_at_end=16;
-      const width_diff=container.chat.element.clientWidth-menu.element.clientWidth-gap_at_end;
-      const height_diff=container.chat.element.clientHeight-menu.element.clientHeight-gap_at_end;
-      menu.style({
-        top:(event.y<height_diff?event.y:height_diff)+"px",
-        left:(event.x<width_diff?event.x:width_diff)+"px"
-      });
+      menu.mount(container.chat, event);
     }
   });
 
@@ -306,7 +385,9 @@ UI.onInit(ui=>{
   const chatItems=new UIHandler.ComponentList();
 
   chatItems.on("insert",function(chatItem){
-    chatItem.mount(container.chat.sub.friendsList);
+    if(container.chat.sub.chatList.sub.emptyArea.mounted)
+      container.chat.sub.chatList.sub.emptyArea.unmount();
+    chatItem.mount(container.chat.sub.chatList);
   });
   chatItems.on("delete",function(chatItem){
     chatItem.remove();
@@ -315,6 +396,8 @@ UI.onInit(ui=>{
     chatItem.chatArea.unmount();
   });
   chatItems.on("select",function(chatItem){
+    if(container.chat.sub.messagesArea.sub.emptyArea.mounted)
+      container.chat.sub.messagesArea.sub.emptyArea.unmount();
     chatItem.chatArea.mount(container.chat.sub.messagesArea);
   });
 
@@ -338,23 +421,30 @@ UI.onInit(ui=>{
   ];
   const demoChats=[
     new Chat("1",[users[0],users[1]],[
-      new Message("1",users[0],"hello",Date.now()),
-      new Message("2",users[1],"haan",Date.now()+60000),
-      new Message("3",users[1],"bolo",Date.now()+60000*3)
+      new Message("1","1",users[0],"hello",randomDate()),
+      new Message("2","1",users[1],"haan",randomDate()),
+      new Message("3","1",users[1],"bolo",randomDate())
     ]),
     new Chat("2",[users[0],users[2]],[
-      new Message("4",users[0],"hello",Date.now()-60000*30),
-      new Message("5",users[1],"hi",Date.now()-60000*20),
-      new Message("6",users[0],"bye",Date.now()+60000*3),
+      new Message("4","2",users[0],"hello",randomDate()),
+      new Message("5","2",users[1],"hi",randomDate()),
+      new Message("6","2",users[0],"bye",randomDate()),
     ]),
     new Chat("3",[users[0],users[3],users[4]],[
-      new Message("7",users[0],"hello",Date.now()-60000*10),
-      new Message("8",users[1],"hello 2",Date.now()-60000*3),
-      new Message("9",users[2],"hello 3",Date.now()),
+      new Message("7","3",users[0],"hello",randomDate()),
+      new Message("8","3",users[1],"hello 2",randomDate()),
+      new Message("9","3",users[2],"hello 3",randomDate()),
     ])
-  ];
+  ].map(chat=>{
+    if(!chat.title)
+      chat.title=chat.participants[1].name
+    chat.image=chat.participants[1].image
+    return chat;
+  });
 
-  demoChats.forEach(chat=>App.data.chats.insert(chat.id,chat));
+  setTimeout(function(){
+    demoChats.forEach(chat=>App.data.chats.insert(chat.id,chat));
+  },1500);
   container.prompts.style({display:"none"});
 });
 
@@ -362,3 +452,7 @@ window.addEventListener("load",function(){
   UI.init();
   App.auth();
 });
+
+function randomDate(){
+  return Date.now()-Math.floor(Math.random()*56659338408);
+}

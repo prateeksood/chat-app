@@ -21,8 +21,6 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + "/../index.html");
 });
 
-app.use('/login', loginRoute)
-app.use('/register', registerRoute)
 app.use('/auth', authRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);
@@ -42,10 +40,30 @@ const server=app.listen(PORT, function () {
 
 
 const socketServer = new WebSocketServer({server});
-socketServer.on("connection",function(socket){
-  socket.on("message",function(rawData){
-    console.log(rawData);
-    socket.send("nice");
+
+socketServer.on("listening",function(){
+  console.log("Socket listening");
+});
+socketServer.on("connection",function(socket,request){
+
+  console.log("Socked connected: ",request.socket.localAddress);
+  socket.send(JSON.stringify({
+    error:null,data:{connect:true}
+  }));
+
+  socket.on("close",function(x){
+    console.log("User disconnected",x);
+  });
+  socket.on("message",function(rawData,isBinary){
+    const response={error:null,data:null};
+    try{
+      const data=JSON.parse(rawData.toString());
+      console.log(data);
+      response.data={status:"received"};
+    }catch(ex){
+      response.error={message:ex};
+    }
+    socket.send(JSON.stringify(response));
   });
 });
 

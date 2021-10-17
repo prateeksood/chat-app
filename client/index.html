@@ -89,7 +89,9 @@
     <div class="container absolute" c-id="chat" c-unmount="false">
       <aside id="left-section">
         <div class="top-bar" id="left-top-bar">
-          <div class="dp-holder"></div>
+          <div class="dp-holder">
+            <img src="resources/illustrations/profile_pic.svg"/>
+          </div>
           <div class="icons">
             <button class="icon" title="Search">
               <svg viewBox="0 0 32 32">
@@ -108,11 +110,18 @@
             </button>
           </div>
         </div>
-        <div id="left-main" c-id="friendsList" c-parent-id="chat">
-
+        <div id="left-main" c-id="chatList" c-parent-id="chat">
+          <div class="list-area" c-id="emptyArea" c-parent-id="chatList">
+            <div class="empty-container">
+              <div class="illustration"></div>
+              <p>No conversations found</p>
+              <button class="link">Start a conversation</button>
+            </div>
+          </div>
         </div>
-        <div class="bottom-bar" id="info-area">
+        <div class="bottom-bar info-area" c-id="infoArea" c-parent-id="chat" c-unmount="true">
           <div class="line">Unable to connect to the server, please check your internet connection.</div>
+          <!-- <div class="line illustration"></div> -->
           <div class="line">
             <button>Try again</button>
           </div>
@@ -120,121 +129,12 @@
         </div>
       </aside>
       <section class="messages-area" c-id="messagesArea" c-parent-id="chat">
-        <!-- @todo Create Some Place holder graphics -->
-        <!-- <div class="chat-area">
-          <div class="top-bar top-bar-right">
-            <div class="dp-holder"></div>
-            <div class="name-holder">
-              <div class="user-name">Full Name</div>
-              <div class="msg-preview">typing...</div>
-            </div>
-            <div class="icons">
-              <button class="icon" title="Search">
-                <svg viewBox="0 0 32 32">
-                  <use xlink:href="#search"></use>
-                </svg>
-              </button>
-              <button class="icon" title="More">
-                <svg viewBox="0 0 32 32">
-                  <use xlink:href="#menu-vertical"></use>
-                </svg>
-              </button>
-            </div>
+        <div class="chat-area" c-id="emptyArea" c-parent-id="messagesArea">
+          <div class="empty-container">
+            <div class="illustration"></div>
+            <p>Click on a contact/chat to view the conversation</p>
           </div>
-          <div class="right-main">
-            <div class="message-group">
-              <div class="message-container">
-                <div class="content">ek message ye</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                </div>
-              </div>
-              <div class="message-container">
-                <div class="content">ye waala dusra</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div class="message-container">
-                <div class="content">aur ye aakhri waala</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="message-group sent">
-              <div class="message-container">
-                <div class="content">Abhi hmare practical to nhi honge na</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div class="message-container">
-                <div class="content">Kuki mujhr ghar jaha n kal</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="message-group">
-              <div class="message-container">
-                <div class="content">Abhi to khtm huye exam thoda sans to lene do tb karni practical ki tension
-                  Abhi badha re tension😇😇</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="message-group sent">
-              <div class="message-container">
-                <div class="content">ye bhi theek hai</div>
-                <div class="info">
-                  <div class="time">04:46 pm</div>
-                  <div class="icon">
-                    <svg viewBox="0 0 32 32">
-                      <use xlink:href="#send-alt-filled"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="bottom-bar bottom-bar-right">
-            <form class="send-area" action="#" method="dialog">
-              <input type="text" name="message" placeholder="Type a message..." autocomplete="off" />
-              <button type="submit" class="icon">
-                <svg viewBox="0 0 32 32">
-                  <use xlink:href="#send-filled"></use>
-                </svg>
-              </button>
-            </form>
-          </div>
-        </div> -->
+        </div>
       </section>
     </div>
     <div class="container absolute auth" c-id="auth" c-unmount="true">

@@ -6,10 +6,10 @@ const UserService = require("../services/user.service");
 module.exports = class ChatController {
 
   /**
- * @typedef {import("express").Request} Request
- * @typedef {import("express").Response} Response
- * @typedef {import("express").NextFunction} NextFunction
- */
+    * @typedef {import("express").Request} Request
+    * @typedef {import("express").Response} Response
+    * @typedef {import("express").NextFunction} NextFunction
+    */
   static async createChat(request, response) {
     const { participants, title } = request.body;
     const { _id: adminId } = request.user;
