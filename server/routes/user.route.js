@@ -1,19 +1,19 @@
 const router = require("express").Router();
 const userController = require("../controllers/user.controller")
 const authMiddleware = require("../middlewares/auth.middleware");
-const uploadProfilePicture = require("../helpers/imageUpload.helper");
+const uploadMiddleware = require("../middlewares/imageUpload.helper");
 
-router.get("/auth",authMiddleware,(request,response) => {
-  if(request.user){
+router.get("/auth", authMiddleware, (request, response) => {
+  if (request.user) {
     response.status(200).json(request.user);
-  }else{
+  } else {
     response.status(401).send("Invalid Token, Access Denied");
   }
 });
 router.post("/login", userController.loginUser);
 router.post("/register", userController.registerUser);
 router.get("/search", authMiddleware, userController.searchUsers);
-router.post("/upload/profilePicture", authMiddleware, uploadProfilePicture.single("profilePicture"), userController.uploadProfilePicture);
+router.post("/upload/profilePicture", authMiddleware, uploadMiddleware.single("profilePicture"), userController.uploadProfilePicture);
 
 router.post("/:requestRecieverId/request/send", authMiddleware, userController.sendRequest);
 router.post("/:requestRecieverId/request/accept", authMiddleware, userController.acceptRequest);
