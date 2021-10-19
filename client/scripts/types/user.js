@@ -1,40 +1,38 @@
 /// <reference path="types.d.ts"/>
 
-class User{
+class User {
   /** @type {string} */
-  email=null;
+  email = null;
   /** @type {string} */
-  image=null;
+  image = null;
   /** @type {string} */
-  lastseen=null;
+  lastseen = null;
   /** @type {{userId:string,since:Date}[]} */
-  contacts=[];
+  contacts = [];
   /** @type {{userId:string,since:Date}[]} */
-  requests=[];
+  requests = [];
   /** @type {{userId:string,since:Date}[]} */
-  blocked=[];
+  blocked = [];
   /**
-   * @param {string} id
+   * @param {string} _id
    * @param {string} username
    * @param {string} name
    */
-  constructor(id,username,name){
-    this.id=id;
-    this.username=username;
-    this.name=name;
-    const femaleString=Math.floor(Math.random()*2)===0?"fe":"";
-    this.image="resources/illustrations/"+femaleString+"male_avatar.svg";
+  constructor (_id, username, name) {
+    this._id = _id;
+    this.username = username;
+    this.name = name;
   }
   /** @param {UserResponse} userResponse */
-  static from(userResponse){
-    const {id,username,name}=userResponse;
-    const user=new User(id,username,name);
-    user.email=userResponse.email??null;
-    user.image=userResponse.image??null;
-    user.lastseen=userResponse.lastseen??null;
-    user.contacts=userResponse.contacts??[];
-    user.requests=userResponse.requests??[];
-    user.blocked=userResponse.blocked??[];
+  static from(userResponse) {
+    const { _id, username, name } = userResponse;
+    const user = new User(_id, username, name);
+    user.email = userResponse.email ?? null;
+    user.image = userResponse.image ?? null;
+    user.lastseen = userResponse.lastseen ?? null;
+    user.contacts = userResponse.contacts ?? [];
+    user.requests = userResponse.requests ?? [];
+    user.blocked = userResponse.blocked ?? [];
     return user;
   }
 };
