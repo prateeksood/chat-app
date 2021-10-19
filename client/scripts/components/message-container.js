@@ -3,8 +3,8 @@
 /// <reference path="../ui-handler.js"/>
 
 
-class MessageComponent extends UIHandler.Component{
-  #messageContent="";
+class MessageComponent extends UIHandler.Component {
+  #messageContent = "";
   #recipient;
   #sender;
   /**
@@ -13,35 +13,35 @@ class MessageComponent extends UIHandler.Component{
    * @param {Date} messageTime 
    * @param {boolean} isSent 
    */
-  constructor(messageContent,messageTime,isSent=false){
+  constructor (messageContent, messageTime, isSent = false) {
     // this.#messageContent=messageContent;
     // this.#recipient=recipient;
     // this.#sender=sender;
-    const element=DOM.create("div",{
-      class:`message-group ${isSent ? " sent" : ""}` ,
+    const element = DOM.create("div", {
+      class: `message-group ${isSent ? " sent" : ""}`,
       children: [
-        DOM.create("div",{
-          class:"message-container",
-          children:[
-            DOM.create("div",{
-              class:"content",
-              html:messageContent
+        DOM.create("div", {
+          class: "message-container",
+          children: [
+            DOM.create("div", {
+              class: "content",
+              html: messageContent
             }), // div.content
-            DOM.create("div",{
-              class:"info",
-              children:[
-                DOM.create("div",{
-                  class:"time",
-                  html:App.date.stringify(messageTime)
+            DOM.create("div", {
+              class: "info",
+              children: [
+                DOM.create("div", {
+                  class: "time",
+                  html: App.date.format(messageTime)
                 }), // div.time
-                DOM.create("div",{
-                  class:"icon",
-                  children:[
-                    DOM.createNS("svg",{
-                      viewBox:"0 0 32 32",
-                      children:[
-                        DOM.createNS("use",{
-                          "xlink:href":"#send-alt-filled"
+                DOM.create("div", {
+                  class: "icon",
+                  children: [
+                    DOM.createNS("svg", {
+                      viewBox: "0 0 32 32",
+                      children: [
+                        DOM.createNS("use", {
+                          "xlink:href": "#send-alt-filled"
                         })// use
                       ]
                     })// svg
@@ -53,8 +53,8 @@ class MessageComponent extends UIHandler.Component{
         })//div.message-container
       ]
     })//div.message-group
-    
-   
-    super("message",element);
+
+
+    super("message", element);
   }
 }

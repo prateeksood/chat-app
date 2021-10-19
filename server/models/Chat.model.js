@@ -5,7 +5,11 @@ const mongoose = require('mongoose');
 const chatSchema = new mongoose.Schema({
   title: {
     type: String,
-    default: ""
+    default: null
+  },
+  image: {
+    type: String,
+    default: null
   },
   isGroupChat: {
     type: Boolean,

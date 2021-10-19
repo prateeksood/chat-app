@@ -14,7 +14,7 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 app.use("/", express.static(__dirname + "/../client"));
-app.use("/uploads", express.static(__dirname + "/./public/uploads/profilePictures"));
+app.use("/resources/profilePictures", express.static(__dirname + "/./public/uploads/profilePictures"));
 
 app.get("/", function (request, response) {
   response.sendFile(__dirname + "/../index.html");
@@ -39,7 +39,7 @@ const server = app.listen(PORT, function () {
 
 
 const socketServer = new WebSocketServer({ server });
-const connections={};
+const connections = {};
 socketServer.on("listening", function () {
   console.log("Socket listening");
 });
