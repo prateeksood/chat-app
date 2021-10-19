@@ -5,7 +5,10 @@
 	width:400px;
   border-right:2px solid #eee;
   z-index:2;
-  transition:width 100ms 1s ease-out;
+  transition:width 100ms ease-out;
+}
+#left-section[collapsed]{
+  width:5.25em;
 }
 .top-bar,
 .bottom-bar{
@@ -24,6 +27,10 @@
 }
 .top-bar#left-top-bar{
   box-shadow:-0.1em 0.1em 0.3em #2223;
+}
+.bottom-bar.options{
+  display:flex;
+  box-shadow:none;
 }
 .bottom-bar.info-area{
 	padding:0.5em;
@@ -61,7 +68,7 @@
 #left-main{
 	/* background:#ededed; */
 	height:100%;
-	overflow:auto;
+	overflow:hidden;
 }
 .chat-item{
 	display:flex;
@@ -100,7 +107,7 @@
   height:3.25em;
   font-weight:500;
   overflow:hidden;
-  transition:width 100ms 1s ease-in;
+  transition:width 100ms ease-in;
 }
 .dp-holder{
   flex-shrink:0;
@@ -205,7 +212,7 @@
 }
 
 .top-bar .dp-holder{
-  margin:0.5em;
+  margin:0.5em 1em;
   width:3em;
   height:3em;
 }
@@ -216,40 +223,31 @@
   margin-bottom:0.25em;
   font-size:small;
 }
-.top-bar .icons{
+.icons{
   display:flex;
   align-items:center;
-  margin-left:auto;
   height:100%;
 }
-.icon{
-  display:flex;
-  justify-content:center;
-  align-items:center;
+.icons .icon{
   margin:0.5em;
-  width:2.5em;
-  height:2.5em;
-  border-radius:50%;
-  font-size:1em;
-  color:#444;
-  background-color:transparent;
-  border:none;
-  transition:all 0.1s ease-out;
+  transition:margin 100ms ease-out;
 }
-button.icon{
-  cursor:pointer;
+.top-bar .icons{
+  margin-left:auto;
 }
-button.icon:hover{
-  background-color:#f8f8f8;
-  /* box-shadow:0.1em 0.1em 0.5em #2223; */
+.options .icons .icon,
+#left-section[collapsed]:not(:hover) :not(.options) .icons .icon{
+  margin:0.5em 1.375em;
 }
-.icon svg{
-  width:1.5em;
-  height:1.5em;
-  user-select:none;
+#left-section[collapsed] :not(.options) .icons .icon{
+  transition:margin 100ms 1s ease-out;
 }
-button.icon:active svg{
-  transform:scale(0.9);
+#left-section .options .icons .icon svg{
+  display:none;
+}
+#left-section:not([collapsed]) .options .icons .icon svg.unpin,
+#left-section[collapsed] .options .icons .icon svg.pin{
+  display:initial;
 }
 
 .right-main{
@@ -386,16 +384,15 @@ button.icon:active svg{
     background-color:#fff;
     border-right:none;
     box-shadow:0em 0.1em 0.3em #2223;
+    transition:width 100ms 0s ease-out;
+  }
+  #left-section:hover{
+    width:400px;
+    transition:width 100ms 1s ease-out;
   }
   .messages-area{
     position:absolute;
     left:5.25em;
     width:calc(100% - 5.25em);
-  }
-  #left-section:not(:hover){
-    width:5.25em;
-  }
-  #left-section:not(:hover) :is(.name-holder, .other-info){
-    width:0px;
   }
 }

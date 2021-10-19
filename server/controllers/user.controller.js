@@ -64,13 +64,15 @@ module.exports = class UserController {
         image
       });
       jwt.sign(savedUser, process.env.JWT_SECRET, { expiresIn: tokenExpiry }, async (ex, token) => {
-        if (ex)
+        if(ex){
           throw ex;
-        savedUser = {
-          ...savedUser,
-          token
-        };
-        response.status(200).json(savedUser);
+        }
+        response.cookie("token",token,{
+          maxAge:tokenExpiry,
+          path:"/",
+          sameSite:"strict",
+          httpOnly:true
+        }).status(200).json(savedUser);
       });
 
 
@@ -106,10 +108,12 @@ module.exports = class UserController {
           if (err)
             response.status(500).send(`Something went wrong : ${err.message}`);
           else {
-            response.status(200).json({
-              ...foundUser,
-              token
-            });
+            response.cookie("token",token,{
+              maxAge:tokenExpiry,
+              path:"/",
+              sameSite:"strict",
+              httpOnly:true
+            }).status(200).json(foundUser);
           }
         });
 

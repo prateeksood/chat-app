@@ -14,13 +14,13 @@ module.exports = class ChatController {
     const { participants, title } = request.body;
     const { _id: adminId } = request.user;
     try {
+      participants=participants.split(",").push(adminId);
       if (participants && participants.length < 1) {
         response.status(400).json({ message: "Atleast two participant IDs are required" });
         return;
       }
 
       const foundUsers = await UserService.getUsersByIDs(participants, "in");
-      console.log(foundUsers);
       if (participants.length !== foundUsers.length) {
         response.status(400).json({ message: "There were invalid user IDs present in your request" });
         return;
@@ -33,14 +33,20 @@ module.exports = class ChatController {
         {
           title,
           isGroupChat: participants.length > 2,
-          groupAdmins: [adminId],
+          groupAdmins: participants.length > 2 ? [adminId] : participants,
           participants: foundUsers.map(userDoc => {
             return {
               user: userDoc._id,
             };
           })
         }
-      )
+      );
+      for(let user of foundUsers){
+        if(participants.length===2 && user._id===adminId)
+          user.contacts.push(participants[0]);
+        user.chats.push({chat:newChat._id});
+        await user.save();
+      }
       response.status(200).json(newChat);
     }
     catch (ex) {

@@ -5,6 +5,7 @@ const authRoute = require("./routes/auth.route");
 const messageRoute = require("./routes/message.route");
 const chatRoute = require("./routes/chat.route");
 const userRoute = require("./routes/user.route");
+const UserService = require("./services/user.service");
 
 const app = express();
 
@@ -38,22 +39,24 @@ const server = app.listen(PORT, function () {
 
 
 const socketServer = new WebSocketServer({ server });
-
+const connections={};
 socketServer.on("listening", function () {
   console.log("Socket listening");
 });
 socketServer.on("connection", function (socket, request) {
 
-  console.log("Socked connected: ", request.socket.localAddress);
+  console.log("Socked connected: ", request.url);
   socket.send(JSON.stringify({
-    error: null, data: { connect: true }
+    error: null, type: "connection", data: {
+      user: UserService.getLoggedInUser(request.headers.cookie)
+    }
   }));
 
   socket.on("close", function (x) {
     console.log("User disconnected", x);
   });
   socket.on("message", function (rawData, isBinary) {
-    const response = { error: null, data: null };
+    const response = { error: null, data: null, type: "message" };
     try {
       const data = JSON.parse(rawData.toString());
       console.log(data);

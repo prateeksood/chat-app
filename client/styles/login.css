@@ -14,35 +14,16 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
   background: #fff;
   background-image: url("../Resources/Images/form-bg.svg");
   background-repeat: no-repeat;
   background-size: cover;
   filter: drop-shadow(1px 1px 15px 0px #2223);
 }
-.message-holder {
-  position: absolute;
-  top: 1em;
-  left: 1em;
-  min-width: 400px;
-  max-width: 80%;
-  padding: 1em 1.5em;
-  background: #FFF176;
-  text-align: center;
-  border-radius: 4px;
-  word-break: break-word;
-  box-shadow: 1px 1px 15px 0px #2223;
-  transition: opacity 0.15s linear;
-}
-.message-holder:empty {
-  opacity: 0;
-}
 .form-holder {
   /* height:80%; */
-  width: 50%;
-  max-width: 400px;
+  width: 400px;
+  max-width: 100%;
   padding: 50px 20px;
   background: #fff;
   border-radius: 20px;
@@ -74,7 +55,6 @@ body {
   height: 40px;
   border-radius: 10px;
   margin-bottom: 20px;
-  outline: none;
   border: 0;
   box-shadow: 1px 1px 5px 0px rgba(34, 34, 34, 0.2);
   padding: 10px;
@@ -87,7 +67,14 @@ body {
 .form-holder form input:focus {
   box-shadow: 1px 1px 7px 0px rgba(34, 34, 34, 0.3);
 }
+.form-holder form input:focus-visible {
+  outline: none;
+}
 .form-holder form button {
+  font-size: 0.9em;
+  font-weight: 500;
+}
+.form-holder form [type=submit] {
   color: #fff;
   background-color: #222222;
   cursor: pointer;
@@ -96,7 +83,7 @@ body {
   /* padding:0px 1.2em; */
   letter-spacing: 0.1em;
 }
-.form-holder form button:disabled{
+.form-holder form [type=submit]:disabled{
   cursor:not-allowed;
 }
 .form-holder form button.icon {
@@ -110,7 +97,7 @@ body {
   display:none;
 }
 
-.form-holder form button:disabled svg{
+.form-holder form [type=submit]:disabled svg{
   display:initial;
   animation:rotation 4s 1s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
@@ -123,13 +110,13 @@ body {
   }
 }
 
-.form-holder form button:disabled span{
+.form-holder form [type=submit]:disabled span{
   display:none;
 }
-.form-holder form button:focus {
+.form-holder form [type=submit]:focus {
   transform: scale(0.97);
 }
-.form-holder form button:hover {
+.form-holder form [type=submit]:hover {
   background-color: #222;
   box-shadow: 1px 1px 7px 0px rgba(246, 246, 246, 0.3) inset;
   transform: scale(0.99);
@@ -139,10 +126,11 @@ body {
   text-align: center;
   color: #444;
 }
-.form-holder form .alread-reg-msg input[type="reset"] {
-  color: #2196f3;
-  background-color: transparent;
-  box-shadow: unset;
-  cursor: pointer;
-  letter-spacing: 0.05em;
+
+@media screen and (max-width:400px) {
+  .form-holder{
+    height:100%;
+    border-radius:0px;
+    box-shadow:unset;
+  }
 }

@@ -25,21 +25,30 @@ const App=new class AppManager{
   socket=new class{
     /** @type {WebSocket} */
     #socket=null;
-    open(){
+    connect(){
       this.#socket=new WebSocket("ws://localhost:3000");
       this.#socket.onmessage=event=>{
         const response=JSON.parse(event.data);
         if(response.error)
           this.onerror(response.error);
+        else if(response.type==="connection")
+          this.onconnect(response.data);
         else
-          this.onmessage(data.data);
+          this.onmessage(response.type,response.data);
       };
     }
     send(data){
       this.#socket.send(JSON.stringify(data));
     }
-    onmessage(data){}
-    onerror(error){}
+    onmessage(type,data){
+      console.log(type,data);
+    }
+    onconnect(data){
+      console.log(data);
+    }
+    onerror(error){
+      console.log(error);
+    }
   };
 
   popupCount=0;
@@ -136,12 +145,8 @@ const App=new class AppManager{
     return `${date.getHours()>12?date.getHours()-12:date.getHours()}:${date.getMinutes()} ${date.getHours()>12?"pm":"am"}`
   }
   async populateFriendsList(){
-    const token=localStorage.getItem('token');
     App.request("/chat",{
-      method:"GET",
-      headers:{
-        "x-auth-token": token
-      }
+      method:"GET"
     }).then(/** @param {ChatResponse[]} data */data=>{
 
       data.forEach(chatResponse=>{
@@ -160,33 +165,20 @@ const App=new class AppManager{
     });
   }
   async auth(){
-    const token=localStorage.getItem('token');
-    if(!token){
-      // UI.container.chat.unmount();
-      // UI.container.auth.mount(UI.container.main);
-      return;
-    }
-    const request=await fetch("/auth",{
-      method:"POST",
-      headers:{
-        "x-auth-token": token
-      }
-    }).catch(ex=>{
-      UI.container.chat.unmount();
-      UI.container.auth.mount(UI.container.main);
-      App.popAlert("ERROR: ",ex)
-    });
-
-    if(request && request.ok){
-      const user=await request.json();
-      App.session.currentUser=user;
+    App.request("/user/auth",{
+      method:"GET"
+    }).then(async request=>{
+      console.log(request);
+      App.session.currentUser=await request.json();
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
       App.populateFriendsList();
-    }
+    }).catch(()=>{
+      // UI.container.chat.unmount();
+      // UI.container.auth.mount(UI.container.main);
+    });
   }
   logout(){
-    localStorage.removeItem("token");
     App.session.removeCurrentUser();
     window.location.reload();
   }
@@ -220,14 +212,16 @@ const App=new class AppManager{
    * @param {RequestInfo} object
    * @returns {Promise<{}>}
    */
-  async request(url,object=null){
-    return new Promise(async function(resolve,reject){
-      const request=await fetch(url,object).catch(ex=>{
-        App.popAlert(ex);
-        reject(ex);
-      });
-      if(request && request.ok)
-        resolve(await request.json());
+  request(url,object=null){
+    return new Promise(function(resolve,reject){
+      fetch(url,object).then(async response=>{
+        if(!response.ok){
+          const error=await response.text();
+          reject(error);
+          App.popAlert(error);
+        }else
+          resolve(await response.json());
+      }).catch(ex=>App.popAlert(ex));
     });
   }
 
@@ -272,7 +266,7 @@ UI.onInit(ui=>{
       event.preventDefault();
       const formData=new FormData(event.target);
       event.target.elements.submit.disabled=true;
-      const request=await fetch("/login",{
+      const request=await fetch("/user/login",{
         method:"POST",
         body:new URLSearchParams(formData)
       }).catch(ex=>App.popAlert("ERROR: ",ex));
@@ -280,7 +274,6 @@ UI.onInit(ui=>{
       if(request){
         if(request.ok){
           const user=await request.json();
-          localStorage.setItem("token",user.token);
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
@@ -326,7 +319,7 @@ UI.onInit(ui=>{
         return;
       }
       event.target.elements.submit.disabled=true;
-      const request=await fetch("/register",{
+      const request=await fetch("/user/register",{
         method:"POST",
         body:new URLSearchParams(formData)
       }).catch(ex=>App.popAlert("Error: ",ex));
@@ -334,7 +327,6 @@ UI.onInit(ui=>{
       if(request){
         if(request.ok){
           const user=await request.json();
-          localStorage.setItem("token",user.token);
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
@@ -347,6 +339,19 @@ UI.onInit(ui=>{
     }
   });
 
+  // Chat side-bar
+  const {sideBar}=container.chat.sub;
+  container.chat.sub.pinOption.event({
+    click(){
+      if(!sideBar.hasAttr("collapsed")){
+        sideBar.attr({collapsed:true});
+        container.chat.sub.pinOption.attr({title:"Expand"});
+      }else{
+        sideBar.removeAttr("collapsed");
+        container.chat.sub.pinOption.attr({title:"Collapse"});
+      }
+    }
+  });
   // demo code
   const menu=new UIMenu("chat");
   let itemCount=0;

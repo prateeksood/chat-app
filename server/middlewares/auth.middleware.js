@@ -8,7 +8,12 @@ require("dotenv").config();
  */
 
 const auth = (request, response, next) => {
-  const token = request.header("x-auth-token");
+  const token=request.headers.cookie.split(";").filter(cookieStr=>{
+    return cookieStr.search("token=")>=0;
+  }).map(cookieStr=>{
+    return cookieStr.split("=")[1].trim();
+  })[0];
+  // const token = request.header("x-auth-token");
   if (!token) response.status(401).send("Token not found, access denied");
   else {
     try {

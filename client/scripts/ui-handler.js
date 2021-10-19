@@ -130,11 +130,15 @@ UIHandler.Component=class Component{
   attr(attributes){
     DOM.attr(this.element,attributes);
   }
-  /** @param {string} attributes*/
+  /** @param {string} attribute */
   getAttr(attribute){
     return this.element.getAttribute(attribute);
   }
-  /** @param {string} attributes*/
+  /** @param {string} attribute */
+  hasAttr(attribute){
+    return this.element.hasAttribute(attribute);
+  }
+  /** @param {string} attribute */
   removeAttr(attribute){
     return this.element.removeAttribute(attribute);
   }

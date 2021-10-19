@@ -47,6 +47,7 @@ body{
   display:flex;
   width:100%;
   height:100%;
+  overflow:hidden;
 }
 .container.absolute{
   position:absolute;
@@ -64,4 +65,32 @@ button.link{
 }
 button.link:active{
   transform:scale(0.97);
+}
+.icon{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:2.5em;
+  height:2.5em;
+  border-radius:50%;
+  font-size:1em;
+  color:#444;
+  background-color:transparent;
+  border:none;
+  transition:all 0.1s ease-out;
+}
+.icon svg{
+  width:1.5em;
+  height:1.5em;
+  user-select:none;
+}
+button.icon{
+  cursor:pointer;
+}
+button.icon:hover{
+  background-color:#f8f8f8;
+  /* box-shadow:0.1em 0.1em 0.5em #2223; */
+}
+button.icon:active svg{
+  transform:scale(0.9);
 }
