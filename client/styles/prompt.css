@@ -1,3 +1,4 @@
+.container.absolute.prompt,
 .container.absolute.notification{
   z-index: 3;
 }
@@ -10,6 +11,7 @@
   /* background-color:#eeea; */
   justify-content:center;
   align-items:center;
+  overflow:initial;
 }
 .container.prompt[prompts=empty]{
   display:none;
@@ -65,7 +67,6 @@
   border-radius:2.5px;
   letter-spacing:0.5px;
   border:unset;
-  outline:none;
   background-color:var(--theme-white);
   color:var(--theme-darker);
   transition:all 0.15s ease;
@@ -87,12 +88,13 @@
   display:flex;
   flex-direction:column;
   position:absolute;
-  bottom:20px;
-  right:10px;
-  width:300px;
+  top:1em;
+  right:1em;
+  width:20em;
   height:auto;
   /* background-color:var(--theme-dark); */
   z-index:2;
+  overflow:initial;
 }
 .container.notification[hidden=true]{
   display:none;
@@ -137,11 +139,10 @@
 }
 .container.notification .notification .actions{
   display:flex;
-  flex-direction:column;
+  flex-direction:row-reverse;
+  flex-wrap:wrap;
   justify-content:space-evenly;
   align-items:center;
-  width:20px;
-  height:auto;
 }
 
 .container.notification .notification[hidden=true]{
@@ -158,13 +159,13 @@
   display:flex;
   justify-content:center;
   align-items:center;
+  margin:0.5em;
   width:1.5em;
   height:1.5em;
   padding:0px;
   border-radius:50%;
   font-size:small;
   border:unset;
-  outline:none;
   background-color:transparent;
   color:var(--theme-black);
 }

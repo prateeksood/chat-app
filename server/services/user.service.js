@@ -1,6 +1,8 @@
 /** @typedef {import("../models/models.helper").User} User */
 const UserModel = require("../models/User.model");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 module.exports = class UserService {
 
@@ -159,5 +161,18 @@ module.exports = class UserService {
   }
   static isValidId(id) {
     return mongoose.isValidObjectId(id);
+  }
+  static getLoggedInUser(cookies){
+    const token=cookies.split(";").filter(cookieStr=>{
+      return cookieStr.search("token=")>=0;
+    }).map(cookieStr=>{
+      return cookieStr.split("=")[1].trim();
+    })[0];
+    console.log(token);
+    try{
+      return jwt.verify(token, process.env.JWT_SECRET);
+    }catch(ex){
+      return null;
+    }
   }
 }

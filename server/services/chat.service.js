@@ -35,6 +35,7 @@ module.exports = class ChatService {
     try {
       const chatDocument = new ChatModel(data);
       return await chatDocument.save();
+      UserModel.find
     } catch (ex) {
       throw ex.message;
     }

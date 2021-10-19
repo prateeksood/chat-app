@@ -11,12 +11,8 @@ interface User {
     user: ObjectId, // User.id
     since: Date
   }[];
-  receivedRequests: {
-    user: ObjectId, // User.id
-    since: Date
-  }[];
-  sentRequests: {
-    user: ObjectId, // User.id
+  chats: {
+    chat: ObjectId, // Chat.id
     since: Date
   }[];
   blocked: {
@@ -34,7 +30,9 @@ interface Chat {
   messages: {
     message: ObjectId, // Message.id
     updatedAt: Date
-  }
+  },
+  isGroupChat: boolean,
+  groupAdmins: ObjectId[]
 }
 
 interface Message {
