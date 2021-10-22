@@ -109,16 +109,16 @@ const App = new class AppManager {
       if (deltaDate < 10)
         return "just now";
       else if (deltaDate <= 60)
-        return "few seconds ago";
+        return deltaDate+" s";
       deltaDate = Math.floor(deltaDate / 60);
       if (deltaDate < 60)
-        return deltaDate + " min ago";
+        return deltaDate + " min";
       deltaDate = Math.floor(deltaDate / 60);
       if (deltaDate < 24)
-        return deltaDate + " hr ago";
+        return deltaDate + " hr";
       deltaDate = Math.floor(deltaDate / 24);
       if (deltaDate < 28)
-        return deltaDate + " d ago";
+        return deltaDate + " d";
       return App.date.stringify(date);
     }
   };
@@ -126,17 +126,10 @@ const App = new class AppManager {
     App.request("/chat", {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
-      const profilePicturesUri = "/resources/profilePictures";
-      const defaultImgUri = "default_pic.svg"
+      // const profilePicturesUri = "/resources/profilePictures";
       data.forEach(chatResponse => {
-        const imgUri = chatResponse.isGroupChat ?
-          chatResponse.image :
-          (isCurrentUserId(chatResponse.participants[0]._id) ?
-            participants[0].image :
-            participants[1].image
-          )
-        chatResponse = { ...chatResponse, image: imgUri ? `${profilePicturesUri}/${imgUri}` : `${profilePicturesUri}/${defaultImgUri}` }
-        App.data.chats.insert(chatResponse._id, chatResponse);
+        const chat=Chat.from(chatResponse);
+        App.data.chats.insert(chat.id, chat);
       });
     });
   }
@@ -144,8 +137,7 @@ const App = new class AppManager {
     App.request("/user/auth", {
       method: "GET"
     }).then(async user => {
-      const userObj = User.from(user);
-      App.session.currentUser = userObj;
+      App.session.currentUser = User.from(user);
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
       App.populateFriendsList();
@@ -165,8 +157,16 @@ const App = new class AppManager {
       method: form.method ?? "POST",
       body: new URLSearchParams(formData)
     }).then(data => {
+      const message=Message.from(data);
+      console.log(message);
+      if(UI.list.chatItems.has(message.chatId)){
+        /** @type {ChatItem} */
+        const chatItem=UI.list.chatItems.get(message.chatId);
+        console.log(chatItem)
+        chatItem.addMessage(message);
+      }
     }).catch(ex => {
-      let n = new UINotification("failed to send message", null, "error");
+      let n = new UINotification("failed to send message <br/>"+ex, [], "error");
       n.mount(UI.container.notifications);
     });
   }
@@ -248,11 +248,10 @@ UI.onInit(ui => {
       setTimeout(() => event.target.elements.submit.disabled = false, 1000);
       if (request) {
         if (request.ok) {
-          const user = await request.json();
+          App.session.currentUser = User.from(await request.json());
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          App.session.currentUser = user;
           App.populateFriendsList();
         } else {
           App.popAlert(await request.text());
@@ -301,11 +300,10 @@ UI.onInit(ui => {
       event.target.elements.submit.disabled = false;
       if (request) {
         if (request.ok) {
-          const user = await request.json();
+          App.session.currentUser = User.from(await request.json());
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          App.session.currentUser = user;
           App.populateFriendsList();
         } else {
           App.popAlert(await request.text());
@@ -327,6 +325,14 @@ UI.onInit(ui => {
       }
     }
   });
+
+  const profile=new Profile(new User("123456789","username","Full Name"));
+  container.chat.sub.userDPHolder.event({
+    click(){
+      profile.mount(container.main);
+    }
+  });
+
   // demo code
   const menu = new UIMenu("chat");
   let itemCount = 0;
@@ -362,7 +368,8 @@ UI.onInit(ui => {
   });
 
   /** @type {UIHandler.ComponentList<ChatItem>} */
-  const chatItems = new UIHandler.ComponentList();
+  const chatItems = new UIHandler.ComponentList("chatItems");
+  UI.addList(chatItems);
 
   chatItems.on("insert", function (chatItem) {
     if (container.chat.sub.chatList.sub.emptyArea.mounted)
@@ -385,10 +392,10 @@ UI.onInit(ui => {
     chatItems.insert(new ChatItem(chat));
   });
   App.data.chats.on("delete", function (chat) {
-    chatItems.delete(chat._id);
+    chatItems.delete(chat.id);
   });
   App.data.chats.on("select", function (chat) {
-    chatItems.select(chat._id);
+    chatItems.select(chat.id);
   });
 
   // const users = [

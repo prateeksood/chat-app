@@ -3,14 +3,15 @@
 
 class UIHandler{
   #listener=new Listener();
-  /**
-   * All components are stored here
+  /** All components are stored here
    * @type {Object<string,UIHandler.Component>} */
   #components={};
-  /**
-   * All 'container' type components are stored here and can be accessed by their corresponding id
+  /** All 'container' type components are stored here and can be accessed by their corresponding id
    * @type {Object<string,UIHandler.Component>} */
   container={};
+  /** All 'container' type components are stored here and can be accessed by their corresponding id
+   * @type {Object<string,UIHandler.ComponentList<UIHandler.Component>} */
+  list={};
   init(){
     document.querySelectorAll("[c-id]").forEach(element=>{
       this.addComponent(element);
@@ -32,7 +33,7 @@ class UIHandler{
     const id=element.getAttribute("c-id");
     const type=element.getAttribute("c-type")??"container";
     const component=new UIHandler.Component(id,element);
-  
+
     const parentComponentId=element.getAttribute("c-parent-id");
     // Checks if a component with parentComponentId is already present
     if(this.#components[parentComponentId])
@@ -48,6 +49,11 @@ class UIHandler{
 
     this.#components[id]=component;
     return element;
+  }
+  /** @param {UIHandler.ComponentList} list */
+  addList(list){
+    if(list instanceof UIHandler.ComponentList)
+      this.list[list.id]=list;
   }
 };
 
@@ -163,7 +169,20 @@ UIHandler.ComponentList=class ComponentList{
   #list=new Map();
   /** @type {T} */
   #selected=null;
-  constructor(){}
+  /** @param {string} listId An identification string for list */
+  constructor(listId=null){
+    this.id=listId;
+  }
+  /** Check for data
+   * @param {string} componentId */
+  has(componentId){
+    return this.#list.has(componentId);
+  }
+  /** Get data
+   * @param {string} componentId */
+  get(componentId){
+    return this.#list.get(componentId);
+  }
   /**
    * Inserts a Component into the list
    * @param {T} component */
@@ -205,21 +224,3 @@ UIHandler.ComponentList=class ComponentList{
     this.#listener.on(eventName,action);
   }
 };
-
-// Example
-
-/** @type {UIHandler.ComponentList<UIHandler.Component>} */
-const components=new UIHandler.ComponentList();
-components.on("insert",function(component){
-  console.log("inserted",component.id);
-});
-components.on("delete",function(component){
-  console.log("deleted",component.id);
-});
-[
-  new UIHandler.Component("divOne",DOM.create("div",{text:"DIV 1"})),
-  new UIHandler.Component("divTwo",DOM.create("div",{text:"DIV 2"})),
-  new UIHandler.Component("divThree",DOM.create("div",{text:"DIV 3"}))
-].forEach(component=>components.insert(component));
-
-components.delete("divOne").delete("divTwo");

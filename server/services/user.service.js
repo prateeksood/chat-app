@@ -23,13 +23,13 @@ module.exports = class UserService {
     try {
       let foundUsers = await UserModel.find({
         $or: [{
-          "username": new RegExp(key, "i")
+          "username": key
         },
         {
           "name": new RegExp(key, "i")
         },
         {
-          "email": new RegExp(key, "i")
+          "email": key
         }
         ]
       }).select({ password: false }).lean();
@@ -71,13 +71,12 @@ module.exports = class UserService {
   /**
    * 
    * @param {string [] |mongoose.Types.ObjectId []} id 
-   * @returns {User []}
    */
   static async getUsersByIDs(id, method = null) {
     try {
       let foundUsers;
       if (method === "in")
-        foundUsers = await UserModel.find({ _id: { "$in": id } }).select({ password: false }).lean();
+        foundUsers = await UserModel.find({ _id: { "$in": id } }).select({ password: false });
       return foundUsers;
     } catch (ex) {
       throw ex;

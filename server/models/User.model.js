@@ -1,4 +1,4 @@
-/** @typedef {import("./models.helper.ts").User} User */
+/** @typedef {import("./models.helper").User} User */
 const mongoose = require("mongoose");
 
 /** @type {mongoose.Schema<User, mongoose.Model<User,User,User,User>, User>} */

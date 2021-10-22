@@ -14,12 +14,12 @@ class User {
   /** @type {{userId:string,since:Date}[]} */
   blocked = [];
   /**
-   * @param {string} _id
+   * @param {string} id
    * @param {string} username
    * @param {string} name
    */
-  constructor (_id, username, name) {
-    this._id = _id;
+  constructor (id, username, name) {
+    this.id = id;
     this.username = username;
     this.name = name;
   }
@@ -34,5 +34,8 @@ class User {
     user.requests = userResponse.requests ?? [];
     user.blocked = userResponse.blocked ?? [];
     return user;
+  }
+  static get defaultImage(){
+    return "resources/illustrations/profile_pic.svg";
   }
 };

@@ -4,35 +4,24 @@
 
 
 class MessageComponent extends UIHandler.Component {
-  #messageContent = "";
-  #recipient;
-  #sender;
-  /**
-   * 
-   * @param {string} messageContent 
-   * @param {Date} messageTime 
-   * @param {boolean} isSent 
-   */
-  constructor (messageContent, messageTime, isSent = false) {
-    // this.#messageContent=messageContent;
-    // this.#recipient=recipient;
-    // this.#sender=sender;
+  /** @param {Message} message */
+  constructor (message) {
     const element = DOM.create("div", {
-      class: `message-group ${isSent ? " sent" : ""}`,
+      class: `message-group${App.session.isCurrentUserId(message.senderId) ? " sent" : ""}`,
       children: [
         DOM.create("div", {
           class: "message-container",
           children: [
             DOM.create("div", {
               class: "content",
-              html: messageContent
+              html: message.content
             }), // div.content
             DOM.create("div", {
               class: "info",
               children: [
                 DOM.create("div", {
                   class: "time",
-                  html: App.date.format(messageTime)
+                  html: App.date.format(message.createdAt)
                 }), // div.time
                 DOM.create("div", {
                   class: "icon",
@@ -52,8 +41,7 @@ class MessageComponent extends UIHandler.Component {
           ]
         })//div.message-container
       ]
-    })//div.message-group
-
+    });//div.message-group
 
     super("message", element);
   }

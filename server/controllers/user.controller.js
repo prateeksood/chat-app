@@ -131,8 +131,8 @@ module.exports = class UserController {
    */
   static async searchUsers(request, response, next) {
     try {
-      const { key } = request.query;
-      const foundUsers = await UserService.searchUsers(key);
+      const { query } = request.query;
+      const foundUsers = await UserService.searchUsers(query);
       response.status(200).json(foundUsers);
     } catch (ex) {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });

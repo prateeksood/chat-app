@@ -40,15 +40,13 @@ class ChatArea extends UIHandler.Component {
       component.unmount();
     });
 
-    chat.messages.forEach(message => {
-      const component = new MessageComponent(
-        message.content,
-        message.createdAt,
-        App.session.isCurrentUserId(message.sender)
-      );
-      this.#messages.insert(component);
-    });
+    chat.messages.forEach(message => this.addMessage(message));
 
+  }
+  /** @param {Message} message */
+  addMessage(message){
+    const component = new MessageComponent(message);
+    this.#messages.insert(component);
   }
   /** @param {Chat} chat */
   static createTopBar(chat) {
@@ -106,7 +104,7 @@ class ChatArea extends UIHandler.Component {
       children: [
         DOM.create("form", {
           class: "send-area",
-          action: "chat/" + chat._id + "/send",
+          action: "chat/" + chat.id + "/send",
           method: "POST",
           children: [
             DOM.create("input", {
@@ -134,6 +132,7 @@ class ChatArea extends UIHandler.Component {
           submit(event) {
             event.preventDefault();
             App.sendMessage(event.currentTarget);
+            event.currentTarget.reset();
           } // onsubmit
         }), // div.send-area
       ]
