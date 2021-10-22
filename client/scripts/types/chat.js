@@ -3,6 +3,9 @@
 class Chat{
   /** @type {string} */
   title=null;
+  /** @type {Date} */
+  createdAt=null;
+  isGroup=false;
   /**
    * @param {string} id
    * @param {User[]} participants
@@ -12,17 +15,33 @@ class Chat{
     this.id=id;
     this.participants=participants;
     this.messages=messages;
+    this.createdAt=Date.now();
   }
   /** @param {ChatResponse} chatResponse */
   static from(chatResponse){
-    const {id,participants,messages}=chatResponse;
+    const {_id,participants,messages}=chatResponse;
+    const users=participants.map(participant=>User.from(participant.user));
     const chat=new Chat(
-      id,
-      participants.map(user=>User.from(user)),
+      _id,
+      users,
       messages.map(message=>Message.from(message))
     );
     chat.title=chatResponse.title??null;
+    chat.isGroup=chatResponse.isGroupChat??false;
+    if(chatResponse.createdAt)
+      chat.createdAt=new Date(chatResponse.createdAt);
+    if(chat.isGroup){
+      chat.image=chatResponse.image??Chat.defaultImage;
+    }else{
+      const participant=App.session.isCurrentUserId(users[0].id)?
+        users[1]:users[0];
+      chat.title=participant.name;
+      chat.image=participant.image??User.defaultImage;
+    }
     return chat;
+  }
+  static get defaultImage(){
+    return "resources/images/group.png"
   }
 };
 
@@ -38,21 +57,21 @@ class Message{
    * @param {string} chatId
    * @param {string} senderId
    * @param {string} content
-   * @param {Date} sendAt
+   * @param {Date} createdAt
    * @param {string} [referenceId]
    */
-  constructor(id,chatId,senderId,content,sendAt,referenceId=null){
+  constructor(id,chatId,senderId,content,createdAt,referenceId=null){
     this.id=id;
     this.chatId=chatId;
     this.senderId=senderId;
     this.content=content;
-    this.sendAt=sendAt;
+    this.createdAt=createdAt;
     this.referenceId=referenceId;
   }
   /** @param {MessageResponse} messageResponse */
   static from(messageResponse){
-    const {id,chatId,senderId,content,sendAt,referenceId}=messageResponse;
-    const message=new Message(id,chatId,senderId,content,sendAt,referenceId??null);
+    const {_id,chat,sender,content,createdAt,referenceId}=messageResponse;
+    const message=new Message(_id,chat,sender,content,new Date(createdAt),referenceId??null);
     message.receivedBy=messageResponse.receivedBy??[];
     message.deletedBy=messageResponse.deletedBy??[];
     message.readBy=messageResponse.readBy??[];

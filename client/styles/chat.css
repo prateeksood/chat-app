@@ -3,6 +3,7 @@
 	flex-direction:column;
   flex-shrink:0;
 	width:400px;
+  max-width:100%;
   border-right:2px solid #eee;
   z-index:2;
   transition:width 100ms ease-out;
@@ -114,6 +115,8 @@
   width:3.25em;
 	background:#EDEDED;
 	border-radius:50%;
+  border:unset;
+  font-size:1em;
 }
 .dp-holder img{
   width:100%;
@@ -386,10 +389,10 @@
     box-shadow:0em 0.1em 0.3em #2223;
     transition:width 100ms 0s ease-out;
   }
-  #left-section:hover{
+  /* #left-section:hover{
     width:400px;
     transition:width 100ms 1s ease-out;
-  }
+  } */
   .messages-area{
     position:absolute;
     left:5.25em;

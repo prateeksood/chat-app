@@ -103,8 +103,8 @@
   display:flex;
   justify-content:space-between;
   position:relative;
-  margin-bottom:10px;
-  padding:10px;
+  margin-bottom:1em;
+  padding:1em;
   width:100%;
   height:auto;
   border-radius:4px;
@@ -129,13 +129,13 @@
 }
 .container.notification .notification .content{
   display:flex;
-  padding:0px 5px;
+  padding:0px 0.5em;
   /* width:100%; */
   line-height:20px;
   align-items:center;
 }
 .container.notification .notification.error .content{
-  padding-left:9px;
+  padding-left:1em;
 }
 .container.notification .notification .actions{
   display:flex;
@@ -147,7 +147,7 @@
 
 .container.notification .notification[hidden=true]{
   margin:0px;
-  padding:0px;
+  padding:0px 1em;
   overflow:hidden;
   z-index:2;
 }

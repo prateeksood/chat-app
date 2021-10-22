@@ -44,7 +44,7 @@ module.exports = class MessageController {
         throw "Unable to save message";
       await ChatService.findChatByIdAndUpdate(chatID, { messages: savedMessage._id }, "push");
 
-      response.status(200).json({ message: "Message sent successfully" });
+      response.status(200).json(savedMessage);
     } catch (ex) {
       response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
     }

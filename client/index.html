@@ -7,9 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat App</title>
   <link rel="stylesheet" href="styles/index.css"/>
+  <link rel="stylesheet" href="styles/prompt.css"/>
   <link rel="stylesheet" href="styles/login.css"/>
   <link rel="stylesheet" href="styles/chat.css"/>
-  <link rel="stylesheet" href="styles/prompt.css"/>
+  <link rel="stylesheet" href="styles/profile.css"/>
   <link rel="stylesheet" href="styles/components/context-menu.css"/>
   <script type="text/javascript" src="scripts/dom.js"></script>
   <script type="text/javascript" src="scripts/listener.js"></script>
@@ -18,7 +19,9 @@
   <script type="text/javascript" src="scripts/data-manager.js"></script>
   <script type="text/javascript" src="scripts/types/user.js"></script>
   <script type="text/javascript" src="scripts/types/chat.js"></script>
+  <script type="text/javascript" src="scripts/auto-updater.js"></script>
   <script type="text/javascript" src="scripts/components/popup.js"></script>
+  <script type="text/javascript" src="scripts/components/profile.js"></script>
   <script type="text/javascript" src="scripts/components/_chat-area.js"></script>
   <script type="text/javascript" src="scripts/components/message-container.js"></script>
   <script type="text/javascript" src="scripts/components/_friends-area.js"></script>
@@ -84,32 +87,44 @@
     <g id="pin-filled" fill="currentColor">
       <path d="M28.5858,13.3137,30,11.9,20,2,18.6858,3.415l1.1858,1.1857L8.38,14.3225,6.6641,12.6067,5.25,14l5.6572,5.6773L2,28.5831,3.41,30l8.9111-8.9087L18,26.7482l1.3929-1.414L17.6765,23.618l9.724-11.4895Z"/>
     </g>
-    <g id="button-cancel" fill="currentColor"></g>
-    <g id="button-cancel-outline" fill="currentColor">
+    <g id="cancel" fill="currentColor">
+      <polygon points="24 9.4 22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4"/>
+    </g>
+    <g id="cancel-outline" fill="currentColor">
       <path
         d="M16,2C8.2,2,2,8.2,2,16s6.2,14,14,14s14-6.2,14-14S23.8,2,16,2z M16,28C9.4,28,4,22.6,4,16S9.4,4,16,4s12,5.4,12 12S22.6,28,16,28z" />
       <polygon points="21.4,23 16,17.6 10.6,23 9,21.4 14.4,16 9,10.6 10.6,9 16,14.4 21.4,9 23,10.6 17.6,16 23,21.4 " />
     </g>
-    <g id="button-accept" fill="currentColor"></g>
-    <g id="button-accept-outline" fill="currentColor">
+    <g id="accept" fill="currentColor">
+      <polygon points="13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24"/>
+    </g>
+    <g id="accept-outline" fill="currentColor">
       <polygon points="14 21.414 9 16.413 10.413 15 14 18.586 21.585 11 23 12.415 14 21.414" />
       <path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z" />
     </g>
-    <g id="button-add" fill="currentColor"></g>
-    <g id="button-remove" fill="currentColor"></g>
+    <g id="add" fill="currentColor"></g>
+    <g id="remove" fill="currentColor"></g>
     <g id="processing" fill="currentColor">
       <path
         d="M1.90321 7.29677C1.90321 10.341 4.11041 12.4147 6.58893 12.8439C6.87255 12.893 7.06266 13.1627 7.01355 13.4464C6.96444 13.73 6.69471 13.9201 6.41109 13.871C3.49942 13.3668 0.86084 10.9127 0.86084 7.29677C0.860839 5.76009 1.55996 4.55245 2.37639 3.63377C2.96124 2.97568 3.63034 2.44135 4.16846 2.03202L2.53205 2.03202C2.25591 2.03202 2.03205 1.80816 2.03205 1.53202C2.03205 1.25588 2.25591 1.03202 2.53205 1.03202L5.53205 1.03202C5.80819 1.03202 6.03205 1.25588 6.03205 1.53202L6.03205 4.53202C6.03205 4.80816 5.80819 5.03202 5.53205 5.03202C5.25591 5.03202 5.03205 4.80816 5.03205 4.53202L5.03205 2.68645L5.03054 2.68759L5.03045 2.68766L5.03044 2.68767L5.03043 2.68767C4.45896 3.11868 3.76059 3.64538 3.15554 4.3262C2.44102 5.13021 1.90321 6.10154 1.90321 7.29677ZM13.0109 7.70321C13.0109 4.69115 10.8505 2.6296 8.40384 2.17029C8.12093 2.11718 7.93465 1.84479 7.98776 1.56188C8.04087 1.27898 8.31326 1.0927 8.59616 1.14581C11.4704 1.68541 14.0532 4.12605 14.0532 7.70321C14.0532 9.23988 13.3541 10.4475 12.5377 11.3662C11.9528 12.0243 11.2837 12.5586 10.7456 12.968L12.3821 12.968C12.6582 12.968 12.8821 13.1918 12.8821 13.468C12.8821 13.7441 12.6582 13.968 12.3821 13.968L9.38205 13.968C9.10591 13.968 8.88205 13.7441 8.88205 13.468L8.88205 10.468C8.88205 10.1918 9.10591 9.96796 9.38205 9.96796C9.65819 9.96796 9.88205 10.1918 9.88205 10.468L9.88205 12.3135L9.88362 12.3123C10.4551 11.8813 11.1535 11.3546 11.7585 10.6738C12.4731 9.86976 13.0109 8.89844 13.0109 7.70321Z">
       </path>
+    </g>
+    <g id="edit" fill="currentColor">
+      <rect x="2" y="26" width="28" height="2"/>
+      <path d="M25.4,9c0.8-0.8,0.8-2,0-2.8c0,0,0,0,0,0l-3.6-3.6c-0.8-0.8-2-0.8-2.8,0c0,0,0,0,0,0l-15,15V24h6.4L25.4,9z M20.4,4L24,7.6l-3,3L17.4,7L20.4,4z M6,22v-3.6l10-10l3.6,3.6l-10,10H6z"/>
+    </g>
+    <g id="edit-off" fill="currentColor">
+      <path d="M30,28.6L3.4,2L2,3.4l10.1,10.1L4,21.6V28h6.4l8.1-8.1L28.6,30L30,28.6z M9.6,26H6v-3.6l7.5-7.5l3.6,3.6L9.6,26z"/>
+      <path d="M29.4,6.2L29.4,6.2l-3.6-3.6c-0.8-0.8-2-0.8-2.8,0l0,0l0,0l-8,8l1.4,1.4L20,8.4l3.6,3.6L20,15.6l1.4,1.4l8-8C30.2,8.2,30.2,7,29.4,6.2L29.4,6.2z M25,10.6L21.4,7l3-3L28,7.6L25,10.6z"/>
     </g>
   </svg>
   <div class="container" c-id="main">
     <div class="container absolute" c-id="chat" c-unmount="false">
       <aside id="left-section" c-id="sideBar" c-parent-id="chat">
         <div class="top-bar" id="left-top-bar">
-          <div class="dp-holder">
+          <button class="dp-holder" c-id="userDPHolder" c-parent-id="chat">
             <img src="resources/illustrations/profile_pic.svg"/>
-          </div>
+          </button>
           <div class="icons">
             <button class="icon" title="Search">
               <svg viewBox="0 0 32 32">

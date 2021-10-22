@@ -24,7 +24,7 @@ class Session {
   /** @param {string} id */
   isCurrentUserId(id) {
     if (this.#currentUser)
-      return id === this.#currentUser._id;
+      return id === this.#currentUser.id;
     return false
   }
 }

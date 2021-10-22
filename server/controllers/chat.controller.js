@@ -1,3 +1,9 @@
+/**
+  * @typedef {import("express").Request} Request
+  * @member {string} Request.body
+  * @typedef {import("express").Response} Response
+  * @typedef {import("express").NextFunction} NextFunction
+  */
 
 const ChatService = require("../services/chat.service");
 const MessageService = require("../services/message.service");
@@ -6,15 +12,21 @@ const UserService = require("../services/user.service");
 module.exports = class ChatController {
 
   /**
-    * @typedef {import("express").Request} Request
-    * @typedef {import("express").Response} Response
-    * @typedef {import("express").NextFunction} NextFunction
-    */
+   * @param {Request} request
+   * @param {Response} response
+   */
   static async createChat(request, response) {
-    const { participants, title } = request.body;
+    const { title } = request.body;
     const { _id: adminId } = request.user;
+    if(!request.body.participants){
+      response.status(400).json({message:"Participants required"});
+      return;
+    }
     try {
-      participants=participants.split(",").push(adminId);
+      /** @type {string[]} */
+      const participants=request.body.participants.split(",");
+      if(!participants.includes(adminId))
+        participants.push(adminId);
       if (participants && participants.length < 1) {
         response.status(400).json({ message: "Atleast two participant IDs are required" });
         return;
@@ -44,7 +56,7 @@ module.exports = class ChatController {
       for(let user of foundUsers){
         if(participants.length===2 && user._id===adminId)
           user.contacts.push(participants[0]);
-        user.chats.push({chat:newChat._id});
+        user.chats.push(newChat._id);
         await user.save();
       }
       response.status(200).json(newChat);

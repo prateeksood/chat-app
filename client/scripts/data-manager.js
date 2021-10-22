@@ -5,6 +5,18 @@ class DataManager{
   #list=new Map();
   constructor(){}
   /**
+   * Check for data
+   * @param {string} dataId */
+  has(dataId){
+    return this.#list.has(dataId);
+  }
+  /**
+   * Get data
+   * @param {string} dataId */
+  get(dataId){
+    return this.#list.get(dataId);
+  }
+  /**
    * Inserts data
    * @param {string} dataId An unique ID for data
    * @param {DataType} data */

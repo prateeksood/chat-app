@@ -18,6 +18,16 @@ class Listener{
     this.#actions.push({action,type:"once"});
   }
   /**
+   * remove a stored action
+   * @param {function} action
+   */
+  off(action){
+    const index=this.#actions.findIndex(stored=>stored.action===action);
+    if(index>=0){
+      this.#actions.splice(index,1);
+    }
+  }
+  /**
    * triggers stored actions and pass values into those actions
    */
   trigger(...value){

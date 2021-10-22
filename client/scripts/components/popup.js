@@ -137,17 +137,17 @@ class UINotification extends UIHandler.Component{
     super("notification",element);
 
     this.#timeoutTime=timeout;
-    const children=actions.map(action=>{
+    const children=actions?actions.map(action=>{
       if(action.type==="cancel"){
         if(!action.action){
           action.action=()=>this.close();
         }
         if(!action.iconId){
-          action.iconId="button-cancel-outline";
+          action.iconId="cancel-outline";
         }
       }else if(action.type==="accept"){
         if(!action.iconId){
-          action.iconId="button-accept-outline";
+          action.iconId="accept-outline";
         }
       }else if(action.type==="processing"){
         if(!action.iconId){
@@ -156,9 +156,9 @@ class UINotification extends UIHandler.Component{
         action.action=null;
       }
       return UINotification.createAction(this,action.type,action.iconId,action.action);
-    });
+    }):[];
     if(children.length===0)
-      children.push(UINotification.createAction(this,"cancel","button-cancel-outline",()=>this.close()));
+      children.push(UINotification.createAction(this,"cancel","cancel-outline",()=>this.close()));
     DOM.attr(actionsElement,{children});
     this.open();
   }
