@@ -1,11 +1,12 @@
 const router = require("express").Router();
-const userController = require("../controllers/user.controller")
+const UserService = require("../services/user.service");
+const userController = require("../controllers/user.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const uploadMiddleware = require("../middlewares/imageUpload.helper");
 
-router.get("/auth", authMiddleware, (request, response) => {
+router.get("/auth", authMiddleware, async (request, response) => {
   if (request.user) {
-    response.status(200).json(request.user);
+    response.status(200).json(await UserService.getUserByID(request.user._id));
   } else {
     response.status(401).send("Invalid Token, Access Denied");
   }

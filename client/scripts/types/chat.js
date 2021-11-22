@@ -16,6 +16,9 @@ class Chat{
     this.participants=participants;
     this.messages=messages;
     this.createdAt=Date.now();
+    const participant=App.session.isCurrentUserId(participants[0].id)?participants[1]:participants[0];
+    this.image=participant.image;
+    this.title=participant.name;
   }
   /** @param {ChatResponse} chatResponse */
   static from(chatResponse){
@@ -75,6 +78,7 @@ class Message{
     message.receivedBy=messageResponse.receivedBy??[];
     message.deletedBy=messageResponse.deletedBy??[];
     message.readBy=messageResponse.readBy??[];
+    console.log(App.session.currentUser.id===message.senderId);
     return message;
   }
 };

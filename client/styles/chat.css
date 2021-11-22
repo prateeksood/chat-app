@@ -66,12 +66,13 @@
   box-shadow:0.06em 0.06em 1em #2223;
 }
 
-#left-main{
+.left-main{
 	/* background:#ededed; */
 	height:100%;
-	overflow:hidden;
+	overflow:auto;
+  overflow-x:hidden;
 }
-.chat-item{
+.list-item{
 	display:flex;
 	align-items:center;
   position:relative;
@@ -84,14 +85,14 @@
   user-select:none;
   transition:all 100ms ease;
 }
-.chat-item:hover{
+.list-item:hover{
   background-color:#fafafa;
 }
-.chat-item:active{
+.list-item:active{
   background-color:#f8f8f8;
   transform:scale(0.95);
 }
-.chat-item::after{
+.list-item::after{
   content:"";
   position:absolute;
   bottom:0px;
@@ -102,8 +103,8 @@
 }
 
 .dp-holder,
-.name-holder,
-.other-info{
+.info-holder,
+.time-holder{
 	margin:0.5em;
   height:3.25em;
   font-weight:500;
@@ -121,39 +122,40 @@
 .dp-holder img{
   width:100%;
 }
-.name-holder{
+.info-holder{
   display:flex;
 	flex-direction:column;
   justify-content:space-between;
 	min-width:0px;
   width:100%;
 }
-.name-holder .user-name,
-.name-holder .msg-preview{
+.info-holder .main-text,
+.info-holder .sub-text{
   width:100%;
   white-space:nowrap;
   text-overflow:ellipsis;
   overflow:hidden;
 }
-.name-holder .user-name{
+.info-holder .main-text{
   margin-top:0.25em;
 	font-weight:600;
 	font-size:1.1em;
 	color:#777;
   font-weight:600;
 }
-.name-holder .msg-preview{
+.info-holder .sub-text{
+  /* margin-bottom:0.1em; */
   font-size:smaller;
   color:#c7c7c7;
   letter-spacing:0.01em;
 }
-.other-info{
+.time-holder{
   display:flex;
   align-items:flex-end;
   /* width:4em; */
   flex-shrink:0;
 }
-.other-info .msg-time{
+.time-holder .time-text{
 	font-size:0.8em;
   white-space:nowrap;
   word-break:keep-all;
@@ -195,6 +197,12 @@
   height:18em;
   background-image:url("../resources/illustrations/begin_chat.svg");
 }
+.list-area.user-list .empty-container .illustration{
+  width:15em;
+  height:15em;
+  background-image:url("../resources/illustrations/people.svg");
+}
+
 .empty-container p{
   margin-bottom:3em;
   max-width:26.25em;
@@ -219,10 +227,10 @@
   width:3em;
   height:3em;
 }
-.top-bar .name-holder .user-name{
+.top-bar .info-holder .main-text{
   margin-top:0.4em;
 }
-.top-bar .name-holder .msg-preview{
+.top-bar .info-holder .sub-text{
   margin-bottom:0.25em;
   font-size:small;
 }
@@ -238,11 +246,11 @@
 .top-bar .icons{
   margin-left:auto;
 }
-.options .icons .icon,
-#left-section[collapsed]:not(:hover) :not(.options) .icons .icon{
+.options .icons .icon{
   margin:0.5em 1.375em;
 }
 #left-section[collapsed] :not(.options) .icons .icon{
+  margin:0.5em 1.375em;
   transition:margin 100ms 1s ease-out;
 }
 #left-section .options .icons .icon svg{
@@ -254,22 +262,33 @@
 }
 
 .right-main{
+  padding:0.5em;
 	height:100%;
 	overflow:auto;
-  padding:0.5em;
 }
 
 .right-main .message-group{
   display:flex;
   flex-direction:column;
+  width:100%;
+}
+.message-group .sender{
+  margin:0.3em 1em;
+}
+.message-group.sent .sender{
+  align-self:flex-end;
 }
 .message-group .message-container{
   display:flex;
-  flex-direction:column;
-  align-items:flex-start;
+  flex-direction:row-reverse;
+  align-items:flex-end;
+  justify-content:flex-end;
 }
 .message-group.sent .message-container{
-  align-items:flex-end;
+  flex-direction:row;
+}
+.message-group .message-container:hover{
+  background-color:#f8f8f8;
 }
 .message-container .content{
   display:flex;
@@ -277,7 +296,7 @@
   margin:0.3em;
   padding:0.6em 1em;
   width:auto;
-  max-width:50%;
+  max-width:calc(50% - 10em);
   border-radius:10px;
   background-color:#eee;
   color:#444;
@@ -320,15 +339,17 @@
   display:flex;
   flex-direction:row-reverse;
   align-items:center;
+  justify-content:flex-end;
   margin:0px 0.3em;
-  width:auto;
-  height:0px;
+  max-width:0px;
+  height:100%;
   font-size:smaller;
   color:#444;
   letter-spacing:0.01em;
   font-weight:500;
+  white-space:nowrap;
   overflow:hidden;
-  opacity:0;
+  /* opacity:0; */
   transition:all 150ms 1s ease;
 }
 .message-group.sent .info{
@@ -341,9 +362,8 @@
   margin:0px 0.3em;
 }
 
-.message-container:is(:active,:hover) :is(.content+.info,.info){
-  margin-top:-0.3em;
-  height:2em;
+:hover .message-container:is([active],:hover) :is(.content+.info,.info){
+  max-width:10em;
   opacity:1;
 }
 
