@@ -93,7 +93,7 @@ class DataList{
     if(index<0)
       index=this.#list.push(item);
     else
-      this.#list.insertAt(index,item);
+      this.#list.splice(index,0,item);
     this.#listener.
     if(this.#autoSelect)
       this.select(index);
