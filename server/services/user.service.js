@@ -56,12 +56,14 @@ module.exports = class UserService {
   }
   /**
    * 
-   * @param {string|mongoose.Types.ObjectId} id 
-   * @returns {User }
+   * @param {string|mongoose.Types.ObjectId} id
    */
   static async getUserByID(id) {
     try {
-      let foundUser = await UserModel.findById(id).select({ password: false }).lean();
+      let foundUser = await UserModel.findById(id).select({ password: false }).populate([{
+        path:"contacts.user",
+        select:"_id name username lastSeen"
+      }]).lean();
       return foundUser;
     } catch (ex) {
       throw ex;

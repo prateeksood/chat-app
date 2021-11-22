@@ -8,7 +8,10 @@ require("dotenv").config();
  */
 
 const auth = (request, response, next) => {
-  if (!request.headers.cookie) response.status(401).send("Token not found, access denied");
+  if (!request.headers.cookie){
+    response.status(401).send("Token not found, access denied");
+    return;
+  }
   const token = request.headers.cookie.split(";").filter(cookieStr => {
     return cookieStr.search("token=") >= 0;
   }).map(cookieStr => {

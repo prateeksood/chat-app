@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="styles/chat.css"/>
   <link rel="stylesheet" href="styles/profile.css"/>
   <link rel="stylesheet" href="styles/components/context-menu.css"/>
+  <script type="text/javascript" src="../data/sample-users.js"></script>
+  <script type="text/javascript" src="../data/sample-messages.js"></script>
   <script type="text/javascript" src="scripts/dom.js"></script>
   <script type="text/javascript" src="scripts/listener.js"></script>
   <script type="text/javascript" src="scripts/sessions.js"></script>
@@ -123,32 +125,50 @@
       <aside id="left-section" c-id="sideBar" c-parent-id="chat">
         <div class="top-bar" id="left-top-bar">
           <button class="dp-holder" c-id="userDPHolder" c-parent-id="chat">
-            <img src="resources/illustrations/profile_pic.svg"/>
+            <img src="resources/illustrations/profile_pic.svg" c-id="image" c-parent-id="userDPHolder"/>
           </button>
-          <div class="icons">
-            <button class="icon" title="Search">
+          <div class="icons" c-id="actions" c-parent-id="chat">
+            <button class="icon" title="Search" c-id="findPeople" c-parent-id="actions">
               <svg viewBox="0 0 32 32">
                 <use xlink:href="#search"></use>
               </svg>
             </button>
-            <button class="icon" title="Contacts">
+            <button class="icon" title="Contacts" c-id="contacts" c-parent-id="actions">
               <svg viewBox="0 0 32 32">
                 <use xlink:href="#contacts"></use>
               </svg>
             </button>
-            <button class="icon" title="Settings">
+            <button class="icon" title="Settings" c-id="settings" c-parent-id="actions">
               <svg viewBox="0 0 32 32">
                 <use xlink:href="#settings"></use>
               </svg>
             </button>
           </div>
         </div>
-        <div id="left-main" c-id="chatList" c-parent-id="chat">
+        <div class="left-main chat-list" c-id="chatList" c-parent-id="chat">
           <div class="list-area" c-id="emptyArea" c-parent-id="chatList">
             <div class="empty-container">
               <div class="illustration"></div>
               <p>No conversations found</p>
-              <button class="link">Start a conversation</button>
+              <button class="link" c-id="startChat" c-parent-id="emptyArea">Start a conversation</button>
+            </div>
+          </div>
+        </div>
+        <div class="left-main" c-id="contactList" c-parent-id="chat" c-unmount="true">
+          <div class="list-area user-list" c-id="emptyArea" c-parent-id="contactList">
+            <div class="empty-container">
+              <div class="illustration"></div>
+              <p>No contacts found</p>
+              <button class="link" c-id="newContact" c-parent-id="emptyArea">Add new contact</button>
+            </div>
+          </div>
+        </div>
+        <div class="left-main" c-id="peopleSearchList" c-parent-id="chat" c-unmount="true">
+          <div class="list-area user-list" c-id="emptyArea" c-parent-id="peopleSearchList">
+            <div class="empty-container">
+              <div class="illustration"></div>
+              <p>People not found</p>
+              <button class="link">Try again</button>
             </div>
           </div>
         </div>

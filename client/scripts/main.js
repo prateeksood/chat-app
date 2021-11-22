@@ -1,3 +1,5 @@
+/// <reference path="../../data/sample-users.js"/>
+/// <reference path="../../data/sample-messages.js"/>
 /// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
 /// <reference path="sessions.js"/>
@@ -138,6 +140,8 @@ const App = new class AppManager {
       method: "GET"
     }).then(async user => {
       App.session.currentUser = User.from(user);
+      App.session.currentUser.image=User.defaultImage;
+      App.loadUser(App.session.currentUser);
       UI.container.auth.unmount();
       UI.container.chat.mount(UI.container.main);
       App.populateFriendsList();
@@ -199,6 +203,17 @@ const App = new class AppManager {
       }).catch(ex => App.popAlert(ex));
     });
   }
+  /** @param {User} user */
+  loadUser(user){
+    UI.container.chat.sub.userDPHolder.sub.image.attr({
+      src:user.image
+    });
+    UI.container.userProfile=new Profile(user);
+    user.contacts.forEach(contact=>{
+      const listItem=new UserItem(contact);
+      UI.list.contacts.insert(listItem);
+    });
+  }
 
   popAlert(...content) {
     const component = new UINotification(content.join("<br/>"));
@@ -225,7 +240,7 @@ const App = new class AppManager {
 
 UI.onInit(ui => {
 
-  const { container } = ui; // UI == ui
+  const { container, list } = ui; // UI == ui
 
   const { loginForm, registerForm, formHolder } = container.auth.sub;
 
@@ -326,10 +341,56 @@ UI.onInit(ui => {
     }
   });
 
-  const profile=new Profile(new User("123456789","username","Full Name"));
   container.chat.sub.userDPHolder.event({
     click(){
-      profile.mount(container.main);
+      if(container.userProfile)
+        container.userProfile.mount(container.main);
+    }
+  });
+
+  const {actions,contactList,chatList,peopleSearchList}=container.chat.sub;
+  actions.sub.findPeople.event({
+    click(){
+      if(contactList.mounted){
+        peopleSearchList.mountAfter(contactList);
+        contactList.unmount();
+      }else if(chatList.mounted){
+        peopleSearchList.mountAfter(chatList);
+        chatList.unmount();
+      }
+    }
+  });
+  actions.sub.contacts.event({
+    click(){
+      if(contactList.mounted){
+        chatList.mountAfter(peopleSearchList.mounted?peopleSearchList:contactList);
+        peopleSearchList.unmount();
+        contactList.unmount();
+        DOM.attrNS(actions.sub.contacts.element.children[0].children[0],{
+          "xlink:href":"#contacts"
+        });
+      }else{
+        contactList.mountAfter(peopleSearchList.mounted?peopleSearchList:chatList);
+        peopleSearchList.unmount();
+        chatList.unmount();
+        DOM.attrNS(actions.sub.contacts.element.children[0].children[0],{
+          "xlink:href":"#menu"
+        });
+      }
+    }
+  });
+  actions.sub.settings.event({
+    click(){}
+  });
+
+  chatList.sub.emptyArea.sub.startChat.event({
+    click(){
+      actions.sub.contacts.element.click();
+    }
+  });
+  contactList.sub.emptyArea.sub.newContact.event({
+    click(){
+      actions.sub.findPeople.element.click();
     }
   });
 
@@ -370,7 +431,14 @@ UI.onInit(ui => {
   /** @type {UIHandler.ComponentList<ChatItem>} */
   const chatItems = new UIHandler.ComponentList("chatItems");
   UI.addList(chatItems);
+  /** @type {UIHandler.ComponentList<UserItem>} */
+  const contacts = new UIHandler.ComponentList("contacts");
+  UI.addList(contacts);
+  /** @type {UIHandler.ComponentList<UserItem>} */
+  const peopleSearched = new UIHandler.ComponentList("peopleSearched");
+  UI.addList(peopleSearched);
 
+  // ChatItem listeners
   chatItems.on("insert", function (chatItem) {
     if (container.chat.sub.chatList.sub.emptyArea.mounted)
       container.chat.sub.chatList.sub.emptyArea.unmount();
@@ -398,40 +466,37 @@ UI.onInit(ui => {
     chatItems.select(chat.id);
   });
 
-  // const users = [
-  //   new User("0", "sir.tim", "Tim Berners Lee"),
-  //   new User("1", "ms.windows", "Bill Gates"),
-  //   new User("2", "man.iron", "Tony Stark"),
-  //   new User("3", "winter.soldier", "Bucky Barnes"),
-  //   new User("4", "mark", "Mark Zuckerberg"),
-  //   new User("5", "sherlock", "Sherlock Holmes")
-  // ];
-  // const demoChats = [
-  //   new Chat("1", [users[0], users[1]], [
-  //     new Message("1", "1", users[0], "hello", randomDate()),
-  //     new Message("2", "1", users[1], "haan", randomDate()),
-  //     new Message("3", "1", users[1], "bolo", randomDate())
-  //   ]),
-  //   new Chat("2", [users[0], users[2]], [
-  //     new Message("4", "2", users[0], "hello", randomDate()),
-  //     new Message("5", "2", users[1], "hi", randomDate()),
-  //     new Message("6", "2", users[0], "bye", randomDate()),
-  //   ]),
-  //   new Chat("3", [users[0], users[3], users[4]], [
-  //     new Message("7", "3", users[0], "hello", randomDate()),
-  //     new Message("8", "3", users[1], "hello 2", randomDate()),
-  //     new Message("9", "3", users[2], "hello 3", randomDate()),
-  //   ])
-  // ].map(chat => {
-  //   if (!chat.title)
-  //     chat.title = chat.participants[1].name
-  //   chat.image = chat.participants[1].image
-  //   return chat;
-  // });
+  // UserItem listeners
+  contacts.on("insert",function(userItem){
+    if(contactList.sub.emptyArea.mounted)
+      contactList.sub.emptyArea.unmount();
+    userItem.mount(contactList);
+  });
+  contacts.on("delete",function(userItem){
+    userItem.unmount();
+    console.log(contacts.size);
+    if(contacts.size===0)
+      contactList.sub.emptyArea.mount(contactList);
+  });
+  peopleSearched.on("insert",function(userItem){
+    if(peopleSearchList.sub.emptyArea.mounted)
+      peopleSearchList.sub.emptyArea.unmount();
+    userItem.mount(peopleSearchList);
+  });
+  peopleSearched.on("delete",function(userItem){
+    userItem.unmount();
+    console.log(peopleSearched.size);
+    if(peopleSearched.size===0)
+      peopleSearchList.sub.emptyArea.mount(peopleSearchList);
+  });
 
-  // setTimeout(function () {
-  //   demoChats.forEach(chat => App.data.chats.insert(chat.id, chat));
-  // }, 1500);
+  const data=generateData();
+
+  App.session.currentUser.chats.forEach(id=>{
+    App.data.chats.insert(id,data.chats[id]);
+  });
+  App.loadUser(App.session.currentUser);
+
   container.prompts.style({ display: "none" });
 });
 
@@ -440,6 +505,55 @@ window.addEventListener("load", function () {
   App.auth();
 });
 
-function randomDate() {
-  return Date.now() - Math.floor(Math.random() * 56659338408);
+function generateData() {
+  /** @type {Object<string,User>} */
+  const users={};
+  /** @type {Object<string,Chat>} */
+  const chats={};
+  sample_users.forEach((sample_user,index)=>{
+    sample_user._id=sample_user._id.$oid;
+    sample_user.lastSeen=sample_user.lastSeen.$date;
+    const user=User.from(sample_user);
+    user.username=user.name.toLowerCase().replaceAll(" ",".");
+    users[user.id]=user;
+    sample_users[index]=user;
+    return user;
+  });
+  const usersKeys=Object.keys(users).slice(0,10);
+  App.session.currentUser=users[usersKeys[0]];
+  usersKeys.forEach(id=>{
+    usersKeys.forEach(uid=>{
+      const user=users[uid];
+      if(users[id]!==user && isTrue() && !user.contacts.find(contact=>contact.id===id)){
+        // users[id].contacts.push(new Contact(user));
+        users[user.id].contacts.push(new Contact(users[id],user.lastseen));
+        const chat=new Chat(id+user.id,[users[id],user],[]);
+        chat.createdAt=user.lastseen;
+        chats[chat.id]=chat;
+        users[id].chats.push(chat.id);
+      }
+    });
+  });
+  const chatsArray=Object.keys(chats);
+  const perChat=Math.floor(sample_messages.length/chatsArray.length);
+  console.log(sample_messages.length,chatsArray.length,perChat);
+  chatsArray.forEach((id,index)=>{
+    for(let i=perChat*index;i<perChat*(index+1);i++){
+      const message=sample_messages[i];
+      message._id=message._id.$oid;
+      message.createdAt=message.createdAt.$date;
+      message.chat=id;
+      message.sender=chats[id].participants[randomInt(0,1)].id;
+      chats[id].messages.push(Message.from(message));
+    }
+    chats[id].messages.sort((a,b)=>a.createdAt-b.createdAt);
+  });
+  return {chats,users};
+}
+
+function isTrue(){
+  return randomInt(0,1)===0;
+}
+function randomInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
 }

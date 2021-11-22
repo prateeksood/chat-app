@@ -69,7 +69,7 @@ UIHandler.Component=class Component{
   /**
    * Component's parent component
    * @type {Component} */
-  parent=null;
+  parentComponent=null;
   /** Whether the component is mounted or not */
   mounted=false;
   /**
@@ -108,7 +108,17 @@ UIHandler.Component=class Component{
    * Inserts Component at the end of parent
    * @param {Component} parent */
   mount(parent){
-    parent.element.appendChild(this.element);
+    if(!parent && this.parentComponent && this.parentComponent.element)
+      this.parentComponent.element.appendChild(this.element);
+    else
+      parent.element.appendChild(this.element);
+    this.mounted=true;
+  }
+  /**
+   * Inserts Component after the Component's element
+   * @param {Component} component */
+  mountAfter(component){
+    component.element.after(this.element);
     this.mounted=true;
   }
   /** Add multiple components as sub components
@@ -173,6 +183,9 @@ UIHandler.ComponentList=class ComponentList{
   constructor(listId=null){
     this.id=listId;
   }
+  get size(){
+    return this.#list.size;
+  }
   /** Check for data
    * @param {string} componentId */
   has(componentId){
@@ -196,8 +209,9 @@ UIHandler.ComponentList=class ComponentList{
    * @param {string} componentId */
   delete(componentId){
     if(this.#list.has(componentId)){
-      this.#listener.trigger("delete",this.#list.get(componentId));
+      const component=this.#list.get(componentId);
       this.#list.delete(componentId);
+      this.#listener.trigger("delete",component);
     }
     return this;
   }

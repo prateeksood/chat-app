@@ -31,9 +31,18 @@ class ChatArea extends UIHandler.Component {
     super("chatArea", element);
     this.addSub(rightMain);
 
+    /** @type {UIHandler.Component} */
+    let lastGroup=null;
     // Whenever a Message component is inserted into the this.#messages using this.#messages.insert method
     this.#messages.on("insert", component => {
-      component.mount(rightMain);
+      if(!lastGroup){
+        lastGroup=MessageComponent.createMessageGroup(component);
+      }
+      if(lastGroup.getAttr("sender-id")!==component.sender.id){
+        lastGroup=MessageComponent.createMessageGroup(component);
+      }
+      lastGroup.mount(rightMain);
+      component.mount(lastGroup);
     });
     // Whenever a Message component is deleted from the this.#messages using this.#messages.delete method
     this.#messages.on("delete", component => {
