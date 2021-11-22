@@ -94,7 +94,7 @@ class DataList{
       index=this.#list.push(item);
     else
       this.#list.splice(index,0,item);
-    this.#listener.
+    this.#listener.trigger("add",item,index);
     if(this.#autoSelect)
       this.select(index);
     return this;
