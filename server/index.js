@@ -41,21 +41,27 @@ const server = app.listen(PORT, function () {
 
 
 const socketServer = new WebSocketServer({ server });
-const connections = {};
+global.connections = {};
 socketServer.on("listening", function () {
   console.log("Socket listening");
 });
 socketServer.on("connection", function (socket, request) {
+  if (!request.headers.cookie) {
+    socket.send(JSON.stringify({ error: "Kindly login to continue", data: null, type: null }));
+    return;
+  }
+  const user = UserService.getLoggedInUser(request.headers.cookie);
+  global.connections[user._id] = socket;
+  console.log("Socked connected: ", request.url, "for", user._id);
+  // console.log({ connection: global.connections });
 
-  console.log("Socked connected: ", request.url);
   socket.send(JSON.stringify({
-    error: null, type: "connection", data: {
-      user: UserService.getLoggedInUser(request.headers.cookie)
-    }
+    error: null, type: "connection", data: { user }
   }));
 
   socket.on("close", function (x) {
-    console.log("User disconnected", x);
+    delete global.connections[user._id];
+    // console.log("User disconnected", x, global.connections);
   });
   socket.on("message", function (rawData, isBinary) {
     const response = { error: null, data: null, type: "message" };

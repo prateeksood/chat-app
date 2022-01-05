@@ -39,15 +39,33 @@ const App = new class AppManager {
         else
           this.onmessage(response.type, response.data);
       };
+      this.#socket.onclose = event => {
+        this.ondisconnect();
+      };
     }
     send(data) {
       this.#socket.send(JSON.stringify(data));
     }
+    disconnect() {
+      this.#socket.close();
+    }
     onmessage(type, data) {
       console.log(type, data);
+      if (type = "message") {
+        const message = Message.from(data.message);
+        console.log(message);
+        if (UI.list.chatItems.has(message.chatId)) {
+          const chatItem = UI.list.chatItems.get(message.chatId);
+          chatItem.addMessage(message);
+        }
+      }
     }
     onconnect(data) {
-      console.log(data);
+      console.log("Socket connected: ", data);
+
+    }
+    ondisconnect(data) {
+      console.log("Socket connection disconnected");
     }
     onerror(error) {
       console.log(error);
@@ -144,6 +162,7 @@ const App = new class AppManager {
         App.session.currentUser = User.from(user);
         App.session.currentUser.image = User.defaultImage;
         App.loadUser(App.session.currentUser);
+        App.socket.connect();
       })
       .then(() => {
         App.populateFriendsList();
@@ -160,6 +179,7 @@ const App = new class AppManager {
   }
   logout() {
     App.session.removeCurrentUser();
+    App.socket.disconnect();
     window.location.reload();
   }
   /** @param {HTMLFormElement} form */
@@ -274,6 +294,7 @@ UI.onInit(ui => {
           // App.auth();
           const user = await request.json();
           App.session.currentUser = User.from(user);
+          App.socket.connect();
           App.populateFriendsList();
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
@@ -326,7 +347,9 @@ UI.onInit(ui => {
       if (request) {
         if (request.ok) {
           // App.auth();
-          App.session.currentUser = User.from(await request.json());
+          const user = await request.json();
+          App.session.currentUser = User.from(user);
+          App.socket.connect();
           App.populateFriendsList();
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
