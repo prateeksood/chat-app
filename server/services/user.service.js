@@ -6,7 +6,7 @@ require("dotenv").config();
 
 module.exports = class UserService {
 
-  static async getAllUsers() {
+  static async fetchAllUsers() {
     try {
       let allUsers = await UserModel.find().select({ password: false }).lean();
       return allUsers
@@ -61,8 +61,8 @@ module.exports = class UserService {
   static async getUserByID(id) {
     try {
       let foundUser = await UserModel.findById(id).select({ password: false }).populate([{
-        path:"contacts.user",
-        select:"_id name username lastSeen"
+        path: "contacts.user",
+        select: "_id name username lastSeen"
       }]).lean();
       return foundUser;
     } catch (ex) {
@@ -148,9 +148,9 @@ module.exports = class UserService {
         updatedUser = await UserModel.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
       else if (method === "pull") {
         updatedUser = await UserModel.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
-      }else if (method === "pop") {
+      } else if (method === "pop") {
         updatedUser = await UserModel.findByIdAndUpdate(id, { $pop: data }, { new: true }).lean();
-      }else
+      } else
         updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true }).lean();
       if (updatedUser) {
         delete updatedUser.password;
@@ -163,16 +163,15 @@ module.exports = class UserService {
   static isValidId(id) {
     return mongoose.isValidObjectId(id);
   }
-  static getLoggedInUser(cookies){
-    const token=cookies.split(";").filter(cookieStr=>{
-      return cookieStr.search("token=")>=0;
-    }).map(cookieStr=>{
+  static getLoggedInUser(cookies) {
+    const token = cookies.split(";").filter(cookieStr => {
+      return cookieStr.search("token=") >= 0;
+    }).map(cookieStr => {
       return cookieStr.split("=")[1].trim();
     })[0];
-    console.log(token);
-    try{
+    try {
       return jwt.verify(token, process.env.JWT_SECRET);
-    }catch(ex){
+    } catch (ex) {
       return null;
     }
   }

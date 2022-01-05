@@ -18,21 +18,26 @@ module.exports = class ChatController {
   static async createChat(request, response) {
     const { title } = request.body;
     const { _id: adminId } = request.user;
-    if(!request.body.participants){
-      response.status(400).json({message:"Participants required"});
+    if (!request.body.participants) {
+      response.status(400).json({ message: "Participants required" });
       return;
     }
     try {
       /** @type {string[]} */
-      const participants=request.body.participants.split(",");
-      if(!participants.includes(adminId))
+      let participants = [];
+      request.body.participants.forEach(user => {
+        participants.push(user._id);
+      })
+      if (!participants.includes(adminId))
         participants.push(adminId);
+      participants = participants.filter(participant => participants.indexOf(participant) === participants.lastIndexOf(participant));
       if (participants && participants.length < 1) {
         response.status(400).json({ message: "Atleast two participant IDs are required" });
         return;
       }
 
       const foundUsers = await UserService.getUsersByIDs(participants, "in");
+
       if (participants.length !== foundUsers.length) {
         response.status(400).json({ message: "There were invalid user IDs present in your request" });
         return;
@@ -53,16 +58,18 @@ module.exports = class ChatController {
           })
         }
       );
-      for(let user of foundUsers){
-        if(participants.length===2 && user._id===adminId)
-          user.contacts.push(participants[0]);
+      for (let user of foundUsers) {
+        if (participants.length === 2 && user._id.equals(adminId))
+          user.contacts.push({ user: participants[0] });
         user.chats.push(newChat._id);
         await user.save();
       }
       response.status(200).json(newChat);
+      // console.log(newChat)
     }
     catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      console.log(ex)
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
   /**
@@ -72,12 +79,11 @@ module.exports = class ChatController {
    */
   static async getChatByCurrentUserId(request, response, next) {
     try {
-
       const { _id: currentUserId } = request.user;
       const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId });
       response.status(200).json(foundChats);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -94,7 +100,7 @@ module.exports = class ChatController {
       const foundMessages = await MessageService.searchMessage(key, chatID);
       response.status(200).json(foundMessages);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 }

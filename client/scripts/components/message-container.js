@@ -6,7 +6,7 @@
 class MessageComponent extends UIHandler.Component {
   /** @param {Message} message */
   constructor (message) {
-    const messageTime=DOM.create("auto-updater", {
+    const messageTime = DOM.create("auto-updater", {
       class: "time",
       html: App.date.format(message.createdAt)
     });
@@ -37,32 +37,48 @@ class MessageComponent extends UIHandler.Component {
           ]
         })// div.info
       ]
-    },{},{
-      click(){
+    }, {}, {
+      click() {
         element.toggleAttribute("active");
       }
     }); //div.message-container
 
     super("message", element);
-    messageTime.handler=()=>{
-      messageTime.innerHTML=App.date.format(message.createdAt);
+    messageTime.handler = () => {
+      messageTime.innerHTML = App.date.format(message.createdAt);
     };
-    const foundUser=sample_users.filter(user=>user.id===message.senderId)[0];
-    this.sender=foundUser;
-    this.isGroup=message.isGroup;
+  }
+  async init(message) {
+
+    try {
+      const response = await fetch(
+        `/user/${message.senderId}`, {
+        method: "GET"
+      });
+      if (response.ok) {
+        const user = await response.json();
+        this.sender = user;
+      }
+    }
+    catch (ex) {
+      consple.log(ex);
+    }
+    finally {
+      this.isGroup = message.isGroup ?? false;
+    }
   }
   /** @param {MessageComponent} component */
-  static createMessageGroup(component){
-    const isCurrentUser=App.session.isCurrentUserId(component.sender.id);
-    return new UIHandler.Component("group",DOM.create("div", {
-      senderId:component.sender.id,
+  static createMessageGroup(component) {
+    const isCurrentUser = App.session.isCurrentUserId(component.sender._id);
+    return new UIHandler.Component("group", DOM.create("div", {
+      senderId: component.sender._id,
       class: `message-group${isCurrentUser ? " sent" : ""}`,
       children: [
-        (()=>{
-          if(!isCurrentUser && component.isGroup)
-            return DOM.create("div",{
-              class:"sender",
-              text:component.sender.name
+        (() => {
+          if (!isCurrentUser && component.isGroup)
+            return DOM.create("div", {
+              class: "sender",
+              text: component.sender.name
             });
         })()
       ]
