@@ -7,7 +7,7 @@ const DOM=new class DOM{
 	/**
    * Sets the attributes
    * @param {Element} element
-   * @param {HTMLElementA} attributesData
+   * @param {DOMAttributes} attributesData
    * @param {boolean} modify
    */
 	attr(element,attributesData={},modify=true){

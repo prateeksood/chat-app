@@ -50,6 +50,15 @@ class UIHandler{
     this.#components[id]=component;
     return element;
   }
+  /**
+   * Store and manage a component
+   * @param {UIHandler.Component} component */
+  _addComponent(component){
+    if("container" in this)
+      this["container"][component.id]=component;
+    this.#components[component.id]=component;
+    return component;
+  }
   /** @param {UIHandler.ComponentList} list */
   addList(list){
     if(list instanceof UIHandler.ComponentList)
@@ -57,6 +66,7 @@ class UIHandler{
   }
 };
 
+/** @template ElementType */
 UIHandler.Component=class Component{
   /**
    * Component's ID
@@ -64,7 +74,7 @@ UIHandler.Component=class Component{
   id=null;
   /**
    * Component's element
-   * @type {HTMLElement} */
+   * @type {ElementType} */
   element=null;
   /**
    * Component's parent component
@@ -78,7 +88,7 @@ UIHandler.Component=class Component{
   sub={};
   /**
    * @param {string} id Component's ID
-   * @param {HTMLElement} element Component's element
+   * @param {ElementType} element Component's element
    * @param {string} [type] Component's element
    */
   constructor(id,element,type){
