@@ -5,6 +5,7 @@ const authRoute = require("./routes/auth.route");
 const messageRoute = require("./routes/message.route");
 const chatRoute = require("./routes/chat.route");
 const userRoute = require("./routes/user.route");
+const contactRoute = require("./routes/contact.route");
 const UserService = require("./services/user.service");
 
 const app = express();
@@ -23,6 +24,7 @@ app.get("/", function (request, response) {
 app.use('/auth', authRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);
+app.use('/contact', contactRoute);
 app.use('/user', userRoute);
 app.post("/upload", function (request, response) {
   console.log(request.body.naam, request.body.file);

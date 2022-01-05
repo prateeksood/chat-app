@@ -8,7 +8,7 @@ require("dotenv").config();
  */
 
 const auth = (request, response, next) => {
-  if (!request.headers.cookie){
+  if (!request.headers.cookie) {
     response.status(401).send("Token not found, access denied");
     return;
   }
@@ -20,11 +20,13 @@ const auth = (request, response, next) => {
   // const token = request.header("x-auth-token");
   if (!token) response.status(401).send("Token not found, access denied");
   else {
+    // console.log(token);
     try {
       const decodedUser = jwt.verify(token, process.env.JWT_SECRET);
       request.user = decodedUser;
       next();
     } catch (err) {
+      console.log(err);
       response.status(500).send(`Something went wrong : ${err.message}`);
     }
   }

@@ -1,5 +1,5 @@
-/// <reference path="../../data/sample-users.js"/>
-/// <reference path="../../data/sample-messages.js"/>
+/// <reference path="../data/sample-users.js"/>
+/// <reference path="../data/sample-messages.js"/>
 /// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
 /// <reference path="sessions.js"/>
@@ -14,6 +14,7 @@
 /// <reference path="components/message-container.js"/>
 /// <reference path="components/_friends-area.js"/>
 /// <reference path="components/_chat-area.js"/>
+
 
 const UI = new UIHandler();
 const App = new class AppManager {
@@ -111,7 +112,7 @@ const App = new class AppManager {
       if (deltaDate < 10)
         return "just now";
       else if (deltaDate <= 60)
-        return deltaDate+" s";
+        return deltaDate + " s";
       deltaDate = Math.floor(deltaDate / 60);
       if (deltaDate < 60)
         return deltaDate + " min";
@@ -130,7 +131,7 @@ const App = new class AppManager {
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
       data.forEach(chatResponse => {
-        const chat=Chat.from(chatResponse);
+        const chat = Chat.from(chatResponse);
         App.data.chats.insert(chat.id, chat);
       });
     });
@@ -138,17 +139,24 @@ const App = new class AppManager {
   async auth() {
     App.request("/user/auth", {
       method: "GET"
-    }).then(async user => {
-      App.session.currentUser = User.from(user);
-      App.session.currentUser.image=User.defaultImage;
-      App.loadUser(App.session.currentUser);
-      UI.container.auth.unmount();
-      UI.container.chat.mount(UI.container.main);
-      App.populateFriendsList();
-    }).catch(() => {
-      UI.container.chat.unmount();
-      UI.container.auth.mount(UI.container.main);
-    });
+    })
+      .then(async user => {
+        App.session.currentUser = User.from(user);
+        App.session.currentUser.image = User.defaultImage;
+        App.loadUser(App.session.currentUser);
+      })
+      .then(() => {
+        App.populateFriendsList();
+        App.loadUser(App.session.currentUser);
+        UI.container.prompts.style({ display: "none" });
+        UI.container.auth.unmount();
+        UI.container.chat.mount(UI.container.main);
+      })
+      .catch((ex) => {
+        console.log(ex)
+        UI.container.chat.unmount();
+        UI.container.auth.mount(UI.container.main);
+      });
   }
   logout() {
     App.session.removeCurrentUser();
@@ -161,16 +169,16 @@ const App = new class AppManager {
       method: form.method ?? "POST",
       body: new URLSearchParams(formData)
     }).then(data => {
-      const message=Message.from(data);
+      const message = Message.from(data);
       console.log(message);
-      if(UI.list.chatItems.has(message.chatId)){
+      if (UI.list.chatItems.has(message.chatId)) {
         /** @type {ChatItem} */
-        const chatItem=UI.list.chatItems.get(message.chatId);
+        const chatItem = UI.list.chatItems.get(message.chatId);
         console.log(chatItem)
         chatItem.addMessage(message);
       }
     }).catch(ex => {
-      let n = new UINotification("failed to send message <br/>"+ex, [], "error");
+      let n = new UINotification("failed to send message <br/>" + ex, [], "error");
       n.mount(UI.container.notifications);
     });
   }
@@ -204,13 +212,13 @@ const App = new class AppManager {
     });
   }
   /** @param {User} user */
-  loadUser(user){
+  loadUser(user) {
     UI.container.chat.sub.userDPHolder.sub.image.attr({
-      src:user.image
+      src: user.image
     });
-    UI.container.userProfile=new Profile(user);
-    user.contacts.forEach(contact=>{
-      const listItem=new UserItem(contact);
+    UI.container.userProfile = new Profile(user);
+    user.contacts.forEach(contact => {
+      const listItem = new UserItem(contact);
       UI.list.contacts.insert(listItem);
     });
   }
@@ -263,11 +271,13 @@ UI.onInit(ui => {
       setTimeout(() => event.target.elements.submit.disabled = false, 1000);
       if (request) {
         if (request.ok) {
-          App.session.currentUser = User.from(await request.json());
+          // App.auth();
+          const user = await request.json();
+          App.session.currentUser = User.from(user);
+          App.populateFriendsList();
           App.popAlert("Login successful!🙌");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          App.populateFriendsList();
         } else {
           App.popAlert(await request.text());
         }
@@ -315,11 +325,12 @@ UI.onInit(ui => {
       event.target.elements.submit.disabled = false;
       if (request) {
         if (request.ok) {
+          // App.auth();
           App.session.currentUser = User.from(await request.json());
+          App.populateFriendsList();
           App.popAlert("Registration successful!😍");
           container.auth.unmount();
           container.chat.mount(UI.container.main);
-          App.populateFriendsList();
         } else {
           App.popAlert(await request.text());
         }
@@ -342,54 +353,54 @@ UI.onInit(ui => {
   });
 
   container.chat.sub.userDPHolder.event({
-    click(){
-      if(container.userProfile)
+    click() {
+      if (container.userProfile)
         container.userProfile.mount(container.main);
     }
   });
 
-  const {actions,contactList,chatList,peopleSearchList}=container.chat.sub;
+  const { actions, contactList, chatList, peopleSearchList } = container.chat.sub;
   actions.sub.findPeople.event({
-    click(){
-      if(contactList.mounted){
+    click() {
+      if (contactList.mounted) {
         peopleSearchList.mountAfter(contactList);
         contactList.unmount();
-      }else if(chatList.mounted){
+      } else if (chatList.mounted) {
         peopleSearchList.mountAfter(chatList);
         chatList.unmount();
       }
     }
   });
   actions.sub.contacts.event({
-    click(){
-      if(contactList.mounted){
-        chatList.mountAfter(peopleSearchList.mounted?peopleSearchList:contactList);
+    click() {
+      if (contactList.mounted) {
+        chatList.mountAfter(peopleSearchList.mounted ? peopleSearchList : contactList);
         peopleSearchList.unmount();
         contactList.unmount();
-        DOM.attrNS(actions.sub.contacts.element.children[0].children[0],{
-          "xlink:href":"#contacts"
+        DOM.attrNS(actions.sub.contacts.element.children[0].children[0], {
+          "xlink:href": "#contacts"
         });
-      }else{
-        contactList.mountAfter(peopleSearchList.mounted?peopleSearchList:chatList);
+      } else {
+        contactList.mountAfter(peopleSearchList.mounted ? peopleSearchList : chatList);
         peopleSearchList.unmount();
         chatList.unmount();
-        DOM.attrNS(actions.sub.contacts.element.children[0].children[0],{
-          "xlink:href":"#menu"
+        DOM.attrNS(actions.sub.contacts.element.children[0].children[0], {
+          "xlink:href": "#menu"
         });
       }
     }
   });
   actions.sub.settings.event({
-    click(){}
+    click() { }
   });
 
   chatList.sub.emptyArea.sub.startChat.event({
-    click(){
+    click() {
       actions.sub.contacts.element.click();
     }
   });
   contactList.sub.emptyArea.sub.newContact.event({
-    click(){
+    click() {
       actions.sub.findPeople.element.click();
     }
   });
@@ -467,93 +478,45 @@ UI.onInit(ui => {
   });
 
   // UserItem listeners
-  contacts.on("insert",function(userItem){
-    if(contactList.sub.emptyArea.mounted)
+  contacts.on("insert", function (userItem) {
+    if (contactList.sub.emptyArea.mounted)
       contactList.sub.emptyArea.unmount();
     userItem.mount(contactList);
   });
-  contacts.on("delete",function(userItem){
+  contacts.on("delete", function (userItem) {
     userItem.unmount();
     console.log(contacts.size);
-    if(contacts.size===0)
+    if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
   });
-  peopleSearched.on("insert",function(userItem){
-    if(peopleSearchList.sub.emptyArea.mounted)
+  peopleSearched.on("insert", function (userItem) {
+    if (peopleSearchList.sub.emptyArea.mounted)
       peopleSearchList.sub.emptyArea.unmount();
     userItem.mount(peopleSearchList);
   });
-  peopleSearched.on("delete",function(userItem){
+  peopleSearched.on("delete", function (userItem) {
     userItem.unmount();
     console.log(peopleSearched.size);
-    if(peopleSearched.size===0)
+    if (peopleSearched.size === 0)
       peopleSearchList.sub.emptyArea.mount(peopleSearchList);
   });
 
-  const data=generateData();
+  // Populate db with dummy data
+  // populate();
+  // createChats();
 
-  App.session.currentUser.chats.forEach(id=>{
-    App.data.chats.insert(id,data.chats[id]);
-  });
-  App.loadUser(App.session.currentUser);
-
-  container.prompts.style({ display: "none" });
 });
 
-window.addEventListener("load", function () {
+window.addEventListener("load", async function () {
+
+  await App.auth();
+  // const data = generateData();
   UI.init();
-  App.auth();
 });
 
-function generateData() {
-  /** @type {Object<string,User>} */
-  const users={};
-  /** @type {Object<string,Chat>} */
-  const chats={};
-  sample_users.forEach((sample_user,index)=>{
-    sample_user._id=sample_user._id.$oid;
-    sample_user.lastSeen=sample_user.lastSeen.$date;
-    const user=User.from(sample_user);
-    user.username=user.name.toLowerCase().replaceAll(" ",".");
-    users[user.id]=user;
-    sample_users[index]=user;
-    return user;
-  });
-  const usersKeys=Object.keys(users).slice(0,10);
-  App.session.currentUser=users[usersKeys[0]];
-  usersKeys.forEach(id=>{
-    usersKeys.forEach(uid=>{
-      const user=users[uid];
-      if(users[id]!==user && isTrue() && !user.contacts.find(contact=>contact.id===id)){
-        // users[id].contacts.push(new Contact(user));
-        users[user.id].contacts.push(new Contact(users[id],user.lastseen));
-        const chat=new Chat(id+user.id,[users[id],user],[]);
-        chat.createdAt=user.lastseen;
-        chats[chat.id]=chat;
-        users[id].chats.push(chat.id);
-      }
-    });
-  });
-  const chatsArray=Object.keys(chats);
-  const perChat=Math.floor(sample_messages.length/chatsArray.length);
-  console.log(sample_messages.length,chatsArray.length,perChat);
-  chatsArray.forEach((id,index)=>{
-    for(let i=perChat*index;i<perChat*(index+1);i++){
-      const message=sample_messages[i];
-      message._id=message._id.$oid;
-      message.createdAt=message.createdAt.$date;
-      message.chat=id;
-      message.sender=chats[id].participants[randomInt(0,1)].id;
-      chats[id].messages.push(Message.from(message));
-    }
-    chats[id].messages.sort((a,b)=>a.createdAt-b.createdAt);
-  });
-  return {chats,users};
+function isTrue() {
+  return randomInt(0, 1) === 0;
 }
-
-function isTrue(){
-  return randomInt(0,1)===0;
-}
-function randomInt(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

@@ -32,14 +32,14 @@ class ChatArea extends UIHandler.Component {
     this.addSub(rightMain);
 
     /** @type {UIHandler.Component} */
-    let lastGroup=null;
+    let lastGroup = null;
     // Whenever a Message component is inserted into the this.#messages using this.#messages.insert method
     this.#messages.on("insert", component => {
-      if(!lastGroup){
-        lastGroup=MessageComponent.createMessageGroup(component);
+      if (!lastGroup) {
+        lastGroup = MessageComponent.createMessageGroup(component);
       }
-      if(lastGroup.getAttr("sender-id")!==component.sender.id){
-        lastGroup=MessageComponent.createMessageGroup(component);
+      if (lastGroup.getAttr("sender-id") !== component.sender._id) {
+        lastGroup = MessageComponent.createMessageGroup(component);
       }
       lastGroup.mount(rightMain);
       component.mount(lastGroup);
@@ -53,8 +53,9 @@ class ChatArea extends UIHandler.Component {
 
   }
   /** @param {Message} message */
-  addMessage(message){
+  async addMessage(message) {
     const component = new MessageComponent(message);
+    await component.init(message);
     this.#messages.insert(component);
   }
   /** @param {Chat} chat */

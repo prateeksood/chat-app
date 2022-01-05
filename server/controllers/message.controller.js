@@ -19,7 +19,7 @@ module.exports = class MessageController {
       const foundMessages = await MessageService.getMessagesByChatId(chatID, pageSize, skips);
       response.status(200).json(foundMessages);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -46,7 +46,7 @@ module.exports = class MessageController {
 
       response.status(200).json(savedMessage);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 }

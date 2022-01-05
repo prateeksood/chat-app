@@ -16,9 +16,27 @@ module.exports = class UserController {
    * @param {Response} response
    * @param {NextFunction} next
    */
+  static async fetchAllUsers(request, response, next) {
+    try {
+      const foundUsers = await UserService.fetchAllUsers();
+      if (!foundUsers)
+        response.status(400).json({ message: "Users not found" });
+
+      else {
+        response.status(200).json({ users: foundUsers });
+      }
+    }
+    catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
+  /**
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
+   */
   static async registerUser(request, response, next) {
     let image = request.file ? request.file.filename : null;
-
     const {
       name,
       email,
@@ -63,21 +81,21 @@ module.exports = class UserController {
         password: hashedPassword,
         image
       });
-      jwt.sign(savedUser, process.env.JWT_SECRET, { expiresIn: tokenExpiry }, async (ex, token) => {
-        if(ex){
+      jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: tokenExpiry }, async (ex, token) => {
+        if (ex) {
           throw ex;
         }
-        response.cookie("token",token,{
-          maxAge:tokenExpiry,
-          path:"/",
-          sameSite:"strict",
-          httpOnly:true
+        response.cookie("token", token, {
+          maxAge: tokenExpiry,
+          path: "/",
+          sameSite: "strict",
+          httpOnly: true
         }).status(200).json(savedUser);
       });
 
 
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -102,17 +120,18 @@ module.exports = class UserController {
         delete foundUser.password;
         if (!isPasswordMatch)
           response.status(401).json({ message: "Invalid Password" });
-        jwt.sign(foundUser, process.env.JWT_SECRET, {
+        jwt.sign({ _id: foundUser._id }, process.env.JWT_SECRET, {
           expiresIn: tokenExpiry
         }, (err, token) => {
-          if (err)
-            response.status(500).send(`Something went wrong : ${err.message}`);
+          if (err) {
+            throw err;
+          }
           else {
-            response.cookie("token",token,{
-              maxAge:tokenExpiry,
-              path:"/",
-              sameSite:"strict",
-              httpOnly:true
+            response.cookie("token", token, {
+              maxAge: tokenExpiry,
+              path: "/",
+              sameSite: "strict",
+              httpOnly: true
             }).status(200).json(foundUser);
           }
         });
@@ -120,7 +139,7 @@ module.exports = class UserController {
       }
     }
     catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -135,7 +154,22 @@ module.exports = class UserController {
       const foundUsers = await UserService.searchUsers(query);
       response.status(200).json(foundUsers);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
+
+  /**
+   * @param {Request} request
+   * @param {Response} response
+   * @param {NextFunction} next
+   */
+  static async searchUserById(request, response, next) {
+    try {
+      const { id } = request.params;
+      const foundUser = await UserService.getSingleUserByParams({ _id: id }, false);
+      response.status(200).json(foundUser);
+    } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -172,7 +206,7 @@ module.exports = class UserController {
       }
       response.status(400).json({ message: "Unable to send request" });
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -208,7 +242,7 @@ module.exports = class UserController {
       }
       response.status(400).json({ message: "Unable to accept request" });
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -217,7 +251,7 @@ module.exports = class UserController {
    * @param {Response} response
    * @param {NextFunction} next
    */
-   static async deleteRequest(request, response, next) {
+  static async deleteRequest(request, response, next) {
     try {
       const { _id: requestSenderId } = request.user;
       const { requestRecieverId } = request.params;
@@ -233,7 +267,7 @@ module.exports = class UserController {
       }
       response.status(400).json({ message: "Unable to accept request" });
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -256,7 +290,7 @@ module.exports = class UserController {
       await UserService.findUserByIdAndUpdate(blockerId, { blocked: { user: userToBeBlockedId } }, "push");
       response.status(200).json({ message: "User successfully blocked" });
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -279,7 +313,7 @@ module.exports = class UserController {
       await UserService.findUserByIdAndUpdate(unblockerId, { blocked: { user: userToBeUnblockedId } }, "pull");
       response.status(200).json({ message: "User successfully unblocked" });
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 
@@ -299,7 +333,7 @@ module.exports = class UserController {
       const updatedUser = await UserService.findUserByIdAndUpdate(currentUserId, { image: filename });
       response.status(200).json(updatedUser);
     } catch (ex) {
-      response.status(500).json({ message: `Someting went wrong: ${ex.message}` });
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
 }
