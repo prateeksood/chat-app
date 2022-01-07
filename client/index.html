@@ -153,6 +153,10 @@
           </div>
         </div>
         <div class="left-main chat-list" c-id="chatList" c-parent-id="chat">
+          <form action="#" class="search-bar" c-id="searchBar" c-parent-id="chatList">
+            <input type="text" name="query" minlength="4" placeholder="Search"/>
+            <button type="search" name="submit">Search</button>
+          </form>
           <div class="list-area" c-id="emptyArea" c-parent-id="chatList">
             <div class="empty-container">
               <div class="illustration"></div>
@@ -162,6 +166,10 @@
           </div>
         </div>
         <div class="left-main" c-id="contactList" c-parent-id="chat" c-unmount="true">
+          <form action="#" class="search-bar" c-id="searchBar" c-parent-id="contactList">
+            <input type="text" name="query" minlength="4" placeholder="Username"/>
+            <button type="search" name="submit">Search</button>
+          </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="contactList">
             <div class="empty-container">
               <div class="illustration"></div>
@@ -171,6 +179,10 @@
           </div>
         </div>
         <div class="left-main" c-id="peopleSearchList" c-parent-id="chat" c-unmount="true">
+          <form action="#" class="search-bar" c-id="searchBar" c-parent-id="peopleSearchList">
+            <input type="text" name="query" minlength="4" placeholder="Username"/>
+            <button type="search" name="submit">Search</button>
+          </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="peopleSearchList">
             <div class="empty-container">
               <div class="illustration"></div>
@@ -180,12 +192,12 @@
           </div>
         </div>
         <div class="bottom-bar info-area" c-id="infoArea" c-parent-id="chat" c-unmount="true">
-          <div class="line">Unable to connect to the server, please check your internet connection.</div>
+          <div class="line" c-id="content" c-parent-id="infoArea">Unable to connect to the server, please check your internet connection.</div>
           <!-- <div class="line illustration"></div> -->
-          <div class="line">
-            <button>Try again</button>
+          <div class="line" c-id="buttonLine" c-parent-id="infoArea">
+            <button c-id="button" c-parent-id="infoArea">Try again</button>
           </div>
-          <div class="line">Retrying to connect in 5s</div>
+          <div class="line" c-id="time" c-parent-id="infoArea">Retrying to connect in 5s</div>
         </div>
         <div class="bottom-bar options">
           <div class="icons">

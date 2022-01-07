@@ -55,7 +55,7 @@ class ChatArea extends UIHandler.Component {
   /** @param {Message} message */
   async addMessage(message) {
     const component = new MessageComponent(message);
-    await component.init(message);
+    component.init(message);
     this.#messages.insert(component);
   }
   /** @param {Chat} chat */

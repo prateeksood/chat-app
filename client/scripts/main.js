@@ -18,6 +18,7 @@
 
 const UI = new UIHandler();
 const App = new class AppManager {
+  #timeout=null;
   session = new Session();  // session.js
 
   data = {
@@ -29,6 +30,7 @@ const App = new class AppManager {
     /** @type {WebSocket} */
     #socket = null;
     connect() {
+      UI.container.chat.sub.infoArea.sub.time.attr({text:"Reconnecting..."});
       this.#socket = new WebSocket("ws://localhost:3000");
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
@@ -40,7 +42,7 @@ const App = new class AppManager {
           this.onmessage(response.type, response.data);
       };
       this.#socket.onclose = event => {
-        this.ondisconnect();
+        this.ondisconnect(event);
       };
     }
     send(data) {
@@ -50,11 +52,11 @@ const App = new class AppManager {
       this.#socket.close();
     }
     onmessage(type, data) {
-      console.log(type, data);
-      if (type = "message") {
+      if (type == "message") {
         const message = Message.from(data.message);
-        console.log(message);
+        console.log(message)
         if (UI.list.chatItems.has(message.chatId)) {
+          /** @type {ChatItem} */
           const chatItem = UI.list.chatItems.get(message.chatId);
           chatItem.addMessage(message);
         }
@@ -62,13 +64,19 @@ const App = new class AppManager {
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
-
+      UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
-      console.log("Socket connection disconnected");
+      console.log("Socket connection disconnected",data);
+      App.connectionInfo("Unable to connect to the server, please check your internet connection.",()=>{
+        this.connect();
+      });
     }
     onerror(error) {
       console.log(error);
+      App.connectionInfo(error,()=>{
+        this.connect();
+      });
     }
   };
 
@@ -148,6 +156,7 @@ const App = new class AppManager {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
+      console.log(data);
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
         App.data.chats.insert(chat.id, chat);
@@ -166,7 +175,6 @@ const App = new class AppManager {
       })
       .then(() => {
         App.populateFriendsList();
-        App.loadUser(App.session.currentUser);
         UI.container.prompts.style({ display: "none" });
         UI.container.auth.unmount();
         UI.container.chat.mount(UI.container.main);
@@ -213,6 +221,11 @@ const App = new class AppManager {
     });
   }
 
+  /** @param {Component<HTMLFormElement>} formComponent */
+  async searchUsers(formComponent){
+    formComponent
+  }
+
   /**
    * Make a fetch request
    * @param {RequestInit} url
@@ -238,7 +251,7 @@ const App = new class AppManager {
     });
     UI.container.userProfile = new Profile(user);
     user.contacts.forEach(contact => {
-      const listItem = new UserItem(contact);
+      const listItem = new ContactItem(contact);
       UI.list.contacts.insert(listItem);
     });
   }
@@ -263,6 +276,25 @@ const App = new class AppManager {
     });
     component.mount(UI.container.prompts);
     this.popupCount++;
+  }
+  /**
+   * @param {string} text
+   * @param {()} action */
+  connectionInfo(text,action=()=>{}){
+    clearTimeout(this.#timeout);
+    const {infoArea}=UI.container.chat.sub;
+    infoArea.mount(UI.container.chat.sub.sideBar);
+    infoArea.sub.content.attr({text});
+    infoArea.sub.button.event({click:action});
+    let seconds=10;
+    this.#timeout=setInterval(()=>{
+      infoArea.sub.time.attr({text:"Retrying to connect in "+seconds+"s"});
+      seconds--;
+      if(seconds<0){
+        clearTimeout(this.#timeout);
+        action();
+      }
+    },1000);
   }
 };
 
@@ -428,6 +460,29 @@ UI.onInit(ui => {
     }
   });
 
+  // Search Users Form events
+  peopleSearchList.sub.searchBar.event({
+    async submit(event){
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      // event.target.elements.submit.disabled = true;
+      const request = await fetch("/user/search?query="+formData.get("query"), {
+        method: "GET"
+      }).catch(ex => App.popAlert("ERROR: ", ex));
+      if(request){
+        if(request.ok){
+          /** @type {UserResponse[]} */
+          const responseData=await request.json();
+          peopleSearched.clear();
+          responseData.forEach(user=>{
+            peopleSearched.insert(new ContactItem(User.from(user)));
+          });
+        }else
+          App.popAlert(await request.text());
+      }
+    }
+  });
+
   // demo code
   const menu = new UIMenu("chat");
   let itemCount = 0;
@@ -465,10 +520,10 @@ UI.onInit(ui => {
   /** @type {UIHandler.ComponentList<ChatItem>} */
   const chatItems = new UIHandler.ComponentList("chatItems");
   UI.addList(chatItems);
-  /** @type {UIHandler.ComponentList<UserItem>} */
+  /** @type {UIHandler.ComponentList<ContactItem>} */
   const contacts = new UIHandler.ComponentList("contacts");
   UI.addList(contacts);
-  /** @type {UIHandler.ComponentList<UserItem>} */
+  /** @type {UIHandler.ComponentList<ContactItem>} */
   const peopleSearched = new UIHandler.ComponentList("peopleSearched");
   UI.addList(peopleSearched);
 
@@ -508,7 +563,6 @@ UI.onInit(ui => {
   });
   contacts.on("delete", function (userItem) {
     userItem.unmount();
-    console.log(contacts.size);
     if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
   });

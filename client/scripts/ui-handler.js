@@ -225,6 +225,11 @@ UIHandler.ComponentList=class ComponentList{
     }
     return this;
   }
+  clear(){
+    for(let [id] of this.#list){
+      this.delete(id);
+    }
+  }
   /**
    * Selects a Component components into the list
    * @param {string} componentId */

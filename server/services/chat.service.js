@@ -51,18 +51,41 @@ module.exports = class ChatService {
     try {
       let foundChats = await ChatModel
         .find(params)
-        .populate([{
-          path: "messages",
-          select: "-chat",
-          perDocumentLimit: 30
-        }, {
-          path: "participants.user",
-          select: "_id name username"
-        }])
-        .sort([
+        .populate([
+          {
+            path: "messages",
+            perDocumentLimit: 30,
+            populate: [
+              {
+                path: "sender",
+                select: "_id username name"
+              }, {
+                path: "receivedBy.user",
+                select: "_id username name "
+              }, {
+                path: "readBy.user",
+                select: " _id username name "
+              }, {
+                path: "deletedBy.user",
+                select: "_id username name}"
+              }, {
+                path: "reference",
+                populate: [{
+                  path: "sender",
+                  select: "_id username name"
+                }]
+              }
+            ],
+            options:{
+              sort:{createdAt:-1}
+            }
+          }, {
+            path: "participants.user",
+            select: "_id name username"
+          }
+        ]).sort([
           ["updatedAt", -1]
-        ])
-        .lean();
+        ]).lean();
       if (foundChats) return foundChats;
       return null;
     } catch (ex) {
@@ -76,7 +99,6 @@ module.exports = class ChatService {
    * @param {string|mongoose.Types.ObjectId} id 
    * @param {{}} data 
    * @param {"push"|"pull"|none} method
-   * @returns {Chat }
    */
   static async findChatByIdAndUpdate(id, data, method = null) {
     try {

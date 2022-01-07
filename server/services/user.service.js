@@ -16,23 +16,18 @@ module.exports = class UserService {
   }
   /**
    * 
-   * @param {string} key 
-   * @returns {User []}
+   * @param {string} key
    */
   static async searchUsers(key) {
     try {
       let foundUsers = await UserModel.find({
-        $or: [{
-          "username": key
-        },
-        {
-          "name": new RegExp(key, "i")
-        },
-        {
-          "email": key
-        }
+        $or: [
+          {username: key},
+          {name: new RegExp(key, "i")},
+          {email: key}
         ]
       }).select({ password: false }).lean();
+      console.log(foundUsers);
       return foundUsers;
     } catch (ex) {
       throw ex;

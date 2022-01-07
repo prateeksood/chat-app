@@ -25,8 +25,7 @@ module.exports = class MessageService {
    * 
    * @param {string|mongoose.Types.ObjectId} chatId 
    * @param {Number} pageNumber 
-   * @param {Number} pageSize 
-   * @returns {Message[]}
+   * @param {Number} pageSize
    */
   static async getMessagesByChatId(chatId, pageSize = 30, skips = 0) {
     try {
@@ -43,7 +42,7 @@ module.exports = class MessageService {
             select: "_id username name "
           }, {
             path: "readBy.user",
-            select: " _id  username name "
+            select: " _id username name "
           }, {
             path: "deletedBy.user",
             select: "_id username name}"
@@ -52,11 +51,11 @@ module.exports = class MessageService {
             populate: [
               {
                 path: "sender",
-                select: "_id  username  name"
+                select: "_id username name"
               }
             ]
           }
-        ])
+        ]);
       return foundMessages;
     } catch (ex) {
       throw ex;
@@ -77,14 +76,35 @@ module.exports = class MessageService {
   }
   /**
    * 
-   * @param {{}} data 
-   * @returns {Message}
+   * @param {{}} data
    */
   static async saveNewMessage(data) {
     try {
       const newMessage = new MessageModel(data);
       let savedMessage = await newMessage.save();
-      if (savedMessage) return savedMessage.toObject();
+      if (savedMessage){
+        return (await savedMessage.populate([{
+          path: "sender",
+          select: "_id username name"
+        }, {
+          path: "receivedBy.user",
+          select: "_id username name "
+        }, {
+          path: "readBy.user",
+          select: " _id username name "
+        }, {
+          path: "deletedBy.user",
+          select: "_id username name}"
+        }, {
+          path: "reference",
+          populate: [
+            {
+              path: "sender",
+              select: "_id username name"
+            }
+          ]
+        }])).toObject();
+      }
       return null;
     } catch (ex) {
       throw ex;

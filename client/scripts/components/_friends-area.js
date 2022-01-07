@@ -96,6 +96,45 @@ class ChatItem extends ListItem {
   }
 };
 
+class ContactItem extends ListItem {
+  /** @type {Profile} */
+  profile = null;
+  /** @param {Contact} user */
+  constructor (user) {
+    super(user.id, user.image, user.name, user.username, user.lastseen, {
+      click: () => {
+        this.profile.mount(UI.container.main);
+      },
+      contextmenu: event => {
+        event.preventDefault();
+        this.menu.mount(UI.container.chat, event);
+      }
+    });
+    this.profile = new ContactProfile(user);
+
+    // test
+    this.menu = new UIMenu(user.id);
+    this.menu.addItem("remove", "Remove Contact", () => {
+      UI.list.contacts.delete(user.id);
+      this.menu.remove();
+    });
+    this.menu.addItem("chat", "Chat", () => {
+      const chat = App.data.chats.find(function (data) {
+        if (data.participants.length === 2) {
+          const participant = data.participants.find(participant => participant.id === user.id);
+          if (participant)
+            return true
+          else return false;
+        }
+      });
+      if (chat && UI.list.chatItems.has(chat.id)) {
+        UI.list.chatItems.select(chat.id);
+        this.menu.unmount();
+      }
+    });
+  }
+}
+
 class UserItem extends ListItem {
   /** @type {Profile} */
   profile = null;

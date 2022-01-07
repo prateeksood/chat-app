@@ -4,6 +4,9 @@
 
 
 class MessageComponent extends UIHandler.Component {
+  isGropuMessage=false;
+  /** @type {string} */
+  sender=null;
   /** @param {Message} message */
   constructor (message) {
     const messageTime = DOM.create("auto-updater", {
@@ -48,24 +51,10 @@ class MessageComponent extends UIHandler.Component {
       messageTime.innerHTML = App.date.format(message.createdAt);
     };
   }
+  /** @param {Message} message */
   async init(message) {
-
-    try {
-      const response = await fetch(
-        `/user/${message.senderId}`, {
-        method: "GET"
-      });
-      if (response.ok) {
-        const user = await response.json();
-        this.sender = user;
-      }
-    }
-    catch (ex) {
-      consple.log(ex);
-    }
-    finally {
-      this.isGroup = message.isGroup ?? false;
-    }
+    this.isGroupMessage=message.isGroupMessage;
+    this.sender=message.sender;
   }
   /** @param {MessageComponent} component */
   static createMessageGroup(component) {
@@ -75,7 +64,7 @@ class MessageComponent extends UIHandler.Component {
       class: `message-group${isCurrentUser ? " sent" : ""}`,
       children: [
         (() => {
-          if (!isCurrentUser && component.isGroup)
+          if (!isCurrentUser && component.isGroupMessage)
             return DOM.create("div", {
               class: "sender",
               text: component.sender.name

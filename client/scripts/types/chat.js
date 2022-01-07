@@ -27,7 +27,10 @@ class Chat {
     const chat = new Chat(
       _id,
       users,
-      messages.map(message => Message.from(message))
+      messages.reverse().map(message =>{
+        message.isGroupMessage=chatResponse.isGroupChat??false;
+        return Message.from(message);
+      })
     );
     chat.title = chatResponse.title ?? null;
     chat.isGroup = chatResponse.isGroupChat ?? false;
@@ -58,23 +61,23 @@ class Message {
   /**
    * @param {string} id
    * @param {string} chatId
-   * @param {string} senderId
+   * @param {UserResponse} sender
    * @param {string} content
    * @param {Date} createdAt
    * @param {string} [referenceId]
    */
-  constructor (id, chatId, senderId, content, createdAt, referenceId = null) {
+  constructor (id, chatId, sender, content, createdAt, referenceId = null) {
     this.id = id;
     this.chatId = chatId;
-    this.senderId = senderId;
+    this.sender = sender;
     this.content = content;
     this.createdAt = createdAt;
     this.referenceId = referenceId;
   }
   /** @param {MessageResponse} messageResponse */
   static from(messageResponse) {
-    const { _id, chat, sender, content, createdAt, referenceId } = messageResponse;
-    const message = new Message(_id, chat, sender, content, new Date(createdAt), referenceId ?? null);
+    const { _id, chat, sender, content, createdAt, reference } = messageResponse;
+    const message = new Message(_id, chat, sender, content, new Date(createdAt), reference ?? null);
     message.receivedBy = messageResponse.receivedBy ?? [];
     message.deletedBy = messageResponse.deletedBy ?? [];
     message.readBy = messageResponse.readBy ?? [];
