@@ -17,8 +17,8 @@
   <script type="text/javascript" src="scripts/dom.js"></script>
   <script type="text/javascript" src="scripts/listener.js"></script>
   <script type="text/javascript" src="scripts/sessions.js"></script>
-  <script type="text/javascript" src="scripts/ui-handler.js"></script>
   <script type="text/javascript" src="scripts/data-manager.js"></script>
+  <script type="text/javascript" src="scripts/ui-handler.js"></script>
   <script type="text/javascript" src="scripts/types/user.js"></script>
   <script type="text/javascript" src="scripts/types/chat.js"></script>
   <script type="text/javascript" src="scripts/auto-updater.js"></script>
@@ -167,7 +167,7 @@
         </div>
         <div class="left-main" c-id="contactList" c-parent-id="chat" c-unmount="true">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="contactList">
-            <input type="text" name="query" minlength="4" placeholder="Username"/>
+            <input type="text" name="query" c-id="searchBarInput" c-parent-id="contactList" minlength="1" placeholder="Username"/>
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="contactList">

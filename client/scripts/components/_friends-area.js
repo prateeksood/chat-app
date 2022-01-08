@@ -4,6 +4,7 @@
 /// <reference path="../types/types.d.ts"/>
 /// <reference path="../types/chat.js"/>
 
+/** @extends {UIHandler.Component<HTMLDivElement>} */
 class ListItem extends UIHandler.Component {
   /**
    * @param {string} itemId
@@ -115,7 +116,12 @@ class ContactItem extends ListItem {
     // test
     this.menu = new UIMenu(user.id);
     this.menu.addItem("remove", "Remove Contact", () => {
-      UI.list.contacts.delete(user.id);
+      UI.list.contacts.find((value,index)=>{
+        if(value.id===this.id){
+          UI.list.contacts.remove(index);
+          return true;
+        }
+      });
       this.menu.remove();
     });
     this.menu.addItem("chat", "Chat", () => {

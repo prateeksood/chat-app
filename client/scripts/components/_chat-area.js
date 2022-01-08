@@ -34,7 +34,7 @@ class ChatArea extends UIHandler.Component {
     /** @type {UIHandler.Component} */
     let lastGroup = null;
     // Whenever a Message component is inserted into the this.#messages using this.#messages.insert method
-    this.#messages.on("insert", component => {
+    this.#messages.on("add", component => {
       if (!lastGroup) {
         lastGroup = MessageComponent.createMessageGroup(component);
       }
@@ -44,8 +44,8 @@ class ChatArea extends UIHandler.Component {
       lastGroup.mount(rightMain);
       component.mount(lastGroup);
     });
-    // Whenever a Message component is deleted from the this.#messages using this.#messages.delete method
-    this.#messages.on("delete", component => {
+    // Whenever a Message component is deleted from the this.#messages using this.#messages.remove method
+    this.#messages.on("remove", component => {
       component.unmount();
     });
 
@@ -56,7 +56,7 @@ class ChatArea extends UIHandler.Component {
   async addMessage(message) {
     const component = new MessageComponent(message);
     component.init(message);
-    this.#messages.insert(component);
+    this.#messages.add(component);
   }
   /** @param {Chat} chat */
   static createTopBar(chat) {
