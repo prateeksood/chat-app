@@ -18,7 +18,7 @@
 
 const UI = new UIHandler();
 const App = new class AppManager {
-  #timeout=null;
+  #timeout = null;
   session = new Session();  // session.js
 
   data = {
@@ -30,7 +30,7 @@ const App = new class AppManager {
     /** @type {WebSocket} */
     #socket = null;
     connect() {
-      UI.container.chat.sub.infoArea.sub.time.attr({text:"Reconnecting..."});
+      UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
       this.#socket = new WebSocket("ws://localhost:3000");
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
@@ -54,7 +54,6 @@ const App = new class AppManager {
     onmessage(type, data) {
       if (type == "message") {
         const message = Message.from(data.message);
-        console.log(message)
         if (UI.list.chatItems.has(message.chatId)) {
           /** @type {ChatItem} */
           const chatItem = UI.list.chatItems.get(message.chatId);
@@ -67,14 +66,14 @@ const App = new class AppManager {
       UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
-      console.log("Socket connection disconnected",data);
-      App.connectionInfo("Unable to connect to the server, please check your internet connection.",()=>{
+      console.log("Socket connection disconnected", data);
+      App.connectionInfo("Unable to connect to the server, please check your internet connection.", () => {
         this.connect();
       });
     }
     onerror(error) {
       console.log(error);
-      App.connectionInfo(error,()=>{
+      App.connectionInfo(error, () => {
         this.connect();
       });
     }
@@ -152,14 +151,28 @@ const App = new class AppManager {
     }
   };
   async populateFriendsList() {
-    App.request("/chat", {
+    const skips = App.data.chats.size();
+    App.request(`/chat?skips=${skips}`, {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
-      console.log(data);
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
         App.data.chats.add(chat.id, chat);
+      });
+    });
+  }
+  async fetchMessages(chatId, skips) {
+    App.request(`/message/${chatId}?skips=${skips}`, {
+      method: "GET"
+    }).then(/** @param {ChatResponse[]} data */data => {
+      data.forEach(messageResponse => {
+        const message = Message.from(messageResponse);
+        /**
+         * 
+         * @TODO Populate messages to ui
+         * 
+         */
       });
     });
   }
@@ -222,7 +235,7 @@ const App = new class AppManager {
   }
 
   /** @param {Component<HTMLFormElement>} formComponent */
-  async searchUsers(formComponent){
+  async searchUsers(formComponent) {
     formComponent
   }
 
@@ -280,21 +293,21 @@ const App = new class AppManager {
   /**
    * @param {string} text
    * @param {()} action */
-  connectionInfo(text,action=()=>{}){
+  connectionInfo(text, action = () => { }) {
     clearTimeout(this.#timeout);
-    const {infoArea}=UI.container.chat.sub;
+    const { infoArea } = UI.container.chat.sub;
     infoArea.mount(UI.container.chat.sub.sideBar);
-    infoArea.sub.content.attr({text});
-    infoArea.sub.button.event({click:action});
-    let seconds=10;
-    this.#timeout=setInterval(()=>{
-      infoArea.sub.time.attr({text:"Retrying to connect in "+seconds+"s"});
+    infoArea.sub.content.attr({ text });
+    infoArea.sub.button.event({ click: action });
+    let seconds = 10;
+    this.#timeout = setInterval(() => {
+      infoArea.sub.time.attr({ text: "Retrying to connect in " + seconds + "s" });
       seconds--;
-      if(seconds<0){
+      if (seconds < 0) {
         clearTimeout(this.#timeout);
         action();
       }
-    },1000);
+    }, 1000);
   }
 };
 
@@ -303,7 +316,24 @@ UI.onInit(ui => {
   const { container, list } = ui; // UI == ui
 
   const { loginForm, registerForm, formHolder } = container.auth.sub;
-
+  const chatObserver = new IntersectionObserver(elements => {
+    const lastChat = elements[0];
+    if (!lastChat.isIntersecting) return;
+    App.populateFriendsList();
+    chatObserver.unobserve(lastChat.target);
+  }, {
+    rootMargin: "150px"
+  });
+  const messageObserver = new IntersectionObserver(elements => {
+    const lastMessage = elements[0];
+    if (!lastMessage.isIntersecting) return;
+    const currentChatId = App.data.chats.getSelected();
+    const messageCount = App.data.chats.get(currentChatId).messages.length;
+    App.fetchMessages(currentChatId, messageCount);
+    messageObserver.unobserve(lastMessage.target);
+  }, {
+    // rootMargin: "150px"
+  });
   // Login Form events
   loginForm.event({
     reset(event) {
@@ -415,6 +445,8 @@ UI.onInit(ui => {
   });
 
   const { actions, contactList, chatList, peopleSearchList } = container.chat.sub;
+
+
   actions.sub.findPeople.event({
     click() {
       if (contactList.mounted) {
@@ -462,22 +494,22 @@ UI.onInit(ui => {
 
   // Search Users Form events
   peopleSearchList.sub.searchBar.event({
-    async submit(event){
+    async submit(event) {
       event.preventDefault();
       const formData = new FormData(event.target);
       // event.target.elements.submit.disabled = true;
-      const request = await fetch("/user/search?query="+formData.get("query"), {
+      const request = await fetch("/user/search?query=" + formData.get("query"), {
         method: "GET"
       }).catch(ex => App.popAlert("ERROR: ", ex));
-      if(request){
-        if(request.ok){
+      if (request) {
+        if (request.ok) {
           /** @type {UserResponse[]} */
-          const responseData=await request.json();
+          const responseData = await request.json();
           peopleSearched.clear();
-          responseData.forEach(user=>{
+          responseData.forEach(user => {
             peopleSearched.add(new ContactItem(User.from(user)));
           });
-        }else
+        } else
           App.popAlert(await request.text());
       }
     }
@@ -485,18 +517,18 @@ UI.onInit(ui => {
 
   // Search Contacts Form events
   contactList.sub.searchBar.event({
-    submit(event){
+    submit(event) {
       event.preventDefault();
       const formData = new FormData(event.target);
-      const query=formData.get("query");
+      const query = formData.get("query");
       contacts.clearFiltered();
-      contacts.filter(item=>item.mainText.innerText.includes(query));
+      contacts.filter(item => item.mainText.innerText.includes(query));
     }
   });
   contactList.sub.searchBarInput.event({
-    async keyup(event){
+    async keyup(event) {
       contacts.clearFiltered().sort();
-      contacts.filter(item=>item.mainText.innerText.includes(event.target.value));
+      contacts.filter(item => item.mainText.innerText.includes(event.target.value));
     }
   });
 
@@ -549,8 +581,10 @@ UI.onInit(ui => {
     if (container.chat.sub.chatList.sub.emptyArea.mounted)
       container.chat.sub.chatList.sub.emptyArea.unmount();
     chatItem.mount(container.chat.sub.chatList);
+    const chat = chatItem.element;
+    chatObserver.observe(chat);
   });
-  chatItems.on("remove", function (index,chatItem) {
+  chatItems.on("remove", function (index, chatItem) {
     chatItem.remove();
   });
   chatItems.on("unselect", function (index) {
@@ -560,6 +594,11 @@ UI.onInit(ui => {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
     chatItems.get(index).chatArea.mount(container.chat.sub.messagesArea);
+
+    const messages = document.querySelectorAll(".message-container")
+    // messages.forEach(message => {
+    messageObserver.observe(messages[0]);
+    // })
   });
 
   App.data.chats.on("add", function (chat) {
@@ -569,8 +608,8 @@ UI.onInit(ui => {
     chatItems.remove(id);
   });
   App.data.chats.on("select", function (chat) {
-    chatItems.has((chatItem,index)=>{
-      if(chatItem.id===chat.id){
+    chatItems.has((chatItem, index) => {
+      if (chatItem.id === chat.id) {
         chatItems.select(index);
         return true;
       }
@@ -583,7 +622,7 @@ UI.onInit(ui => {
       contactList.sub.emptyArea.unmount();
     userItem.mount(contactList);
   });
-  contacts.on("remove", function (index,userItem) {
+  contacts.on("remove", function (index, userItem) {
     userItem.unmount();
     if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
@@ -593,7 +632,7 @@ UI.onInit(ui => {
       peopleSearchList.sub.emptyArea.unmount();
     userItem.mount(peopleSearchList);
   });
-  peopleSearched.on("remove", function (index,userItem) {
+  peopleSearched.on("remove", function (index, userItem) {
     userItem.unmount();
     console.log(peopleSearched.size);
     if (peopleSearched.size === 0)

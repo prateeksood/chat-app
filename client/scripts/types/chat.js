@@ -27,8 +27,8 @@ class Chat {
     const chat = new Chat(
       _id,
       users,
-      messages.reverse().map(message =>{
-        message.isGroupMessage=chatResponse.isGroupChat??false;
+      messages.reverse().map(message => {
+        message.isGroupMessage = chatResponse.isGroupChat ?? false;
         return Message.from(message);
       })
     );

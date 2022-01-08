@@ -10,14 +10,13 @@ module.exports = class MessageController {
    */
   static async getMessagesByChatId(request, response, next) {
     try {
-      const { pageNumber = 1, pageSize = 30 } = request.body;
+      const { pageSize, skips } = request.query;
       const { chatID } = request.params;
       if (!MessageService.isValidId(chatID)) {
         response.status(400).json({ message: "Invalid chat id" });
         return
       }
-      const skips = pageSize * (pageNumber - 1);
-      const foundMessages = await MessageService.getMessagesByChatId(chatID, pageSize, skips);
+      const foundMessages = await MessageService.getMessagesByChatId(chatID, { pageSize, skips });
       response.status(200).json(foundMessages);
     } catch (ex) {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });

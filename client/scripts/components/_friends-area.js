@@ -81,6 +81,9 @@ class ChatItem extends ListItem {
       chat.messages[chat.messages.length - 1]?.createdAt ?? chat.createdAt, {
       click() {
         App.data.chats.select(chat.id);
+        const rightMain = document.querySelector(".right-main");
+        rightMain.scroll(0, rightMain.scrollHeight);
+
       }
     }
     );
@@ -116,8 +119,8 @@ class ContactItem extends ListItem {
     // test
     this.menu = new UIMenu(user.id);
     this.menu.addItem("remove", "Remove Contact", () => {
-      UI.list.contacts.find((value,index)=>{
-        if(value.id===this.id){
+      UI.list.contacts.find((value, index) => {
+        if (value.id === this.id) {
           UI.list.contacts.remove(index);
           return true;
         }
