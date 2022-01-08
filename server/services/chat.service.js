@@ -45,9 +45,12 @@ module.exports = class ChatService {
   /**
    * 
    * @param {{}} params 
+   * @param {{}} options 
    * @returns {Chat[]}
    */
-  static async getChatsByParams(params) {
+  static async getChatsByParams(params, options = {}) {
+    const skips = Number(options.skips ?? 0);
+    const pageSize = Number(options.pageSize ?? 10);
     try {
       let foundChats = await ChatModel
         .find(params)
@@ -76,14 +79,17 @@ module.exports = class ChatService {
                 }]
               }
             ],
-            options:{
-              sort:{createdAt:-1}
+            options: {
+              sort: { updatedAt: -1 }
             }
           }, {
             path: "participants.user",
             select: "_id name username"
           }
-        ]).sort([
+        ])
+        .skip(skips)
+        .limit(pageSize)
+        .sort([
           ["updatedAt", -1]
         ]).lean();
       if (foundChats) return foundChats;

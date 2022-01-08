@@ -27,12 +27,12 @@ module.exports = class MessageService {
    * @param {Number} pageNumber 
    * @param {Number} pageSize
    */
-  static async getMessagesByChatId(chatId, pageSize = 30, skips = 0) {
+  static async getMessagesByChatId(chatId, options) {
+    const skips = Number(options.skips ?? 0);
+    const pageSize = Number(options.pageSize ?? 100);
     try {
       const foundMessages = await MessageModel
         .find({ chat: chatId })
-        .skip(skips).limit(pageSize)
-        .sort([['createdAt', -1]])
         .populate([
           {
             path: "sender",
@@ -55,7 +55,11 @@ module.exports = class MessageService {
               }
             ]
           }
-        ]);
+        ])
+        .skip(skips)
+        .limit(pageSize)
+        .sort([['createdAt', -1]])
+        .lean();
       return foundMessages;
     } catch (ex) {
       throw ex;
@@ -82,7 +86,7 @@ module.exports = class MessageService {
     try {
       const newMessage = new MessageModel(data);
       let savedMessage = await newMessage.save();
-      if (savedMessage){
+      if (savedMessage) {
         return (await savedMessage.populate([{
           path: "sender",
           select: "_id username name"

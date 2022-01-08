@@ -79,8 +79,9 @@ module.exports = class ChatController {
    */
   static async getChatByCurrentUserId(request, response, next) {
     try {
+      const { pageSize, skips } = request.query;
       const { _id: currentUserId } = request.user;
-      const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId });
+      const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId }, { pageSize, skips });
       response.status(200).json(foundChats);
     } catch (ex) {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
