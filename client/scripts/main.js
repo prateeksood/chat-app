@@ -22,8 +22,8 @@ const App = new class AppManager {
   session = new Session();  // session.js
 
   data = {
-    /** @type {DataManager<Chat>} */
-    chats: new DataManager()  // data-manager.js
+    /** @type {DataGroup<Chat>} */
+    chats: new DataGroup()  // data-manager.js
   };
 
   socket = new class {
@@ -159,7 +159,7 @@ const App = new class AppManager {
       console.log(data);
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
-        App.data.chats.insert(chat.id, chat);
+        App.data.chats.add(chat.id, chat);
       });
     });
   }
@@ -252,7 +252,7 @@ const App = new class AppManager {
     UI.container.userProfile = new Profile(user);
     user.contacts.forEach(contact => {
       const listItem = new ContactItem(contact);
-      UI.list.contacts.insert(listItem);
+      UI.list.contacts.add(listItem);
     });
   }
 
@@ -475,11 +475,28 @@ UI.onInit(ui => {
           const responseData=await request.json();
           peopleSearched.clear();
           responseData.forEach(user=>{
-            peopleSearched.insert(new ContactItem(User.from(user)));
+            peopleSearched.add(new ContactItem(User.from(user)));
           });
         }else
           App.popAlert(await request.text());
       }
+    }
+  });
+
+  // Search Contacts Form events
+  contactList.sub.searchBar.event({
+    submit(event){
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const query=formData.get("query");
+      contacts.clearFiltered();
+      contacts.filter(item=>item.mainText.innerText.includes(query));
+    }
+  });
+  contactList.sub.searchBarInput.event({
+    async keyup(event){
+      contacts.clearFiltered().sort();
+      contacts.filter(item=>item.mainText.innerText.includes(event.target.value));
     }
   });
 
@@ -528,50 +545,55 @@ UI.onInit(ui => {
   UI.addList(peopleSearched);
 
   // ChatItem listeners
-  chatItems.on("insert", function (chatItem) {
+  chatItems.on("add", function (chatItem) {
     if (container.chat.sub.chatList.sub.emptyArea.mounted)
       container.chat.sub.chatList.sub.emptyArea.unmount();
     chatItem.mount(container.chat.sub.chatList);
   });
-  chatItems.on("delete", function (chatItem) {
+  chatItems.on("remove", function (index,chatItem) {
     chatItem.remove();
   });
-  chatItems.on("deselect", function (chatItem) {
-    chatItem.chatArea.unmount();
+  chatItems.on("unselect", function (index) {
+    chatItems.get(index).chatArea.unmount();
   });
-  chatItems.on("select", function (chatItem) {
+  chatItems.on("select", function (index) {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
-    chatItem.chatArea.mount(container.chat.sub.messagesArea);
+    chatItems.get(index).chatArea.mount(container.chat.sub.messagesArea);
   });
 
-  App.data.chats.on("insert", function (chat) {
-    chatItems.insert(new ChatItem(chat));
+  App.data.chats.on("add", function (chat) {
+    chatItems.add(new ChatItem(chat));
   });
-  App.data.chats.on("delete", function (chat) {
-    chatItems.delete(chat.id);
+  App.data.chats.on("remove", function (id) {
+    chatItems.remove(id);
   });
   App.data.chats.on("select", function (chat) {
-    chatItems.select(chat.id);
+    chatItems.has((chatItem,index)=>{
+      if(chatItem.id===chat.id){
+        chatItems.select(index);
+        return true;
+      }
+    })
   });
 
   // UserItem listeners
-  contacts.on("insert", function (userItem) {
+  contacts.on("add", function (userItem) {
     if (contactList.sub.emptyArea.mounted)
       contactList.sub.emptyArea.unmount();
     userItem.mount(contactList);
   });
-  contacts.on("delete", function (userItem) {
+  contacts.on("remove", function (index,userItem) {
     userItem.unmount();
     if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
   });
-  peopleSearched.on("insert", function (userItem) {
+  peopleSearched.on("add", function (userItem) {
     if (peopleSearchList.sub.emptyArea.mounted)
       peopleSearchList.sub.emptyArea.unmount();
     userItem.mount(peopleSearchList);
   });
-  peopleSearched.on("delete", function (userItem) {
+  peopleSearched.on("remove", function (index,userItem) {
     userItem.unmount();
     console.log(peopleSearched.size);
     if (peopleSearched.size === 0)

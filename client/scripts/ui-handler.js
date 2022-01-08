@@ -182,74 +182,14 @@ UIHandler.Component=class Component{
   }
 };
 
-/** @template T */
-UIHandler.ComponentList=class ComponentList{
-  #listener=new Listeners(["insert","delete","update","select","deselect"]);
-  /** @type {Map<string,T>} */
-  #list=new Map();
-  /** @type {T} */
-  #selected=null;
+/**
+ * @template T
+ * @extends DataList<T>
+ * */
+UIHandler.ComponentList=class ComponentList extends DataList{
   /** @param {string} listId An identification string for list */
-  constructor(listId=null){
+  constructor(listId=""){
+    super();
     this.id=listId;
-  }
-  get size(){
-    return this.#list.size;
-  }
-  /** Check for data
-   * @param {string} componentId */
-  has(componentId){
-    return this.#list.has(componentId);
-  }
-  /** Get data
-   * @param {string} componentId */
-  get(componentId){
-    return this.#list.get(componentId);
-  }
-  /**
-   * Inserts a Component into the list
-   * @param {T} component */
-  insert(component){
-    this.#list.set(component.id,component);
-    this.#listener.trigger("insert",component);
-    return this;
-  }
-  /**
-   * Deletes a Component into the list
-   * @param {string} componentId */
-  delete(componentId){
-    if(this.#list.has(componentId)){
-      const component=this.#list.get(componentId);
-      this.#list.delete(componentId);
-      this.#listener.trigger("delete",component);
-    }
-    return this;
-  }
-  clear(){
-    for(let [id] of this.#list){
-      this.delete(id);
-    }
-  }
-  /**
-   * Selects a Component components into the list
-   * @param {string} componentId */
-  select(componentId){
-    if(this.#list.has(componentId)){
-      if(this.#selected)
-        this.#listener.trigger("deselect",this.#selected);
-      this.#selected=this.#list.get(componentId);
-      this.#listener.trigger("select",this.#selected);
-    }
-    return this;
-  }
-  /**
-   * @callback listAction
-   * @param {T} component
-   * @returns {void}
-   * @param {"insert"|"delete"|"update"|"select"|"deselect"} eventName
-   * @param {listAction} action
-   */
-  on(eventName,action){
-    this.#listener.on(eventName,action);
   }
 };
