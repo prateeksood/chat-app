@@ -141,18 +141,17 @@ class ContactItem extends ListItem {
       this.menu.remove();
     });
     this.menu.addItem("chat", "Chat", () => {
-      const chat = App.data.chats.forEach(function (data) {
-        if (data.participants.length === 2) {
-          const participant = data.participants.find(participant => participant.id === user.id);
-          if (participant)
-            return true
-          else return false;
+      App.data.chats.forEach(data=>{
+        if (data.participants.length === 2 && !data.isGroup) {
+          const participant = data.participants.some(participant => participant.id === user.id);
+          if(participant){
+            const index=UI.list.chatItems.findIndex(({id})=>id===data.id);
+            if(index>=0)
+              UI.list.chatItems.select(index);
+          }
         }
       });
-      if (chat && UI.list.chatItems.has(chat.id)) {
-        UI.list.chatItems.select(chat.id);
-        this.menu.unmount();
-      }
+      this.menu.unmount();
     });
   }
 }

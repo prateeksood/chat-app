@@ -202,9 +202,11 @@ UIHandler.Component=class Component{
  * @extends DataList<T>
  * */
 UIHandler.ComponentList=class ComponentList extends DataList{
-  /** @param {string} listId An identification string for list */
-  constructor(listId=""){
-    super();
+  /**
+   * @param {string} listId An identification string for list
+   * @param {DataListOptions} options */
+  constructor(listId="",options={}){
+    super(options);
     this.id=listId;
   }
 };

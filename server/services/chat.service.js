@@ -49,8 +49,8 @@ module.exports = class ChatService {
    * @returns {Chat[]}
    */
   static async getChatsByParams(params, options = {}) {
-    const skips = Number(options.skips ?? 0);
-    const pageSize = Number(options.pageSize ?? 10);
+    const skips = Number(options.skips || 0);
+    const pageSize = Number(options.pageSize || 10);
     try {
       let foundChats = await ChatModel
         .find(params)
