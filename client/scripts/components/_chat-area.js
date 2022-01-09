@@ -43,7 +43,7 @@ class ChatArea extends UIHandler.Component {
       }
       lastGroup.mount(rightMain);
       component.mount(lastGroup);
-      component.element.scrollIntoView({block:"nearest"});
+      component.element.scrollIntoView({ block: "nearest" });
     });
     // Whenever a Message component is deleted from the this.#messages using this.#messages.remove method
     this.#messages.on("remove", component => {
@@ -53,11 +53,14 @@ class ChatArea extends UIHandler.Component {
     chat.messages.forEach(message => this.addMessage(message));
 
   }
-  /** @param {Message} message */
-  addMessage(message) {
+  /** 
+   * @param {Message} message 
+   * @param {Number} index
+   * */
+  addMessage(message, index) {
     const component = new MessageComponent(message);
     component.init(message);
-    this.#messages.add(component);
+    this.#messages.add(component, index);
   }
   /** @param {Chat} chat */
   static createTopBar(chat) {

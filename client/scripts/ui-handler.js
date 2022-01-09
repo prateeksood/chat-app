@@ -1,20 +1,20 @@
 /// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
 
-class UIHandler{
-  #listener=new Listener();
+class UIHandler {
+  #listener = new Listener();
   /** All components are stored here
    * @type {Object<string,UIHandler.Component>} */
-  #components={};
+  #components = {};
   /** All 'container' type components are stored here and can be accessed by their corresponding id
    * @type {Object<string,UIHandler.Component>} */
-  container={};
+  container = {};
   /** @type {Object<string,UIHandler.ComponentList<UIHandler.Component>} */
-  list={};
+  list = {};
   /** @type {Object<string,UIHandler.ComponentGroup<UIHandler.Component>} */
-  group={};
-  init(){
-    document.querySelectorAll("[c-id]").forEach(element=>{
+  group = {};
+  init() {
+    document.querySelectorAll("[c-id]").forEach(element => {
       this.addComponent(element);
     });
     this.#listener.trigger(this);
@@ -24,176 +24,176 @@ class UIHandler{
    * @callback initAction
    * @param {UIHandler} interface
    */
-  onInit(action){
+  onInit(action) {
     this.#listener.on(action);
   }
   /**
    * Store and manage element as a component
    * @param {HTMLElement} element */
-  addComponent(element){
-    const id=element.getAttribute("c-id");
-    const type=element.getAttribute("c-type")??"container";
-    const component=new UIHandler.Component(id,element);
+  addComponent(element) {
+    const id = element.getAttribute("c-id");
+    const type = element.getAttribute("c-type") ?? "container";
+    const component = new UIHandler.Component(id, element);
 
-    const parentComponentId=element.getAttribute("c-parent-id");
+    const parentComponentId = element.getAttribute("c-parent-id");
     // Checks if a component with parentComponentId is already present
-    if(this.#components[parentComponentId])
+    if (this.#components[parentComponentId])
       this.#components[parentComponentId].addSub(component);
-    else if(type in this)
-      this[type][id]=component;
+    else if (type in this)
+      this[type][id] = component;
     // else
-      // this.type[type][id]=component;
+    // this.type[type][id]=component;
 
-    const unmount=element.getAttribute("c-unmount");
-    if(unmount==="true")
+    const unmount = element.getAttribute("c-unmount");
+    if (unmount === "true")
       component.unmount();
 
-    this.#components[id]=component;
+    this.#components[id] = component;
     return element;
   }
   /**
    * Store and manage a component
    * @param {UIHandler.Component} component */
-  _addComponent(component){
-    if("container" in this)
-      this["container"][component.id]=component;
-    this.#components[component.id]=component;
+  _addComponent(component) {
+    if ("container" in this)
+      this["container"][component.id] = component;
+    this.#components[component.id] = component;
     return component;
   }
   /** @param {UIHandler.ComponentList} list */
-  addList(list){
-    if(list instanceof UIHandler.ComponentList)
-      this.list[list.id]=list;
+  addList(list) {
+    if (list instanceof UIHandler.ComponentList)
+      this.list[list.id] = list;
   }
   /** @param {UIHandler.ComponentGroup} group */
-  addGroup(group){
-    if(group instanceof UIHandler.ComponentGroup)
-      this.group[group.id]=group;
+  addGroup(group) {
+    if (group instanceof UIHandler.ComponentGroup)
+      this.group[group.id] = group;
   }
 };
 
 /** @template ElementType */
-UIHandler.Component=class Component{
+UIHandler.Component = class Component {
   /**
    * Component's ID
    * @type {string} */
-  id=null;
+  id = null;
   /**
    * Component's element
    * @type {ElementType} */
-  element=null;
+  element = null;
   /**
    * Component's parent component
    * @type {Component} */
-  parentComponent=null;
+  parentComponent = null;
   /** Whether the component is mounted or not */
-  mounted=false;
+  mounted = false;
   /**
    * Consists of sub components. (usage eg. parentId.sub.childId)
    * @type {Object<string,UIHandler.Component<HTMLElement>>} */
-  sub={};
+  sub = {};
   /**
    * @param {string} id Component's ID
    * @param {ElementType} element Component's element
    * @param {string} [type] Component's element
    */
-  constructor(id,element,type){
-    this.id=id;
-    this.element=element;
-    this.attr({cId:id,cType:type});
-    if(element.parentElement)
-      this.mounted=true;
+  constructor (id, element, type) {
+    this.id = id;
+    this.element = element;
+    this.attr({ cId: id, cType: type });
+    if (element.parentElement)
+      this.mounted = true;
   }
   /** Remove/delete element from component */
-  remove(){
-    if(this.element){
+  remove() {
+    if (this.element) {
       this.element.remove();
-      this.element=null;
+      this.element = null;
       return true;
-    }else{
+    } else {
       return false;
     }
   }
   /** Unmount element from HTML document */
-  unmount(){
-    if(this.element)
+  unmount() {
+    if (this.element)
       this.element.remove();
-    this.mounted=false;
+    this.mounted = false;
   }
   /**
    * Inserts Component at the end of parent
    * @param {Component} parent */
-  mount(parent){
-    if(!parent && this.parentComponent && this.parentComponent.element)
+  mount(parent) {
+    if (!parent && this.parentComponent && this.parentComponent.element)
       this.parentComponent.element.appendChild(this.element);
     else
       parent.element.appendChild(this.element);
-    this.mounted=true;
+    this.mounted = true;
   }
   /**
    * Inserts Component after the Component's element
    * @param {Component} component */
-  mountAfter(component){
+  mountAfter(component) {
     component.element.after(this.element);
-    this.mounted=true;
+    this.mounted = true;
   }
   /** Add multiple components as sub components
    * @param {UIHandler.Component[]} components */
-  addChildren(components=[]){
-    components.forEach(component=>{
+  addChildren(components = []) {
+    components.forEach(component => {
       this.element.appendChild(component.element);
       this.addSub(component);
     });
     return this;
   }
   /** @returns {Component<HTMLElement>} */
-  getChild(index=0){
+  getChild(index = 0) {
     /** @type {HTMLElement} */
-    const element=this.element.children[index];
-    const cId=element?.getAttribute("c-id");
-    if(cId in this.sub)
+    const element = this.element.children[index];
+    const cId = element?.getAttribute("c-id");
+    if (cId in this.sub)
       return this.sub[cId];
     return null;
   }
   /**
    * Apply CSS style to component's element
    * @param {CSSStyleRule} styles*/
-  style(styles){
-    DOM.style(this.element,styles);
+  style(styles) {
+    DOM.style(this.element, styles);
   }
   /** @param {Object<string,string>} properties*/
-  styleProperties(properties){
-    DOM.styleProp(this.element,properties);
+  styleProperties(properties) {
+    DOM.styleProp(this.element, properties);
   }
   /**
    * Set multiple attributes (usage eg. { class: "className", id: "element-id" })
    * @param {DOMAttributes} attributes*/
-  attr(attributes){
-    DOM.attr(this.element,attributes);
+  attr(attributes) {
+    DOM.attr(this.element, attributes);
   }
   /** @param {string} attribute */
-  getAttr(attribute){
+  getAttr(attribute) {
     return this.element.getAttribute(attribute);
   }
   /** @param {string} attribute */
-  hasAttr(attribute){
+  hasAttr(attribute) {
     return this.element.hasAttribute(attribute);
   }
   /** @param {string} attribute */
-  removeAttr(attribute){
+  removeAttr(attribute) {
     return this.element.removeAttribute(attribute);
   }
   /**
    * @param {DOMEvents} events
    * @param {Object<string,AddEventListenerOptions>} options
    */
-  event(events,options={}){
-    DOM.event(this.element,events,options);
+  event(events, options = {}) {
+    DOM.event(this.element, events, options);
   }
   /** @param {Component} component */
-  addSub(component){
-    component.parentComponent=this;
-    this.sub[component.id]=component;
+  addSub(component) {
+    component.parentComponent = this;
+    this.sub[component.id] = component;
   }
 };
 
@@ -201,13 +201,13 @@ UIHandler.Component=class Component{
  * @template T
  * @extends DataList<T>
  * */
-UIHandler.ComponentList=class ComponentList extends DataList{
+UIHandler.ComponentList = class ComponentList extends DataList {
   /**
    * @param {string} listId An identification string for list
    * @param {DataListOptions} options */
-  constructor(listId="",options={}){
+  constructor (listId = "", options = {}) {
     super(options);
-    this.id=listId;
+    this.id = listId;
   }
 };
 
@@ -215,10 +215,10 @@ UIHandler.ComponentList=class ComponentList extends DataList{
  * @template T
  * @extends DataList<T>
  * */
- UIHandler.ComponentGroup=class ComponentGroup extends DataGroup{
+UIHandler.ComponentGroup = class ComponentGroup extends DataGroup {
   /** @param {string} listId An identification string for Group */
-  constructor(GroupId=""){
+  constructor (GroupId = "") {
     super();
-    this.id=GroupId;
+    this.id = GroupId;
   }
 };

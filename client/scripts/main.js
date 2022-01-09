@@ -55,9 +55,9 @@ const App = new class AppManager {
       if (type == "message") {
         const message = Message.from(data.message);
         console.log(message)
-        let a=[];
-        UI.list.chatItems.find((chatItem,index)=>{
-          if(chatItem.id===message.chatId){
+        let a = [];
+        UI.list.chatItems.find((chatItem, index) => {
+          if (chatItem.id === message.chatId) {
             /** @type {ChatItem} */
             const chatItem = UI.list.chatItems.get(index);
             chatItem.addMessage(message);
@@ -162,6 +162,7 @@ const App = new class AppManager {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
+      console.log(data);
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
         App.data.chats.add(chat.id, chat);
@@ -174,11 +175,15 @@ const App = new class AppManager {
     }).then(/** @param {ChatResponse[]} data */data => {
       data.forEach(messageResponse => {
         const message = Message.from(messageResponse);
-        /**
-         * 
-         * @TODO Populate messages to ui
-         * 
-         */
+        UI.list.chatItems.find((chatItem, index) => {
+          if (chatItem.id === message.chatId) {
+            /** @type {ChatItem} */
+            const chatItem = UI.list.chatItems.get(index);
+            chatItem.chatArea.addMessage(message, 0);
+            return true;
+          }
+          return false;
+        });
       });
     });
   }
@@ -218,8 +223,8 @@ const App = new class AppManager {
     }).then(data => {
       const message = Message.from(data);
       console.log(message);
-      UI.list.chatItems.find((chatItem,index)=>{
-        if(chatItem.id===message.chatId){
+      UI.list.chatItems.find((chatItem, index) => {
+        if (chatItem.id === message.chatId) {
           /** @type {ChatItem} */
           const chatItem = UI.list.chatItems.get(index);
           console.log(chatItem)
@@ -327,11 +332,22 @@ UI.onInit(ui => {
   const chatObserver = new IntersectionObserver(elements => {
     const lastChat = elements[0];
     if (!lastChat.isIntersecting) return;
+    console.log(elements);
     App.populateFriendsList();
-    chatObserver.unobserve(lastChat.target);
+    // chatObserver.unobserve(lastChat.target);
   }, {
     rootMargin: "150px"
   });
+
+  const unobserveLastChat = (chat) => {
+    const observedChat = document.querySelector(".list-item:nth-last-child(2)");
+    if (observedChat)
+      chatObserver.unobserve(observedChat);
+  }
+  const observeLastChat = () => {
+    const toBeObservedChat = document.querySelector(".list-item:last-child");
+    chatObserver.observe(toBeObservedChat);
+  }
   const messageObserver = new IntersectionObserver(elements => {
     const lastMessage = elements[0];
     if (!lastMessage.isIntersecting) return;
@@ -342,6 +358,16 @@ UI.onInit(ui => {
   }, {
     // rootMargin: "150px"
   });
+  const unobserveLastMessage = () => {
+    const observedMessage = document.querySelector(".message-container:nth-child(2)");
+    if (observedMessage)
+      messageObserver.unobserve(observedMessage);
+  }
+  const observeLastMessage = () => {
+    const toBeObservedMessage = document.querySelector(".message-container");
+    messageObserver.observe(toBeObservedMessage);
+  }
+
   // Login Form events
   loginForm.event({
     reset(event) {
@@ -533,32 +559,32 @@ UI.onInit(ui => {
       contacts.filter(item => item.mainText.innerText.includes(query));
     }
   });
-  let oldValue="";
+  let oldValue = "";
   contactList.sub.searchBarInput.event({
-    keyup(event){
-      if(event.target.value===oldValue)
+    keyup(event) {
+      if (event.target.value === oldValue)
         return;
       contacts.clearFiltered();
-      contacts.filter(item=>item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
-      contacts.sort((a,b)=>{
-        return b.mainText.innerText.localeCompare(a.mainText.innerText,"en",{
-          sensitivity:"base"
+      contacts.filter(item => item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
+      contacts.sort((a, b) => {
+        return b.mainText.innerText.localeCompare(a.mainText.innerText, "en", {
+          sensitivity: "base"
         });
       });
-      oldValue=event.target.value;
+      oldValue = event.target.value;
     }
   });
-  let c_oldValue="";
+  let c_oldValue = "";
   chatList.sub.searchBarInput.event({
-    keyup(event){
-      if(event.target.value===c_oldValue)
+    keyup(event) {
+      if (event.target.value === c_oldValue)
         return;
       chatItems.clearFiltered();
-      chatItems.filter(item=>item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
-      chatItems.sort((a,b)=>{
+      chatItems.filter(item => item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
+      chatItems.sort((a, b) => {
         return parseInt(a.timeText.getAttribute("time")) - parseInt(b.timeText.getAttribute("time"))
       });
-      c_oldValue=event.target.value;
+      c_oldValue = event.target.value;
     }
   });
 
@@ -597,7 +623,7 @@ UI.onInit(ui => {
   });
 
   /** @type {UIHandler.ComponentList<ChatItem>} */
-  const chatItems = new UIHandler.ComponentList("chatItems",{selectMultiple:false});
+  const chatItems = new UIHandler.ComponentList("chatItems", { selectMultiple: false });
   UI.addList(chatItems);
   /** @type {UIHandler.ComponentList<ContactItem>} */
   const contacts = new UIHandler.ComponentList("contacts");
@@ -611,15 +637,19 @@ UI.onInit(ui => {
     if (chatList.sub.emptyArea.mounted)
       chatList.sub.emptyArea.unmount();
     chatList.addChildren([chatItem]);
+    unobserveLastChat();
+    observeLastChat();
   });
-  chatItems.on("remove", function (index,chatItem) {
+  chatItems.on("remove", function (index, chatItem) {
     delete chatList.sub[chatItem.id];
+    unobserveLastChat();
+    observeLastChat();
     chatItem.unmount();
     if (chatItems.size === 0)
       chatList.sub.emptyArea.mount(chatList);
   });
-  chatItems.on("update",function(index,item){
-    item.mountAfter(chatList.getChild(index+1));
+  chatItems.on("update", function (index, item) {
+    item.mountAfter(chatList.getChild(index + 1));
   });
   chatItems.on("unselect", function (index) {
     chatItems.get(index).chatArea.unmount();
@@ -628,11 +658,8 @@ UI.onInit(ui => {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
     chatItems.get(index).chatArea.mount(container.chat.sub.messagesArea);
-
-    const messages = document.querySelectorAll(".message-container")
-    // messages.forEach(message => {
-    messageObserver.observe(messages[0]);
-    // })
+    unobserveLastMessage();
+    observeLastMessage();
   });
 
   App.data.chats.on("add", function (chat) {
@@ -651,19 +678,19 @@ UI.onInit(ui => {
   });
 
   // UserItem listeners
-  contacts.on("add", function (userItem,index) {
+  contacts.on("add", function (userItem, index) {
     if (contactList.sub.emptyArea.mounted)
       contactList.sub.emptyArea.unmount();
     contactList.addChildren([userItem]);
   });
-  contacts.on("remove", function (index,userItem) {
+  contacts.on("remove", function (index, userItem) {
     delete contactList.sub[userItem.id];
     userItem.unmount();
     if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
   });
-  contacts.on("update",function(index,item){
-    item.mountAfter(contactList.getChild(index+1));
+  contacts.on("update", function (index, item) {
+    item.mountAfter(contactList.getChild(index + 1));
   });
 
   peopleSearched.on("add", function (userItem) {

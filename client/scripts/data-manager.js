@@ -12,16 +12,16 @@ class DataList {
   #filteredOut = [];
   #pointer = -1;
   canUndo = true;
-  selectMultiple=true;
+  selectMultiple = true;
   /** @type {[undo:function,redo:function][]} */
   #history = [];
   /** @type {[undo:function,redo:function][]} */
   #undoHistory = [];
   #listener = new Listeners(["add", "remove", "update", "select", "unselect", "pointerMove"]);
   /** @param {DataListOptions} options */
-  constructor (options={}) {
-    this.canUndo=options.canUndo??true;
-    this.selectMultiple=options.selectMultiple??true;
+  constructor (options = {}) {
+    this.canUndo = options.canUndo ?? true;
+    this.selectMultiple = options.selectMultiple ?? true;
   }
   get pointer() {
     return this.#pointer;
@@ -46,7 +46,7 @@ class DataList {
   }
   /** @param {(value: DataType, index: number, obj: DataType[])} predicate */
   has(predicate) {
-    return this.#list.findIndex(predicate)>=0;
+    return this.#list.findIndex(predicate) >= 0;
   }
   /** @param {(value: DataType, index: number, obj: DataType[])} predicate */
   find(predicate) {
@@ -103,10 +103,10 @@ class DataList {
     }
   }
   /** @param {Number} index */
-  select(index,clear=!this.selectMultiple) {
+  select(index, clear = !this.selectMultiple) {
     if (this.#list[index]) {
       if (!this.#selected.includes(index)) {
-        if(clear)
+        if (clear)
           this.clear();
         this.#selected.push(index);
         this.#listener.trigger("select", index);
@@ -239,9 +239,9 @@ class DataGroup {
     return this.#group.has(id);
   }
   /** @param {(data: DataType, id: string) DataType} predicate */
-  forEach(predicate){
-    for(let [id,data] of this.#group){
-      predicate(data,id);
+  forEach(predicate) {
+    for (let [id, data] of this.#group) {
+      predicate(data, id);
     }
   }
   select(id, triggeredBy) {
