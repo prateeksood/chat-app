@@ -154,7 +154,7 @@
         </div>
         <div class="left-main chat-list" c-id="chatList" c-parent-id="chat">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="chatList">
-            <input type="text" name="query" minlength="4" placeholder="Search"/>
+            <input type="text" name="query" c-id="searchBarInput" c-parent-id="chatList" minlength="1" placeholder="Search chat" autocomplete="off"/>
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area" c-id="emptyArea" c-parent-id="chatList">
@@ -167,7 +167,7 @@
         </div>
         <div class="left-main" c-id="contactList" c-parent-id="chat" c-unmount="true">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="contactList">
-            <input type="text" name="query" c-id="searchBarInput" c-parent-id="contactList" minlength="1" placeholder="Username"/>
+            <input type="text" name="query" c-id="searchBarInput" c-parent-id="contactList" minlength="1" placeholder="Search contact" autocomplete="off"/>
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="contactList">
@@ -180,7 +180,7 @@
         </div>
         <div class="left-main" c-id="peopleSearchList" c-parent-id="chat" c-unmount="true">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="peopleSearchList">
-            <input type="text" name="query" minlength="4" placeholder="Username"/>
+            <input type="text" name="query" minlength="4" placeholder="Username" autocomplete="off"/>
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="peopleSearchList">

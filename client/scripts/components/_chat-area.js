@@ -43,6 +43,7 @@ class ChatArea extends UIHandler.Component {
       }
       lastGroup.mount(rightMain);
       component.mount(lastGroup);
+      component.element.scrollIntoView({block:"nearest"});
     });
     // Whenever a Message component is deleted from the this.#messages using this.#messages.remove method
     this.#messages.on("remove", component => {
@@ -53,7 +54,7 @@ class ChatArea extends UIHandler.Component {
 
   }
   /** @param {Message} message */
-  async addMessage(message) {
+  addMessage(message) {
     const component = new MessageComponent(message);
     component.init(message);
     this.#messages.add(component);

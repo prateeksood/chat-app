@@ -54,11 +54,17 @@ const App = new class AppManager {
     onmessage(type, data) {
       if (type == "message") {
         const message = Message.from(data.message);
-        if (UI.list.chatItems.has(message.chatId)) {
-          /** @type {ChatItem} */
-          const chatItem = UI.list.chatItems.get(message.chatId);
-          chatItem.addMessage(message);
-        }
+        console.log(message)
+        let a=[];
+        UI.list.chatItems.find((chatItem,index)=>{
+          if(chatItem.id===message.chatId){
+            /** @type {ChatItem} */
+            const chatItem = UI.list.chatItems.get(index);
+            chatItem.addMessage(message);
+            return true;
+          }
+          return false;
+        });
       }
     }
     onconnect(data) {
@@ -212,12 +218,14 @@ const App = new class AppManager {
     }).then(data => {
       const message = Message.from(data);
       console.log(message);
-      if (UI.list.chatItems.has(message.chatId)) {
-        /** @type {ChatItem} */
-        const chatItem = UI.list.chatItems.get(message.chatId);
-        console.log(chatItem)
-        chatItem.addMessage(message);
-      }
+      UI.list.chatItems.find((chatItem,index)=>{
+        if(chatItem.id===message.chatId){
+          /** @type {ChatItem} */
+          const chatItem = UI.list.chatItems.get(index);
+          console.log(chatItem)
+          chatItem.addMessage(message);
+        }
+      });
     }).catch(ex => {
       let n = new UINotification("failed to send message <br/>" + ex, [], "error");
       n.mount(UI.container.notifications);
@@ -525,10 +533,32 @@ UI.onInit(ui => {
       contacts.filter(item => item.mainText.innerText.includes(query));
     }
   });
+  let oldValue="";
   contactList.sub.searchBarInput.event({
-    async keyup(event) {
-      contacts.clearFiltered().sort();
-      contacts.filter(item => item.mainText.innerText.includes(event.target.value));
+    keyup(event){
+      if(event.target.value===oldValue)
+        return;
+      contacts.clearFiltered();
+      contacts.filter(item=>item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
+      contacts.sort((a,b)=>{
+        return b.mainText.innerText.localeCompare(a.mainText.innerText,"en",{
+          sensitivity:"base"
+        });
+      });
+      oldValue=event.target.value;
+    }
+  });
+  let c_oldValue="";
+  chatList.sub.searchBarInput.event({
+    keyup(event){
+      if(event.target.value===c_oldValue)
+        return;
+      chatItems.clearFiltered();
+      chatItems.filter(item=>item.mainText.innerText.toLowerCase().includes(event.target.value.toLowerCase()));
+      chatItems.sort((a,b)=>{
+        return parseInt(a.timeText.getAttribute("time")) - parseInt(b.timeText.getAttribute("time"))
+      });
+      c_oldValue=event.target.value;
     }
   });
 
@@ -567,7 +597,7 @@ UI.onInit(ui => {
   });
 
   /** @type {UIHandler.ComponentList<ChatItem>} */
-  const chatItems = new UIHandler.ComponentList("chatItems");
+  const chatItems = new UIHandler.ComponentList("chatItems",{selectMultiple:false});
   UI.addList(chatItems);
   /** @type {UIHandler.ComponentList<ContactItem>} */
   const contacts = new UIHandler.ComponentList("contacts");
@@ -578,14 +608,18 @@ UI.onInit(ui => {
 
   // ChatItem listeners
   chatItems.on("add", function (chatItem) {
-    if (container.chat.sub.chatList.sub.emptyArea.mounted)
-      container.chat.sub.chatList.sub.emptyArea.unmount();
-    chatItem.mount(container.chat.sub.chatList);
-    const chat = chatItem.element;
-    chatObserver.observe(chat);
+    if (chatList.sub.emptyArea.mounted)
+      chatList.sub.emptyArea.unmount();
+    chatList.addChildren([chatItem]);
   });
-  chatItems.on("remove", function (index, chatItem) {
-    chatItem.remove();
+  chatItems.on("remove", function (index,chatItem) {
+    delete chatList.sub[chatItem.id];
+    chatItem.unmount();
+    if (chatItems.size === 0)
+      chatList.sub.emptyArea.mount(chatList);
+  });
+  chatItems.on("update",function(index,item){
+    item.mountAfter(chatList.getChild(index+1));
   });
   chatItems.on("unselect", function (index) {
     chatItems.get(index).chatArea.unmount();
@@ -613,20 +647,25 @@ UI.onInit(ui => {
         chatItems.select(index);
         return true;
       }
-    })
+    });
   });
 
   // UserItem listeners
-  contacts.on("add", function (userItem) {
+  contacts.on("add", function (userItem,index) {
     if (contactList.sub.emptyArea.mounted)
       contactList.sub.emptyArea.unmount();
-    userItem.mount(contactList);
+    contactList.addChildren([userItem]);
   });
-  contacts.on("remove", function (index, userItem) {
+  contacts.on("remove", function (index,userItem) {
+    delete contactList.sub[userItem.id];
     userItem.unmount();
     if (contacts.size === 0)
       contactList.sub.emptyArea.mount(contactList);
   });
+  contacts.on("update",function(index,item){
+    item.mountAfter(contactList.getChild(index+1));
+  });
+
   peopleSearched.on("add", function (userItem) {
     if (peopleSearchList.sub.emptyArea.mounted)
       peopleSearchList.sub.emptyArea.unmount();

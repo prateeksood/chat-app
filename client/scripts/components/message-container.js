@@ -2,7 +2,7 @@
 /// <reference path="../listener.js"/>
 /// <reference path="../ui-handler.js"/>
 
-
+/** @extends {UIHandler.Component<HTMLDivElement>} */
 class MessageComponent extends UIHandler.Component {
   isGropuMessage=false;
   /** @type {string} */

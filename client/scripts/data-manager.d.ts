@@ -1,3 +1,7 @@
+interface DataListOptions{
+  canUndo:Boolean;
+  selectMultiple:Boolean;
+}
 interface DataListAction<DataType>{
   add(item:DataType,index:Number):void,
   remove(index:Number,item:DataType):void,

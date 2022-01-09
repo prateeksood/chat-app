@@ -28,8 +28,8 @@ module.exports = class MessageService {
    * @param {Number} pageSize
    */
   static async getMessagesByChatId(chatId, options) {
-    const skips = Number(options.skips ?? 0);
-    const pageSize = Number(options.pageSize ?? 100);
+    const skips = Number(options.skips || 0);
+    const pageSize = Number(options.pageSize || 100);
     try {
       const foundMessages = await MessageModel
         .find({ chat: chatId })

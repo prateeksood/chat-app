@@ -9,9 +9,10 @@ class UIHandler{
   /** All 'container' type components are stored here and can be accessed by their corresponding id
    * @type {Object<string,UIHandler.Component>} */
   container={};
-  /** All 'container' type components are stored here and can be accessed by their corresponding id
-   * @type {Object<string,UIHandler.ComponentList<UIHandler.Component>} */
+  /** @type {Object<string,UIHandler.ComponentList<UIHandler.Component>} */
   list={};
+  /** @type {Object<string,UIHandler.ComponentGroup<UIHandler.Component>} */
+  group={};
   init(){
     document.querySelectorAll("[c-id]").forEach(element=>{
       this.addComponent(element);
@@ -64,6 +65,11 @@ class UIHandler{
     if(list instanceof UIHandler.ComponentList)
       this.list[list.id]=list;
   }
+  /** @param {UIHandler.ComponentGroup} group */
+  addGroup(group){
+    if(group instanceof UIHandler.ComponentGroup)
+      this.group[group.id]=group;
+  }
 };
 
 /** @template ElementType */
@@ -84,7 +90,7 @@ UIHandler.Component=class Component{
   mounted=false;
   /**
    * Consists of sub components. (usage eg. parentId.sub.childId)
-   * @type {Object<string,UIHandler.Component>} */
+   * @type {Object<string,UIHandler.Component<HTMLElement>>} */
   sub={};
   /**
    * @param {string} id Component's ID
@@ -140,6 +146,15 @@ UIHandler.Component=class Component{
     });
     return this;
   }
+  /** @returns {Component<HTMLElement>} */
+  getChild(index=0){
+    /** @type {HTMLElement} */
+    const element=this.element.children[index];
+    const cId=element?.getAttribute("c-id");
+    if(cId in this.sub)
+      return this.sub[cId];
+    return null;
+  }
   /**
    * Apply CSS style to component's element
    * @param {CSSStyleRule} styles*/
@@ -187,9 +202,23 @@ UIHandler.Component=class Component{
  * @extends DataList<T>
  * */
 UIHandler.ComponentList=class ComponentList extends DataList{
-  /** @param {string} listId An identification string for list */
-  constructor(listId=""){
-    super();
+  /**
+   * @param {string} listId An identification string for list
+   * @param {DataListOptions} options */
+  constructor(listId="",options={}){
+    super(options);
     this.id=listId;
+  }
+};
+
+/**
+ * @template T
+ * @extends DataList<T>
+ * */
+ UIHandler.ComponentGroup=class ComponentGroup extends DataGroup{
+  /** @param {string} listId An identification string for Group */
+  constructor(GroupId=""){
+    super();
+    this.id=GroupId;
   }
 };
