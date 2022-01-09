@@ -1,5 +1,6 @@
 /// <reference path="../dom.js"/>
 /// <reference path="../ui-handler.js"/>
+/// <reference path="../auto-updater.js"/>
 /// <reference path="_chat-area.js"/>
 /// <reference path="../types/types.d.ts"/>
 /// <reference path="../types/chat.js"/>
@@ -15,6 +16,7 @@ class ListItem extends UIHandler.Component {
    * @param {DOMEvents} events
   */
   constructor (itemId, imageSrc, mainText, subText, time, events = {}) {
+    time=new Date(time);
     const element = DOM.create("div", {
       class: "list-item",
       cId: itemId,
@@ -34,12 +36,17 @@ class ListItem extends UIHandler.Component {
       class: "sub-text",
       html: subText
     });
+    /** @type {AutoUpdater} */
     this.timeText = DOM.create("auto-updater", {
+      time:time.getTime(),
       class: "time-text",
       html: App.date.format(time)
     });
     this.timeText.handler = () => {
-      this.timeText.innerHTML = App.date.format(time);
+      DOM.attr(this.timeText,{
+        time:time.getTime(),
+        html:App.date.format(time)
+      });
     };
 
     DOM.attr(element, {
@@ -93,9 +100,15 @@ class ChatItem extends ListItem {
   addMessage(message) {
     this.chatArea.addMessage(message);
     this.subText.innerHTML = message.content;
-    this.timeText.innerHTML = App.date.format(message.createdAt);
+    DOM.attr(this.timeText,{
+      time:message.createdAt.getTime(),
+      html:App.date.format(message.createdAt)
+    });
     this.timeText.handler = () => {
-      this.timeText.innerHTML = App.date.format(message.createdAt);
+      DOM.attr(this.timeText,{
+        time:message.createdAt.getTime(),
+        html:App.date.format(message.createdAt)
+      });
     };
   }
 };
@@ -128,7 +141,7 @@ class ContactItem extends ListItem {
       this.menu.remove();
     });
     this.menu.addItem("chat", "Chat", () => {
-      const chat = App.data.chats.find(function (data) {
+      const chat = App.data.chats.forEach(function (data) {
         if (data.participants.length === 2) {
           const participant = data.participants.find(participant => participant.id === user.id);
           if (participant)
