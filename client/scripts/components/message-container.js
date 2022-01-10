@@ -4,12 +4,13 @@
 
 /** @extends {UIHandler.Component<HTMLDivElement>} */
 class MessageComponent extends UIHandler.Component {
-  isGropuMessage=false;
+  isGroupMessage=false;
   /** @type {string} */
   sender=null;
   /** @param {Message} message */
   constructor (message) {
     const messageTime = DOM.create("auto-updater", {
+      time: message.createdAt.getTime(),
       class: "time",
       html: App.date.format(message.createdAt)
     });
@@ -48,18 +49,22 @@ class MessageComponent extends UIHandler.Component {
 
     super("message", element);
     messageTime.handler = () => {
-      messageTime.innerHTML = App.date.format(message.createdAt);
+      DOM.attr(messageTime,{
+        time: message.createdAt.getTime(),
+        html: App.date.format(message.createdAt)
+      });
     };
+    this.messageTime=messageTime;
   }
   /** @param {Message} message */
-  async init(message) {
+  init(message) {
     this.isGroupMessage=message.isGroupMessage;
     this.sender=message.sender;
   }
   /** @param {MessageComponent} component */
-  static createMessageGroup(component) {
+  static createMessageGroup(component,g=0) {
     const isCurrentUser = App.session.isCurrentUserId(component.sender._id);
-    return new UIHandler.Component("group", DOM.create("div", {
+    return new UIHandler.Component("group-"+g, DOM.create("div", {
       senderId: component.sender._id,
       class: `message-group${isCurrentUser ? " sent" : ""}`,
       children: [
