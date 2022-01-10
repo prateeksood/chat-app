@@ -33,6 +33,7 @@ class ChatArea extends UIHandler.Component {
       const group=rightMain.getGroup(component,index);
       group.addChildren([component]);
       component.element.scrollIntoView({block:"nearest"});
+
     });
     // Whenever a Message component is deleted from the this.#messages using this.#messages.remove method
     this.#messages.on("remove", component => {

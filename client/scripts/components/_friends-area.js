@@ -16,7 +16,7 @@ class ListItem extends UIHandler.Component {
    * @param {DOMEvents} events
   */
   constructor (itemId, imageSrc, mainText, subText, time, events = {}) {
-    time=new Date(time);
+    time = new Date(time);
     const element = DOM.create("div", {
       class: "list-item",
       cId: itemId,
@@ -38,14 +38,14 @@ class ListItem extends UIHandler.Component {
     });
     /** @type {AutoUpdater} */
     this.timeText = DOM.create("auto-updater", {
-      time:time.getTime(),
+      time: time.getTime(),
       class: "time-text",
       html: App.date.format(time)
     });
     this.timeText.handler = () => {
-      DOM.attr(this.timeText,{
-        time:time.getTime(),
-        html:App.date.format(time)
+      DOM.attr(this.timeText, {
+        time: time.getTime(),
+        html: App.date.format(time)
       });
     };
 
@@ -100,14 +100,14 @@ class ChatItem extends ListItem {
   addMessage(message) {
     this.chatArea.addMessage(message);
     this.subText.innerHTML = message.content;
-    DOM.attr(this.timeText,{
-      time:message.createdAt.getTime(),
-      html:App.date.format(message.createdAt)
+    DOM.attr(this.timeText, {
+      time: message.createdAt.getTime(),
+      html: App.date.format(message.createdAt)
     });
     this.timeText.handler = () => {
-      DOM.attr(this.timeText,{
-        time:message.createdAt.getTime(),
-        html:App.date.format(message.createdAt)
+      DOM.attr(this.timeText, {
+        time: message.createdAt.getTime(),
+        html: App.date.format(message.createdAt)
       });
     };
   }
@@ -141,12 +141,12 @@ class ContactItem extends ListItem {
       this.menu.remove();
     });
     this.menu.addItem("chat", "Chat", () => {
-      App.data.chats.forEach(data=>{
+      App.data.chats.forEach(data => {
         if (data.participants.length === 2 && !data.isGroup) {
           const participant = data.participants.some(participant => participant.id === user.id);
-          if(participant){
-            const index=UI.list.chatItems.findIndex(({id})=>id===data.id);
-            if(index>=0)
+          if (participant) {
+            const index = UI.list.chatItems.findIndex(({ id }) => id === data.id);
+            if (index >= 0)
               UI.list.chatItems.select(index);
           }
         }
