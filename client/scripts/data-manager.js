@@ -203,12 +203,12 @@ class DataList {
     return this;
   }
   /** @param {string} type */
-  addListener(type){
+  addListener(type) {
     this.#listener.add(type);
   }
   /** @type {<K extends keyof DataListAction>(type:K,response:...any)=>this} */
-  triggerListener(type,...response){
-    this.#listener.trigger(type,...response);
+  triggerListener(type, ...response) {
+    this.#listener.trigger(type, ...response);
   }
 }
 
