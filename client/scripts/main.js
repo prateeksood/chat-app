@@ -31,7 +31,7 @@ const App = new class AppManager {
     #socket = null;
     connect() {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
-      this.#socket = new WebSocket("ws://"+location.host);
+      this.#socket = new WebSocket("ws://" + location.host);
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
         if (response.error)
@@ -56,8 +56,8 @@ const App = new class AppManager {
       if (type == "message") {
         const message = Message.from(data.message);
         console.log(message)
-        UI.list.chatItems.find((chatItem,index)=>{
-          if(chatItem.id===message.chatId){
+        UI.list.chatItems.find((chatItem, index) => {
+          if (chatItem.id === message.chatId) {
             /** @type {ChatItem} */
             const chatItem = UI.list.chatItems.get(index);
             chatItem.addMessage(message);
@@ -65,7 +65,7 @@ const App = new class AppManager {
           }
           return false;
         });
-      }else if(type === "contact.update"){}
+      } else if (type === "contact.update") { }
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
@@ -162,30 +162,38 @@ const App = new class AppManager {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
-      console.log(data);
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
         App.data.chats.add(chat.id, chat);
       });
     });
   }
-  async fetchMessages(chatId, skips) {
-    App.request(`/message/${chatId}?skips=${skips}`, {
-      method: "GET"
-    }).then(/** @param {ChatResponse[]} data */data => {
-      data.forEach(messageResponse => {
-        const message = Message.from(messageResponse);
-        UI.list.chatItems.find((chatItem, index) => {
-          if (chatItem.id === message.chatId) {
-            /** @type {ChatItem} */
-            const chatItem = UI.list.chatItems.get(index);
-            chatItem.chatArea.addMessage(message, 0);
-            return true;
-          }
-          return false;
-        });
-      });
+  async fetchMessages(chatId) {
+    let skips = 0;
+    UI.list.chatItems.find((chatItem, index) => {
+      if (chatItem.id === chatId) {
+        /** @type {ChatItem} */
+        const chatItem = UI.list.chatItems.get(index);
+        skips = chatItem.chatArea.getMessageCount();
+        App.request(`/message/${chatId}?skips=${skips}`, {
+          method: "GET"
+        })
+          .then(/** @param {ChatResponse[]} data */data => {
+            data.forEach(messageResponse => {
+              const message = Message.from(messageResponse);
+              chatItem.chatArea.addMessage(message, true);
+            });
+          })
+          .catch((ex) => {
+            console.log(ex)
+            UI.container.chat.unmount();
+            UI.container.auth.mount(UI.container.main);
+          });
+        return true;
+      }
+      return false;
     });
+
   }
   async auth() {
     App.request("/user/auth", {
@@ -222,12 +230,10 @@ const App = new class AppManager {
       body: new URLSearchParams(formData)
     }).then(data => {
       const message = Message.from(data);
-      console.log(message);
       UI.list.chatItems.find((chatItem, index) => {
         if (chatItem.id === message.chatId) {
           /** @type {ChatItem} */
           const chatItem = UI.list.chatItems.get(index);
-          console.log(chatItem)
           chatItem.addMessage(message);
         }
       });
@@ -327,9 +333,7 @@ UI.onInit(ui => {
   const chatObserver = new IntersectionObserver(elements => {
     const lastChat = elements[0];
     if (!lastChat.isIntersecting) return;
-    console.log(elements);
     App.populateFriendsList();
-    // chatObserver.unobserve(lastChat.target);
   }, {
     rootMargin: "150px"
   });
@@ -347,8 +351,7 @@ UI.onInit(ui => {
     const lastMessage = elements[0];
     if (!lastMessage.isIntersecting) return;
     const currentChatId = App.data.chats.getSelected();
-    const messageCount = App.data.chats.get(currentChatId).messages.length;
-    App.fetchMessages(currentChatId, messageCount);
+    App.fetchMessages(currentChatId);
     messageObserver.unobserve(lastMessage.target);
   }, {
     // rootMargin: "150px"
