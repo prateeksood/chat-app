@@ -31,7 +31,7 @@ const App = new class AppManager {
     #socket = null;
     connect() {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
-      this.#socket = new WebSocket("ws://localhost:3000");
+      this.#socket = new WebSocket("ws://"+location.host);
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
         if (response.error)
@@ -51,11 +51,11 @@ const App = new class AppManager {
     disconnect() {
       this.#socket.close();
     }
+    /** @type {<K extends keyof SocketResponse>(type:K,data:SocketResponse[K])=>this} */
     onmessage(type, data) {
       if (type == "message") {
         const message = Message.from(data.message);
         console.log(message)
-        let a=[];
         UI.list.chatItems.find((chatItem,index)=>{
           if(chatItem.id===message.chatId){
             /** @type {ChatItem} */
@@ -65,7 +65,7 @@ const App = new class AppManager {
           }
           return false;
         });
-      }
+      }else if(type === "contact.update"){}
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
@@ -240,11 +240,6 @@ const App = new class AppManager {
     }).then(data => {
       // Message sent
     });
-  }
-
-  /** @param {Component<HTMLFormElement>} formComponent */
-  async searchUsers(formComponent) {
-    formComponent
   }
 
   /**
@@ -623,11 +618,13 @@ UI.onInit(ui => {
   });
   chatItems.on("unselect", function (index) {
     chatItems.get(index).chatArea.unmount();
+    chatItems.get(index).removeAttr("active");
   });
   chatItems.on("select", function (index) {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
     chatItems.get(index).chatArea.mount(container.chat.sub.messagesArea);
+    chatItems.get(index).attr({active:true});
 
     const messages = document.querySelectorAll(".message-container")
     // messages.forEach(message => {

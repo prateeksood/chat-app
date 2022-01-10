@@ -13,7 +13,7 @@ interface ChatUserResponse {
 interface MessageResponse{
   _id: String;
   chat: String;
-  sender: UserResponse[];
+  sender: UserResponse;
   receipent: String;
   content: String;
   reference: string;
@@ -34,4 +34,13 @@ interface ChatResponse{
   image: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface SocketResponse{
+  message:{
+    message:MessageResponse
+  };
+  "contact.update":{
+    contacts:UserResponse[]
+  };
 }

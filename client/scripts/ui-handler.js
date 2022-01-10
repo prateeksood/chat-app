@@ -1,5 +1,6 @@
 /// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
+/// <reference path="ui-handler.d.ts"/>
 
 class UIHandler{
   #listener=new Listener();
@@ -80,11 +81,11 @@ UIHandler.Component=class Component{
   id=null;
   /**
    * Component's element
-   * @type {ElementType} */
+   * @type {ElementType=HTMLElement} */
   element=null;
   /**
    * Component's parent component
-   * @type {Component} */
+   * @type {Component<HTMLElement>} */
   parentComponent=null;
   /** Whether the component is mounted or not */
   mounted=false;
@@ -103,6 +104,8 @@ UIHandler.Component=class Component{
     this.attr({cId:id,cType:type});
     if(element.parentElement)
       this.mounted=true;
+    /** @type {UIHandler.Component[]} */
+    this.children=[];
   }
   /** Remove/delete element from component */
   remove(){
@@ -122,12 +125,19 @@ UIHandler.Component=class Component{
   }
   /**
    * Inserts Component at the end of parent
-   * @param {Component} parent */
-  mount(parent){
-    if(!parent && this.parentComponent && this.parentComponent.element)
-      this.parentComponent.element.appendChild(this.element);
-    else
-      parent.element.appendChild(this.element);
+   * @param {Component<HTMLElement>} parent */
+  mount(parent,prepend=false){
+    if(!parent && this.parentComponent && this.parentComponent.element){
+      if(prepend)
+        this.parentComponent.element.prepend(this.element);
+      else
+        this.parentComponent.element.appendChild(this.element);
+    }else{
+      if(prepend)
+        parent.element.prepend(this.element);
+      else
+        parent.element.appendChild(this.element);
+    }
     this.mounted=true;
   }
   /**
@@ -137,12 +147,22 @@ UIHandler.Component=class Component{
     component.element.after(this.element);
     this.mounted=true;
   }
+  /**
+   * Inserts Component before the Component's element
+   * @param {Component} component */
+  mountBefore(component){
+    component.element.before(this.element);
+    this.mounted=true;
+  }
   /** Add multiple components as sub components
    * @param {UIHandler.Component[]} components */
-  addChildren(components=[]){
+  addChildren(components=[],log=false){
     components.forEach(component=>{
       this.element.appendChild(component.element);
       this.addSub(component);
+      this.children.push(component);
+      if(log)
+        console.log("%clog","color:#f44",component,this);
     });
     return this;
   }
@@ -207,8 +227,23 @@ UIHandler.ComponentList=class ComponentList extends DataList{
    * @param {DataListOptions} options */
   constructor(listId="",options={}){
     super(options);
+    // super.addListener("added-multiple");
     this.id=listId;
   }
+  // /**
+  //  * @param {T[]} items
+  //  */
+  // addMultiple(items,index=-1){
+  //   let i=index;
+  //   for(let item of items){
+  //     this.add(item,index>=0?index++:-1);
+  //   }
+  //   this.triggerListener("added-multiple",items,i);
+  // }
+  // /** @type {<K extends keyof ComponentListAction>(type:K,action:ComponentListAction<T>[K])=>this} */
+  // on(type,action){
+  //   super.on(type,action);
+  // }
 };
 
 /**
