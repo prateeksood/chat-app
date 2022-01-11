@@ -7,39 +7,16 @@ class MessageComponent extends UIHandler.Component {
   isGroupMessage=false;
   /** @type {string} */
   sender=null;
+  isSent=false;
   /** @param {Message} message */
   constructor (message) {
-    const messageTime = DOM.create("auto-updater", {
-      time: message.createdAt.getTime(),
-      class: "time",
-      html: App.date.format(message.createdAt)
-    });
     const element = DOM.create("div", {
       class: "message-container",
       children: [
         DOM.create("div", {
           class: "content",
           html: message.content
-        }), // div.content
-        DOM.create("div", {
-          class: "info",
-          children: [
-            messageTime, // div.time
-            DOM.create("div", {
-              class: "icon",
-              children: [
-                DOM.createNS("svg", {
-                  viewBox: "0 0 32 32",
-                  children: [
-                    DOM.createNS("use", {
-                      "xlink:href": "#send-alt-filled"
-                    })// use
-                  ]
-                })// svg
-              ]
-            })// div.icon
-          ]
-        })// div.info
+        }) // div.content
       ]
     }, {}, {
       click() {
@@ -47,19 +24,47 @@ class MessageComponent extends UIHandler.Component {
       }
     }); //div.message-container
 
-    super("message", element);
-    messageTime.handler = () => {
-      DOM.attr(messageTime,{
+    super(message.id, element);
+    /** @type {AutoUpdater} */
+    this.messageTime = DOM.create("auto-updater", {
+      time: message.createdAt.getTime(),
+      class: "time",
+      html: App.date.format(message.createdAt)
+    });
+    this.messageTime.handler = () => {
+      DOM.attr(this.messageTime,{
         time: message.createdAt.getTime(),
         html: App.date.format(message.createdAt)
       });
     };
-    this.messageTime=messageTime;
+    this.messageInfonull;
+    this.sent=message.id.includes("temp_")?false:true;
+  }
+  /** @param {boolean} value */
+  set sent(value){
+    this.isSent=value?true:false;
+    this.messageInfo?.remove();
+    this.messageInfo=MessageComponent.createInfo(this);
+    this.element.appendChild(this.messageInfo);
+    this.element.toggleAttribute("active",!this.isSent);
   }
   /** @param {Message} message */
   init(message) {
     this.isGroupMessage=message.isGroupMessage;
     this.sender=message.sender;
+  }
+  /** @param {Message} message */
+  update(message){
+    DOM.attr(this.messageTime, {
+      time: message.createdAt.getTime(),
+      html: App.date.format(message.createdAt)
+    });
+    this.messageTime.handler = () => {
+      DOM.attr(this.messageTime,{
+        time: message.createdAt.getTime(),
+        html: App.date.format(message.createdAt)
+      });
+    };
   }
   /** @param {MessageComponent} component */
   static createMessageGroup(component,g=0) {
@@ -77,5 +82,30 @@ class MessageComponent extends UIHandler.Component {
         })()
       ]
     })); //div.message-group
+  }
+  /** @param {MessageComponent} component */
+  static createInfo(component){
+    return DOM.create("div", {
+      class: "info",
+      children: [
+        component.isSent ? component.messageTime : DOM.create("div",{text:"sending"}),
+        MessageComponent.createIcon(component.isSent)
+      ]
+    });
+  }
+  static createIcon(isSent=false){
+    return DOM.create("div", {
+      class: "icon",
+      children: [
+        DOM.createNS("svg", {
+          viewBox: "0 0 32 32",
+          children: [
+            DOM.createNS("use", {
+              "xlink:href": isSent?"#send-alt-filled":"#in-progress"
+            })// use
+          ]
+        })// svg
+      ]
+    });// div.icon
   }
 }

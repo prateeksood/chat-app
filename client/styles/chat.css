@@ -154,13 +154,20 @@
 .list-item[active] .info-holder .main-text{
   color:#555;
 }
+.list-item[unread] .info-holder .main-text{
+  color:#444;
+  font-weight:bold;
+}
 .info-holder .sub-text{
   /* margin-bottom:0.1em; */
   font-size:smaller;
   color:#c7c7c7;
   letter-spacing:0.01em;
 }
-.info-holder .sub-text[unread]{
+.list-item[active] .info-holder .sub-text{
+  color:#aaa;
+}
+.list-item[unread] .info-holder .sub-text{
   color:#777;
 }
 .time-holder{
@@ -334,12 +341,13 @@
 }
 .message-group .message-container{
   display:flex;
-  flex-direction:row-reverse;
-  align-items:flex-end;
+  flex-direction:column;
+  align-items:flex-start;
   justify-content:flex-end;
 }
 .message-group.sent .message-container{
-  flex-direction:row;
+  flex-direction:column;
+  align-items:flex-end;
 }
 .message-group .message-container:hover{
   background-color:#f8f8f8;
@@ -395,8 +403,8 @@
   align-items:center;
   justify-content:flex-end;
   margin:0px 0.3em;
-  max-width:0px;
-  height:100%;
+  width:100%;
+  max-height:0px;
   font-size:smaller;
   color:#444;
   letter-spacing:0.01em;
@@ -404,7 +412,7 @@
   white-space:nowrap;
   overflow:hidden;
   /* opacity:0; */
-  transition:all 150ms 1s ease;
+  transition:all 150ms 0s ease;
 }
 .message-group.sent .info{
   flex-direction:row;
@@ -416,9 +424,10 @@
   margin:0px 0.3em;
 }
 
-:hover .message-container:is([active],:hover) :is(.content+.info,.info){
-  max-width:10em;
+:hover .message-container:is([active]) :is(.content+.info,.info){
+  max-height:10em;
   opacity:1;
+  /* transition:all 150ms 1s ease; */
 }
 
 .send-area{

@@ -2,6 +2,7 @@
 /// <reference path="../listener.js"/>
 /// <reference path="../ui-handler.js"/>
 
+/** @extends {UIHandler.Component<HTMLMenuElement>} */
 class UIMenu extends UIHandler.Component{
   static #gap_at_end=16;
   constructor(id=""){
@@ -16,6 +17,9 @@ class UIMenu extends UIHandler.Component{
       this.unmount();
       window.removeEventListener("click",event=>this.#clickOutside(event));
     }
+  }
+  getItem(name){
+    return this.element.children[name];
   }
   /**
    * Add a list item to the menu

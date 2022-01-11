@@ -222,25 +222,42 @@ const App = new class AppManager {
     App.socket.disconnect();
     window.location.reload();
   }
-  /** @param {HTMLFormElement} form */
-  async sendMessage(form) {
+  /**
+   * @param {HTMLFormElement} form
+   * @param {Chat} chat */
+  async sendMessage(form,chat) {
     const formData = new FormData(form);
-    App.request(form.action, {
-      method: form.method ?? "POST",
-      body: new URLSearchParams(formData)
-    }).then(data => {
-      const message = Message.from(data);
-      UI.list.chatItems.find((chatItem, index) => {
-        if (chatItem.id === message.chatId) {
-          /** @type {ChatItem} */
-          const chatItem = UI.list.chatItems.get(index);
-          chatItem.addMessage(message);
-        }
+    const date=new Date();
+    const tempMessage=new Message("temp_"+date.getTime(), chat.id, {
+      ...App.session.currentUser,
+      _id: App.session.currentUser.id
+    }, formData.get("content"), date);
+    const chatItemIndex=UI.list.chatItems.findIndex(chatItem => chatItem.id === tempMessage.chatId);
+    if(chatItemIndex>=0){
+
+      /** @type {ChatItem} */
+      const chatItem=UI.list.chatItems.get(chatItemIndex);
+      chatItem.addMessage(tempMessage);
+
+      await new Promise((resolve,reject)=>{
+        setTimeout(resolve,3000);
       });
-    }).catch(ex => {
-      let n = new UINotification("failed to send message <br/>" + ex, [], "error");
-      n.mount(UI.container.notifications);
-    });
+
+      App.request(form.action, {
+        method: form.method ?? "POST",
+        body: new URLSearchParams(formData)
+      }).then(/** @param {MessageResponse} data */data => {
+        const message=Message.from(data);
+        const messageIndex=chatItem.chatArea.messages.findIndex(component=>component.id===tempMessage.id);
+        if(messageIndex>=0)
+          chatItem.updateMessage(messageIndex,message);
+        else
+          chatItem.addMessage(message);
+      }).catch(ex => {
+        let n = new UINotification("failed to send message <br/>" + ex, [], "error");
+        n.mount(UI.container.notifications);
+      });
+    }
   }
 
   /** @param {Component} chatArea */
@@ -650,13 +667,22 @@ UI.onInit(ui => {
     item.mountAfter(chatList.getChild(index + 1));
   });
   chatItems.on("unselect", function (index) {
-    chatItems.get(index).chatArea.unmount();
-    chatItems.get(index).removeAttr("active");
+    const chatItem=chatItems.get(index);
+    chatItem.chatArea.scrolledTop=chatItem.chatArea.sub.rightMain.element.scrollTop;
+    chatItem.chatArea.unmount();
+    chatItem.removeAttr("active");
   });
   chatItems.on("select", function (index) {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
-    chatItems.get(index).chatArea.mount(container.chat.sub.messagesArea);
+    const chatItem=chatItems.get(index);
+    const {chatArea:{sub:{rightMain}, scrolledTop},chatArea}=chatItem;
+    chatItem.attr({active:true});
+    chatArea.mount(container.chat.sub.messagesArea);
+    rightMain.element.scroll({
+      top: scrolledTop===0 ? rightMain.element.scrollHeight : scrolledTop
+    });
+    chatArea.elements.sendForm.elements.content.focus();
     unobserveLastMessage();
     observeLastMessage();
   });
