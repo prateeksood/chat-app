@@ -9,10 +9,13 @@ class ChatArea extends UIHandler.Component {
    * @type {UIHandler.ComponentList<MessageComponent>}
   */
   #messages = new UIHandler.ComponentList();
-
+  scrolledTop=0;
   /** @param {Chat} chat */
   constructor (chat) {
-    const elements = ChatArea.createTopBar(chat);
+    const elements = {
+      ...ChatArea.createTopBar(chat),
+      ...ChatArea.createBottomBar(chat)
+    };
 
     const rightMain = new ChatArea.RightMain();
     const element = DOM.create("div", {
@@ -20,7 +23,7 @@ class ChatArea extends UIHandler.Component {
       children: [
         elements.topBar,
         rightMain.element,
-        ChatArea.createBottomBar(chat)
+        elements.bottomBar
       ]
     });  // div.chat-area
 
@@ -40,6 +43,9 @@ class ChatArea extends UIHandler.Component {
     this.#messages.on("remove", component => {
       component.unmount();
     });
+    // this.#messages.on("update",(index,component)=>{
+    //   component
+    // });
 
     chat.messages.forEach(message => this.addMessage(message));
 
@@ -52,9 +58,20 @@ class ChatArea extends UIHandler.Component {
     if (!App.session.isCurrentUserId(message.sender._id))
       this.updateStatus(message.createdAt);
   }
-
+  /**
+   * @param {number} index
+   * @param {Message} message */
+  updateMessage(index,message){
+    const component=this.#messages.get(index);
+    component.sent=true;
+    component
+    // this.#messages.update(index,component);
+  }
   getMessageCount() {
     return this.#messages.length;
+  }
+  get messages(){
+    return this.#messages;
   }
   /** @param {Date|String} text */
   updateStatus(text) {
@@ -120,44 +137,46 @@ class ChatArea extends UIHandler.Component {
   }
   /** @param {Chat} chat */
   static createBottomBar(chat) {
-    return DOM.create("div", {
+    const sendForm=DOM.create("form", {
+      class: "send-area",
+      action: "chat/" + chat.id + "/send",
+      method: "POST",
+      children: [
+        DOM.create("input", {
+          type: "text",
+          name: "content",
+          placeholder: "Type a message...",
+          autocomplete: "off"
+        }),//input
+        DOM.create("button", {
+          type: "submit",
+          class: "icon",
+          children: [
+            DOM.createNS("svg", {
+              viewBox: "0 0 32 32",
+              children: [
+                DOM.createNS("use", {
+                  "xlink:href": "#send-filled"
+                })// use
+              ]
+            })//svg
+          ]
+        })//div.icon
+      ]
+    }, {/* No styles */ }, {
+      submit(event) {
+        event.preventDefault();
+        App.sendMessage(event.currentTarget,chat);
+        event.currentTarget.reset();
+      } // onsubmit
+    });
+    const bottomBar=DOM.create("div", {
       class: "bottom-bar bottom-bar-right",
       children: [
-        DOM.create("form", {
-          class: "send-area",
-          action: "chat/" + chat.id + "/send",
-          method: "POST",
-          children: [
-            DOM.create("input", {
-              type: "text",
-              name: "content",
-              placeholder: "Type a message...",
-              autocomplete: "off"
-            }),//input
-            DOM.create("button", {
-              type: "submit",
-              class: "icon",
-              children: [
-                DOM.createNS("svg", {
-                  viewBox: "0 0 32 32",
-                  children: [
-                    DOM.createNS("use", {
-                      "xlink:href": "#send-filled"
-                    })// use
-                  ]
-                })//svg
-              ]
-            })//div.icon
-          ]
-        }, {/* No styles */ }, {
-          submit(event) {
-            event.preventDefault();
-            App.sendMessage(event.currentTarget);
-            event.currentTarget.reset();
-          } // onsubmit
-        }), // div.send-area
+        sendForm // div.send-area
       ]
     }); //div.bottom-bar
+    return {bottomBar,sendForm};
   }
 };
 

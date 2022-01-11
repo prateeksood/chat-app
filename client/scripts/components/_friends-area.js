@@ -88,28 +88,59 @@ class ChatItem extends ListItem {
       chat.messages[chat.messages.length - 1]?.createdAt ?? chat.createdAt, {
       click() {
         App.data.chats.select(chat.id);
-        const rightMain = document.querySelector(".right-main");
-        rightMain.scroll(0, rightMain.scrollHeight);
-
+      },
+      contextmenu:event=>{
+        event.preventDefault();
+        this.menu.mount(UI.container.chat, event);
       }
-    }
-    );
+    });
     this.chatArea = new ChatArea(chat);
+    this.menu = new UIMenu(chat.id);
+    this.menu.addItem("markUnread","Mark as unread",()=>{
+      this.toggleUnread();
+      this.menu.unmount();
+    });
   }
   /** @param {Message} message */
   addMessage(message) {
     this.chatArea.addMessage(message);
-    this.subText.innerHTML = message.content;
-    DOM.attr(this.timeText, {
-      time: message.createdAt.getTime(),
-      html: App.date.format(message.createdAt)
-    });
-    this.timeText.handler = () => {
-      DOM.attr(this.timeText, {
+    ChatItem.setText(this,message);
+  }
+  /**
+   * @param {number} index
+   * @param {Message} message */
+  updateMessage(index,message){
+    this.chatArea.updateMessage(index,message);
+    ChatItem.setText(this,message);
+  }
+  /** @param {boolean} [value] */
+  toggleUnread(value){
+    const hasAttribute=this.element.toggleAttribute("unread",value);
+    this.menu.getItem("markUnread").innerText=hasAttribute?"Mark as read":"Mark as unread";
+    return hasAttribute;
+  }
+  /**
+   * @param {ChatItem} chatItem
+   * @param {Message} message */
+  static setText(chatItem,message){
+    const isTempMessage=message.id.includes("temp_");
+    if(isTempMessage){
+      chatItem.subText.innerHTML = "<i>"+message.content+"</i>";
+      DOM.attr(chatItem.timeText, {text: "sending"});
+      chatItem.timeText.handler = () => {};
+    }else{
+      chatItem.subText.innerHTML = message.content;
+      DOM.attr(chatItem.timeText, {
         time: message.createdAt.getTime(),
         html: App.date.format(message.createdAt)
       });
-    };
+      chatItem.timeText.handler = () => {
+        DOM.attr(chatItem.timeText, {
+          time: message.createdAt.getTime(),
+          html: App.date.format(message.createdAt)
+        });
+      };
+    }
   }
 };
 
@@ -120,7 +151,16 @@ class ContactItem extends ListItem {
   constructor (user) {
     super(user.id, user.image, user.name, user.username, user.lastseen, {
       click: () => {
-        this.profile.mount(UI.container.main);
+        App.data.chats.forEach(data => {
+          if (data.participants.length === 2 && !data.isGroup) {
+            const participant = data.participants.some(participant => participant.id === user.id);
+            if (participant) {
+              const index = UI.list.chatItems.findIndex(({ id }) => id === data.id);
+              if (index >= 0)
+                UI.list.chatItems.select(index);
+            }
+          }
+        });
       },
       contextmenu: event => {
         event.preventDefault();
@@ -140,17 +180,8 @@ class ContactItem extends ListItem {
       });
       this.menu.remove();
     });
-    this.menu.addItem("chat", "Chat", () => {
-      App.data.chats.forEach(data => {
-        if (data.participants.length === 2 && !data.isGroup) {
-          const participant = data.participants.some(participant => participant.id === user.id);
-          if (participant) {
-            const index = UI.list.chatItems.findIndex(({ id }) => id === data.id);
-            if (index >= 0)
-              UI.list.chatItems.select(index);
-          }
-        }
-      });
+    this.menu.addItem("profile", "Profile", () => {
+      this.profile.mount(UI.container.main);
       this.menu.unmount();
     });
   }
