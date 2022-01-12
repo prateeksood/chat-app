@@ -59,6 +59,7 @@ module.exports = class ChatService {
             path: "messages",
             perDocumentLimit: 30,
             populate: [
+              "createdAt",
               {
                 path: "sender",
                 select: "_id username name"
@@ -90,7 +91,7 @@ module.exports = class ChatService {
         .skip(skips)
         .limit(pageSize)
         .sort([
-          ["updatedAt", -1]
+          ["lastMessageAt", -1]
         ]).lean();
       if (foundChats) return foundChats;
       return null;
@@ -123,8 +124,33 @@ module.exports = class ChatService {
       throw ex;
     }
   }
+  /**
+     * 
+     * @param {{}} queryParam
+     * @param {{}} data 
+     * @param {"push"|"pull"|none} method
+     */
+  static async findChatAndUpdate(queryParam, data, method = null) {
+    try {
+      let updatedChat;
+      if (method === "push")
+        updatedChat = await ChatModel.updateOne(queryParam, { $push: data }, { new: true }).lean();
+      else if (method === "pull") {
+        updatedChat = await ChatModel.updateOne(queryParam, { $pull: data }, { new: true }).lean();
+      }
+      else
+        updatedChat = await ChatModel.updateOne(queryParam, data, { new: true }).lean();
 
+      return updatedChat;
+
+    } catch (ex) {
+      throw ex;
+    }
+  }
   static isValidId(id) {
     return mongoose.isValidObjectId(id);
+  }
+  static castId(id) {
+    return mongoose.Types.ObjectId(id);
   }
 }

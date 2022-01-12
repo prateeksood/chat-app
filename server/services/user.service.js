@@ -22,9 +22,9 @@ module.exports = class UserService {
     try {
       let foundUsers = await UserModel.find({
         $or: [
-          {username: key},
-          {name: new RegExp(key, "i")},
-          {email: key}
+          { username: key },
+          { name: new RegExp(key, "i") },
+          { email: key }
         ]
       }).select({ password: false }).lean();
       console.log(foundUsers);
@@ -156,7 +156,7 @@ module.exports = class UserService {
     }
   }
   static isValidId(id) {
-    return mongoose.isValidObjectId(id);
+    return id && mongoose.isValidObjectId(id);
   }
   static getLoggedInUser(cookies) {
     const token = cookies.split(";").filter(cookieStr => {

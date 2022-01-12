@@ -1,5 +1,6 @@
 const MessageService = require("../services/message.service");
 const ChatService = require("../services/chat.service");
+const UserService = require("../services/user.service");
 // const connections = require("../socket")
 module.exports = class MessageController {
 
@@ -16,6 +17,7 @@ module.exports = class MessageController {
         response.status(400).json({ message: "Invalid chat id" });
         return
       }
+
       const foundMessages = await MessageService.getMessagesByChatId(chatID, { pageSize, skips });
       response.status(200).json(foundMessages);
     } catch (ex) {
@@ -43,11 +45,13 @@ module.exports = class MessageController {
       if (!savedMessage)
         throw "Unable to save message";
       const chat = await ChatService.findChatByIdAndUpdate(chatID, { messages: savedMessage._id }, "push");
-      chat.participants.forEach(user => {
+      await ChatService.findChatByIdAndUpdate(chatID, { lastMessageAt: new Date() });
+      chat.participants.forEach(async (user) => {
         if (user.user in global.connections && !user.user.equals(sender)) {
           global.connections[user.user].send(JSON.stringify({
             error: null, type: "message", data: { message: savedMessage }
           }));
+          await ChatService.findChatAndUpdate({ _id: chatID, "participants.user": user.user }, { "participants.$.meta.lastReceived": { message: savedMessage._id, time: new Date() } });
         }
       });
       response.status(200).json(savedMessage);

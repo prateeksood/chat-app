@@ -15,9 +15,13 @@ router.get("/", userController.fetchAllUsers);
 router.post("/login", userController.loginUser);
 router.post("/register", userController.registerUser);
 router.get("/search", authMiddleware, userController.searchUsers);
-router.get("/:id", authMiddleware, userController.searchUserById);
 router.post("/upload/profilePicture", authMiddleware, uploadMiddleware.single("profilePicture"), userController.uploadProfilePicture);
 
+router.get("/updateLastSeen", authMiddleware, userController.updateLastSeen);
+router.get("/getLastSeen", authMiddleware, userController.getLastSeen);
+router.get("/checkOnlineStatus", authMiddleware, userController.isUserOnline);
+
+router.get("/:id", authMiddleware, userController.searchUserById);
 router.post("/:requestRecieverId/request/send", authMiddleware, userController.sendRequest);
 router.post("/:requestRecieverId/request/accept", authMiddleware, userController.acceptRequest);
 router.post("/:requestRecieverId/request/delete", authMiddleware, userController.deleteRequest);

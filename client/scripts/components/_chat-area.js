@@ -9,7 +9,7 @@ class ChatArea extends UIHandler.Component {
    * @type {UIHandler.ComponentList<MessageComponent>}
   */
   #messages = new UIHandler.ComponentList();
-  scrolledTop=0;
+  scrolledTop = 0;
   /** @param {Chat} chat */
   constructor (chat) {
     const elements = {
@@ -55,22 +55,22 @@ class ChatArea extends UIHandler.Component {
     const component = new MessageComponent(message);
     component.init(message);
     this.#messages.add(component, atTop ? 0 : -1);
-    if (!App.session.isCurrentUserId(message.sender._id))
-      this.updateStatus(message.createdAt);
+    // if (!App.session.isCurrentUserId(message.sender._id))
+    // this.updateStatus(message.createdAt);
   }
   /**
    * @param {number} index
    * @param {Message} message */
-  updateMessage(index,message){
-    const component=this.#messages.get(index);
-    component.sent=true;
+  updateMessage(index, message) {
+    const component = this.#messages.get(index);
+    component.sent = true;
     component
     // this.#messages.update(index,component);
   }
   getMessageCount() {
     return this.#messages.length;
   }
-  get messages(){
+  get messages() {
     return this.#messages;
   }
   /** @param {Date|String} text */
@@ -137,7 +137,7 @@ class ChatArea extends UIHandler.Component {
   }
   /** @param {Chat} chat */
   static createBottomBar(chat) {
-    const sendForm=DOM.create("form", {
+    const sendForm = DOM.create("form", {
       class: "send-area",
       action: "chat/" + chat.id + "/send",
       method: "POST",
@@ -166,17 +166,17 @@ class ChatArea extends UIHandler.Component {
     }, {/* No styles */ }, {
       submit(event) {
         event.preventDefault();
-        App.sendMessage(event.currentTarget,chat);
+        App.sendMessage(event.currentTarget, chat);
         event.currentTarget.reset();
       } // onsubmit
     });
-    const bottomBar=DOM.create("div", {
+    const bottomBar = DOM.create("div", {
       class: "bottom-bar bottom-bar-right",
       children: [
         sendForm // div.send-area
       ]
     }); //div.bottom-bar
-    return {bottomBar,sendForm};
+    return { bottomBar, sendForm };
   }
 };
 

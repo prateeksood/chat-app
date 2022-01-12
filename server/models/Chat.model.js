@@ -19,17 +19,47 @@ const chatSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
+  lastMessageAt: {
+    type: Date,
+    default: Date.now,
+    required: true
+  },
   participants: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
     since: {
       type: Date,
       default: Date.now,
       required: true
-    }
+    },
+    meta: {
+      lastRead: {
+        message: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Message"
+        },
+        time: {
+          type: Date,
+          default: Date.now,
+          required: true
+        }
+      },
+      lastReceived: {
+        message: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Message"
+        },
+        time: {
+          type: Date,
+          default: Date.now,
+          required: true
+        }
+      },
+    },
+    _id: false
   }],
   messages: {
     type: [mongoose.Schema.Types.ObjectId],

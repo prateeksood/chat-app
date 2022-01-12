@@ -82,6 +82,10 @@ module.exports = class ChatController {
       const { pageSize, skips } = request.query;
       const { _id: currentUserId } = request.user;
       const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId }, { pageSize, skips });
+      foundChats.forEach(async chat => {
+        const lastMessageId = chat.messages[0];
+        await ChatService.findChatAndUpdate({ _id: chat._id, "participants.user": currentUserId }, { "participants.$.meta.lastReceived": { message: lastMessageId, time: new Date() } });
+      })
       response.status(200).json(foundChats);
     } catch (ex) {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
