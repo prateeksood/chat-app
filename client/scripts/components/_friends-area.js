@@ -89,14 +89,16 @@ class ChatItem extends ListItem {
       click() {
         App.data.chats.select(chat.id);
       },
-      contextmenu:event=>{
+      contextmenu: event => {
         event.preventDefault();
         this.menu.mount(UI.container.chat, event);
       }
     });
+    this.isGroup = chat.isGroup;
+    this.participants = chat.participants;
     this.chatArea = new ChatArea(chat);
     this.menu = new UIMenu(chat.id);
-    this.menu.addItem("markUnread","Mark as unread",()=>{
+    this.menu.addItem("markUnread", "Mark as unread", () => {
       this.toggleUnread();
       this.menu.unmount();
     });
@@ -104,31 +106,31 @@ class ChatItem extends ListItem {
   /** @param {Message} message */
   addMessage(message) {
     this.chatArea.addMessage(message);
-    ChatItem.setText(this,message);
+    ChatItem.setText(this, message);
   }
   /**
    * @param {number} index
    * @param {Message} message */
-  updateMessage(index,message){
-    this.chatArea.updateMessage(index,message);
-    ChatItem.setText(this,message);
+  updateMessage(index, message) {
+    this.chatArea.updateMessage(index, message);
+    ChatItem.setText(this, message);
   }
   /** @param {boolean} [value] */
-  toggleUnread(value){
-    const hasAttribute=this.element.toggleAttribute("unread",value);
-    this.menu.getItem("markUnread").innerText=hasAttribute?"Mark as read":"Mark as unread";
+  toggleUnread(value) {
+    const hasAttribute = this.element.toggleAttribute("unread", value);
+    this.menu.getItem("markUnread").innerText = hasAttribute ? "Mark as read" : "Mark as unread";
     return hasAttribute;
   }
   /**
    * @param {ChatItem} chatItem
    * @param {Message} message */
-  static setText(chatItem,message){
-    const isTempMessage=message.id.includes("temp_");
-    if(isTempMessage){
-      chatItem.subText.innerHTML = "<i>"+message.content+"</i>";
-      DOM.attr(chatItem.timeText, {text: "sending"});
-      chatItem.timeText.handler = () => {};
-    }else{
+  static setText(chatItem, message) {
+    const isTempMessage = message.id.includes("temp_");
+    if (isTempMessage) {
+      chatItem.subText.innerHTML = "<i>" + message.content + "</i>";
+      DOM.attr(chatItem.timeText, { text: "sending" });
+      chatItem.timeText.handler = () => { };
+    } else {
       chatItem.subText.innerHTML = message.content;
       DOM.attr(chatItem.timeText, {
         time: message.createdAt.getTime(),

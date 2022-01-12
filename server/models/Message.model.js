@@ -32,7 +32,8 @@ const messageSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
       required: true
-    }
+    },
+    _id: false
   }],
   readBy: [{
     user: {
@@ -44,7 +45,8 @@ const messageSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
       required: true
-    }
+    },
+    _id: false
   }],
   deletedBy: [{
     user: {
@@ -56,7 +58,8 @@ const messageSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
       required: true
-    }
+    },
+    _id: false
   }]
 }, {
   timestamps: true

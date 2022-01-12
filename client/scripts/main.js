@@ -29,6 +29,7 @@ const App = new class AppManager {
   socket = new class {
     /** @type {WebSocket} */
     #socket = null;
+    #lastSeenInterval;
     connect() {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
       this.#socket = new WebSocket("ws://" + location.host);
@@ -69,10 +70,22 @@ const App = new class AppManager {
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
+      this.#lastSeenInterval = setInterval(() => {
+        App.request("/user/updateLastSeen", {
+          method: "GET"
+        })
+          .then(data => {
+
+          })
+          .catch((ex) => {
+            console.log(ex);
+          });
+      }, 10000);
       UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
       console.log("Socket connection disconnected", data);
+      clearInterval(this.#lastSeenInterval);
       App.connectionInfo("Unable to connect to the server, please check your internet connection.", () => {
         this.connect();
       });
@@ -138,6 +151,9 @@ const App = new class AppManager {
     },
     /** @param {Date|number} date*/
     format(date) {
+      if (typeof date !== "object") {
+        date = new Date(date);
+      }
       let deltaDate = Date.now() - date;
       deltaDate = Math.floor(deltaDate / 1000);
       if (deltaDate < 10)
@@ -225,32 +241,32 @@ const App = new class AppManager {
   /**
    * @param {HTMLFormElement} form
    * @param {Chat} chat */
-  async sendMessage(form,chat) {
+  async sendMessage(form, chat) {
     const formData = new FormData(form);
-    const date=new Date();
-    const tempMessage=new Message("temp_"+date.getTime(), chat.id, {
+    const date = new Date();
+    const tempMessage = new Message("temp_" + date.getTime(), chat.id, {
       ...App.session.currentUser,
       _id: App.session.currentUser.id
     }, formData.get("content"), date);
-    const chatItemIndex=UI.list.chatItems.findIndex(chatItem => chatItem.id === tempMessage.chatId);
-    if(chatItemIndex>=0){
+    const chatItemIndex = UI.list.chatItems.findIndex(chatItem => chatItem.id === tempMessage.chatId);
+    if (chatItemIndex >= 0) {
 
       /** @type {ChatItem} */
-      const chatItem=UI.list.chatItems.get(chatItemIndex);
+      const chatItem = UI.list.chatItems.get(chatItemIndex);
       chatItem.addMessage(tempMessage);
 
-      await new Promise((resolve,reject)=>{
-        setTimeout(resolve,3000);
+      await new Promise((resolve, reject) => {
+        setTimeout(resolve, 3000);
       });
 
       App.request(form.action, {
         method: form.method ?? "POST",
         body: new URLSearchParams(formData)
       }).then(/** @param {MessageResponse} data */data => {
-        const message=Message.from(data);
-        const messageIndex=chatItem.chatArea.messages.findIndex(component=>component.id===tempMessage.id);
-        if(messageIndex>=0)
-          chatItem.updateMessage(messageIndex,message);
+        const message = Message.from(data);
+        const messageIndex = chatItem.chatArea.messages.findIndex(component => component.id === tempMessage.id);
+        if (messageIndex >= 0)
+          chatItem.updateMessage(messageIndex, message);
         else
           chatItem.addMessage(message);
       }).catch(ex => {
@@ -667,20 +683,37 @@ UI.onInit(ui => {
     item.mountAfter(chatList.getChild(index + 1));
   });
   chatItems.on("unselect", function (index) {
-    const chatItem=chatItems.get(index);
-    chatItem.chatArea.scrolledTop=chatItem.chatArea.sub.rightMain.element.scrollTop;
+    const chatItem = chatItems.get(index);
+    chatItem.chatArea.scrolledTop = chatItem.chatArea.sub.rightMain.element.scrollTop;
+    chatItem.chatArea.elements.subText.handler = () => { };
     chatItem.chatArea.unmount();
     chatItem.removeAttr("active");
   });
   chatItems.on("select", function (index) {
     if (container.chat.sub.messagesArea.sub.emptyArea.mounted)
       container.chat.sub.messagesArea.sub.emptyArea.unmount();
-    const chatItem=chatItems.get(index);
-    const {chatArea:{sub:{rightMain}, scrolledTop},chatArea}=chatItem;
-    chatItem.attr({active:true});
+    const chatItem = chatItems.get(index);
+    const { chatArea: { sub: { rightMain }, scrolledTop }, chatArea } = chatItem;
+    chatItem.attr({ active: true });
     chatArea.mount(container.chat.sub.messagesArea);
+    chatArea.elements.subText.handler = () => {
+      if (chatItem.isGroup) chatArea.elements.subText.innerHTML = "Click for group info.";
+      else {
+        const otherUser = chatItem.participants.filter(user => !App.session.isCurrentUserId(user.id))[0];
+        App.request(`/user/getLastSeen?user=${otherUser.id}`, {
+          method: "GET"
+        })
+          .then(data => {
+            const lastSeenTime = App.date.format(data.lastSeen);
+            chatArea.elements.subText.innerHTML = lastSeenTime === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
+          })
+          .catch((ex) => {
+            console.log(ex);
+          });
+      }
+    };
     rightMain.element.scroll({
-      top: scrolledTop===0 ? rightMain.element.scrollHeight : scrolledTop
+      top: scrolledTop === 0 ? rightMain.element.scrollHeight : scrolledTop
     });
     chatArea.elements.sendForm.elements.content.focus();
     unobserveLastMessage();

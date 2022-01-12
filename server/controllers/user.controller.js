@@ -336,4 +336,54 @@ module.exports = class UserController {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
+
+  /**
+  * @param {Request} request
+  * @param {Response} response
+  * @param {NextFunction} next
+  */
+  static async updateLastSeen(request, response, next) {
+    try {
+      const { _id: currentUserId } = request.user;
+      const updatedUser = await UserService.findUserByIdAndUpdate(currentUserId, { lastSeen: new Date() });
+      response.status(200).json(updatedUser);
+    } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
+
+  /**
+  * @param {Request} request
+  * @param {Response} response
+  * @param {NextFunction} next
+  */
+  static async getLastSeen(request, response, next) {
+    try {
+      const { user: targetUserId } = request.query;
+      const foundUser = await UserService.getSingleUserByParams({ _id: targetUserId }, false);
+      response.status(200).json({ lastSeen: foundUser.lastSeen });
+    } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
+
+  /**
+  * @param {Request} request
+  * @param {Response} response
+  * @param {NextFunction} next
+  */
+  static async isUserOnline(request, response, next) {
+    try {
+      const { user: targetUserId } = request.query;
+      if (!UserService.isValidId(targetUserId))
+        throw new Error("Invalid User ID");
+      // const tenSeconds = 10000;
+      // const foundUser = await UserService.getSingleUserByParams({ _id: currentUserId }, false);
+      // const isOnline = Math.abs(new Date(foundUser.lastSeen) - new Date()) <= tenSeconds;
+      const isOnline = (targetUserId in global.connections);
+      response.status(200).json({ isOnline });
+    } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
 }

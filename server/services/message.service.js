@@ -114,7 +114,29 @@ module.exports = class MessageService {
       throw ex;
     }
   }
-
+  /**
+  * 
+  * @param {string|mongoose.Types.ObjectId} id 
+  * @param {{}} data 
+  * @param {"push"|"pull"|none} method
+  * @returns {User }
+  */
+  static async findMessageByIdAndUpdate(id, data, method = null) {
+    try {
+      let updatedMessage;
+      if (method === "push")
+        updatedMessage = await MessageModel.findByIdAndUpdate(id, { $push: data }, { new: true }).lean();
+      else if (method === "pull") {
+        updatedMessage = await MessageModel.findByIdAndUpdate(id, { $pull: data }, { new: true }).lean();
+      } else if (method === "pop") {
+        updatedMessage = await MessageModel.findByIdAndUpdate(id, { $pop: data }, { new: true }).lean();
+      } else
+        updatedMessage = await MessageModel.findByIdAndUpdate(id, data, { new: true }).lean();
+      return updatedMessage;
+    } catch (ex) {
+      throw ex;
+    }
+  }
   static isValidId(id) {
     return mongoose.isValidObjectId(id);
   }

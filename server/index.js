@@ -51,8 +51,13 @@ socketServer.on("connection", function (socket, request) {
     return;
   }
   const user = UserService.getLoggedInUser(request.headers.cookie);
+  if (!user) {
+    socket.send(JSON.stringify({ error: "Kindly login to continue", data: null, type: null }));
+    return;
+  }
   global.connections[user._id] = socket;
   console.log("Socked connected: ", request.url, "for", user._id);
+  console.log("here", (new Date()))
   // console.log({ connection: global.connections });
 
   socket.send(JSON.stringify({
