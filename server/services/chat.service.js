@@ -62,21 +62,21 @@ module.exports = class ChatService {
               "createdAt",
               {
                 path: "sender",
-                select: "_id username name"
+                select: "_id username name image"
               }, {
                 path: "receivedBy.user",
-                select: "_id username name "
+                select: "_id username name image"
               }, {
                 path: "readBy.user",
-                select: " _id username name "
+                select: " _id username name image"
               }, {
                 path: "deletedBy.user",
-                select: "_id username name}"
+                select: "_id username name image"
               }, {
                 path: "reference",
                 populate: [{
                   path: "sender",
-                  select: "_id username name"
+                  select: "_id username name image"
                 }]
               }
             ],
@@ -85,7 +85,7 @@ module.exports = class ChatService {
             }
           }, {
             path: "participants.user",
-            select: "_id name username"
+            select: "_id name username image"
           }
         ])
         .skip(skips)

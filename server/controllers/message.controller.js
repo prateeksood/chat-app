@@ -48,7 +48,7 @@ module.exports = class MessageController {
       await ChatService.findChatByIdAndUpdate(chatID, { lastMessageAt: new Date() });
       chat.participants.forEach(async (user) => {
         if (user.user in global.connections && !user.user.equals(sender)) {
-          global.connections[user.user].send(JSON.stringify({
+          global.connections[user.user].socket.send(JSON.stringify({
             error: null, type: "message", data: { message: savedMessage }
           }));
           await ChatService.findChatAndUpdate({ _id: chatID, "participants.user": user.user }, { "participants.$.meta.lastReceived": { message: savedMessage._id, time: new Date() } });

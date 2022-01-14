@@ -11,11 +11,13 @@ router.get("/auth", authMiddleware, async (request, response) => {
     response.status(401).send("Invalid Token, Access Denied");
   }
 });
+router.post("/logout", userController.logout);
 router.get("/", userController.fetchAllUsers);
 router.post("/login", userController.loginUser);
 router.post("/register", userController.registerUser);
 router.get("/search", authMiddleware, userController.searchUsers);
 router.post("/upload/profilePicture", authMiddleware, uploadMiddleware.single("profilePicture"), userController.uploadProfilePicture);
+router.post("/update/:field", authMiddleware, userController.updateField);
 
 router.get("/updateLastSeen", authMiddleware, userController.updateLastSeen);
 router.get("/getLastSeen", authMiddleware, userController.getLastSeen);

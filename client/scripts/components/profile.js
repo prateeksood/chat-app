@@ -47,18 +47,49 @@ class Profile extends UIHandler.Component{
       ]
     });
   }
+  /** @param {User} user */
   static createPictureRow(user){
+    const dpHolder=DOM.create("div",{class:"dp-holder"},{
+      backgroundImage:`url("${user.image}")`
+    });
+    const button=Profile.createButton("edit",function(){
+      Profile.changeButtonType(button,"edit");
+      const file=DOM.create("input",{
+        type:"file",
+        accept:"image/jpeg, image/png"
+      },{/* no style */},{
+        async change(){
+          Profile.changeButtonType(button,"processing");
+          const formData=new FormData();
+          formData.append("profilePicture",file.files[0]);
+          /** @type {UserResponse} */
+          const response=await App.request("user/upload/profilePicture",{
+            method:"POST",
+            body:formData
+          },false);
+          if(response){
+            DOM.style(dpHolder,{backgroundImage:`url("${user.setImage(response.image)}")`})
+            UI.container.chat.sub.userDPHolder.sub.image.attr({src:user.image});
+          }
+          Profile.changeButtonType(button,"edit");
+        }
+      });
+      file.click();
+    });
     return DOM.create("div",{
       class:"row column",
       children:[
         DOM.create("div",{
           class:"picture-container",
           children:[
-            DOM.create("div",{class:"dp-holder"},{
-              backgroundImage:`url("${user.image}")`
-            }), // div.dp-holder
-            Profile.createButton("edit") // button.icon.edit
+            dpHolder, // div.dp-holder
+            button // button.icon.edit
           ]
+        },{/* no style */},{
+          // submit(event){
+          //   event.preventDefault();
+          //   console.log();
+          // }
         })
       ]
     });
@@ -96,8 +127,26 @@ class Profile extends UIHandler.Component{
           input.disabled=false;
           input.focus();
         }),
-        Profile.createButton("accept",function(){
+        Profile.createButton("accept",async function(){
+          input.disabled=true;
           DOM.attr(rowField,{state:"process"});
+          const formData=new FormData();
+          formData.append("value", input.value);
+          /** @type {UserResponse} */
+          const response=await App.request("user/update/"+fieldName,{
+            method:"POST",
+            body:new URLSearchParams(formData)
+          },false);
+          if(response){
+            value=input.value;
+            App.popAlert(fieldName," updated");
+            rowField.removeAttribute("state");
+            input.blur();
+          }else{
+            input.disabled=false;
+            input.focus();
+            DOM.attr(rowField,{state:"open"});
+          }
         }),
         Profile.createButton("cancel",function(){
           rowField.removeAttribute("state");
@@ -149,6 +198,24 @@ class Profile extends UIHandler.Component{
         }) // svg
       ]
     }); // button.icon.edit
+  }
+  /**
+   * @param {HTMLButtonElement} button
+   * @param {keyof Profile.buttons} type */
+  static changeButtonType(button,type,size=32){
+    button.innerHTML="";
+    DOM.attr(button,{
+      children:[
+        DOM.createNS("svg",{
+          "viewBox":"0 0 "+size+" "+size,
+          children:[
+            DOM.createNS("use",{
+              "xlink:href": "#"+Profile.buttons[type]
+            }) // use
+          ]
+        })
+      ]
+    });
   }
 }
 

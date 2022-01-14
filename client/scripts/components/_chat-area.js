@@ -80,9 +80,8 @@ class ChatArea extends UIHandler.Component {
     else
       this.elements.subText.handler = () => {
         const time = App.date.format(text);
-        this.elements.subText.innerHTML = time === "just now" ? "Active now" : time;
+        this.elements.subText.innerHTML = time === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
       };
-    this.elements.subText.handler();
   }
   /** @param {Chat} chat */
   static createTopBar(chat) {
