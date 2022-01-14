@@ -7,8 +7,8 @@ const profilePictureStorage = multer.diskStorage({
     callBack(null, path.join(__dirname, '../public/uploads/profilePictures'));
   },
   filename: (request, file, callBack) => {
-    const { username } = request.body;
-    callBack(null, `${username}_${Date.now()}${path.extname(file.originalname)}`)
+    const { _id } = request.user;
+    callBack(null, `${_id}_${Date.now()}${path.extname(file.originalname)}`)
   }
 });
 const profilePictureFilter = (request, file, cb) => {

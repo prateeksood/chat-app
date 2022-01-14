@@ -6,7 +6,7 @@ interface User {
   name: string;
   password: string;
   image: string;
-  lastseen: Date;
+  lastSeen: Date;
   contacts: {
     user: ObjectId, // User.id
     since: Date

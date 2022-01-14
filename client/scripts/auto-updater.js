@@ -3,11 +3,25 @@ class AutoUpdater extends HTMLElement {
   static #listener = new Map();
   static timeout = {};
   #handler;
-  #timeoutTime = 5000;
+  #timeoutTime = 60000;
   /** @param {<>(handler:AutoUpdater) void} handler */
   constructor (handler) {
     super();
     this.#handler = handler ?? (() => { });
+    // AutoUpdater.#observer.observe(this,{
+    //   attributes:true,
+    //   attributeFilter:["update-time"]
+    // });
+  }
+  get updateTime(){
+    return this.#timeoutTime;
+  }
+  set updateTime(value){
+    if(value>0 && value!==this.#timeoutTime){
+      AutoUpdater.#getListener(this.#timeoutTime).off(this.#handler);
+      this.#timeoutTime=value;
+      AutoUpdater.#getListener(this.#timeoutTime).on(this.#handler);
+    }
   }
   get handler() {
     return this.#handler;
@@ -35,6 +49,11 @@ class AutoUpdater extends HTMLElement {
       this.#listener.get(timeout).trigger();
     }, timeout);
   }
+  // static #observer=new MutationObserver(mutations=>{
+  //   mutations.forEach(record=>{
+  //     record.target.updateTime=parseInt(record.target.getAttribute("update-time")??60000);
+  //   });
+  // });
   connectedCallback() {
     const timeoutTime = this.getAttribute("timeout");
     this.#timeoutTime = timeoutTime ? parseInt(timeoutTime) : this.#timeoutTime;

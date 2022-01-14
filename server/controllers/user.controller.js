@@ -11,6 +11,11 @@ const UserService = require("../services/user.service");
 const dataValidation = require('../validations/register.validation');
 
 module.exports = class UserController {
+  /** @type {(request:Request,response:Response,next:NextFunction)=>User} */
+  static async logout(request, response){
+    response.clearCookie("token");
+    response.status(200).json({message:"You are logged out"});
+  }
   /**
    * @param {Request} request
    * @param {Response} response
@@ -333,6 +338,30 @@ module.exports = class UserController {
       const updatedUser = await UserService.findUserByIdAndUpdate(currentUserId, { image: filename });
       response.status(200).json(updatedUser);
     } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
+  /** @type {(request:Request,response:Response,next:NextFunction)=>User} */
+  static async updateField(request, response, next){
+    try{
+      if(["name"].includes(request.params.field)){
+        const value=request.body.value?.trim();
+        console.log(value,request.params.field,dataValidation[request.params.field].test(value))
+        if(value && dataValidation[request.params.field].test(value)){
+          const data_object={};
+          data_object[request.params.field]=value;
+          // switch(request.params.field){
+          //   case "name":
+          //     // pata nahi kya karna hai
+          //   break;
+          // }
+          const updatedUser=await UserService.findUserByIdAndUpdate(request.user._id, data_object);
+          response.status(200).json(updatedUser);
+        }else
+          response.status(400).json({message:"A value is required"});
+      }else
+        response.status(400).json({message:"A valid field is required"});
+    }catch(ex){
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }

@@ -33,11 +33,7 @@ class User {
     const user = new User(_id, username, name);
     user.email = userResponse.email ?? null;
     user.gender = userResponse.gender ?? 0;
-    user.image = userResponse.image ?? (App.session.isCurrentUserId(user.id)
-      ? User.defaultImage : (user.gender<1
-        ? "resources/illustrations/male_avatar.svg" :
-        "resources/illustrations/female_avatar.svg"
-      ));
+    user.setImage(userResponse.image);
     user.lastseen = userResponse.lastSeen ?? null;
     user.contacts = contacts instanceof Array ?
       contacts.map(contact=>Contact.from(contact)) :
@@ -49,6 +45,15 @@ class User {
   }
   static get defaultImage(){
     return "resources/illustrations/profile_pic.svg";
+  }
+  /** @param {string} src */
+  setImage(src){
+    this.image=src? "/resources/profilePictures/"+src : (App.session.isCurrentUserId(this.id)
+      ? User.defaultImage : (this.gender<1
+        ? "resources/illustrations/male_avatar.svg" :
+        "resources/illustrations/female_avatar.svg"
+      ));
+    return this.image;
   }
 };
 

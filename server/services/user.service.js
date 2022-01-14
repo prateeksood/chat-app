@@ -57,7 +57,7 @@ module.exports = class UserService {
     try {
       let foundUser = await UserModel.findById(id).select({ password: false }).populate([{
         path: "contacts.user",
-        select: "_id name username lastSeen"
+        select: "_id name username lastSeen image"
       }]).lean();
       return foundUser;
     } catch (ex) {
@@ -132,9 +132,8 @@ module.exports = class UserService {
   /**
    * 
    * @param {string|mongoose.Types.ObjectId} id 
-   * @param {{}} data 
+   * @param {mongoose.OnlyFieldsOfType<mongoose.__UpdateQueryDef<User>>} data 
    * @param {"push"|"pull"|none} method
-   * @returns {User }
    */
   static async findUserByIdAndUpdate(id, data, method = null) {
     try {

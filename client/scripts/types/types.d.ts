@@ -37,10 +37,11 @@ interface ChatResponse{
 }
 
 interface SocketResponse{
-  message:{
+  message(data:{
     message:MessageResponse
-  };
-  "contact.update":{
-    contacts:UserResponse[]
-  };
+  }):void;
+  activeContacts(data:{
+    contacts:String[],
+    lastSeen:Date
+  }):void;
 }

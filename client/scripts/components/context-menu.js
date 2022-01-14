@@ -5,18 +5,22 @@
 /** @extends {UIHandler.Component<HTMLMenuElement>} */
 class UIMenu extends UIHandler.Component{
   static #gap_at_end=16;
-  constructor(id=""){
+  /**
+   * Unmount element when clicked outside of it
+   * @type {EventListener} */
+  #clickOutside;
+  /** @param {HTMLElement} activatedBy */
+  constructor(id="", activatedBy=null){
     const element=DOM.create("menu",{class:"context-menu"});
     super("menu"+id,element);
-    /** Unmount element when clicked outside of it */
-    window.addEventListener("click",event=>this.#clickOutside(event));
-  }
-  /** @param {MouseEvent} event */
-  #clickOutside(event){
-    if(!event.path.includes(this.element)){
-      this.unmount();
-      window.removeEventListener("click",event=>this.#clickOutside(event));
-    }
+    this.activatedBy=activatedBy;
+    const that=this;
+    this.#clickOutside=event=>{
+      if(!event.path.includes(that.element) && !event.path.includes(that.activatedBy)){
+        that.unmount();
+        window.removeEventListener("click",that.#clickOutside);
+      }
+    };
   }
   getItem(name){
     return this.element.children[name];
@@ -55,6 +59,8 @@ class UIMenu extends UIHandler.Component{
    * @param {PointerEvent} event
    */
   mount(parent,event){
+    this.activatedBy=event.target;
+    window.addEventListener("click",this.#clickOutside);
     super.mount(parent);
     /** Preventing this.element from displaying outside the parent.element */
     const width_diff=parent.element.clientWidth-this.element.clientWidth-UIMenu.#gap_at_end;

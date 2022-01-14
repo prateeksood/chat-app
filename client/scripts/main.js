@@ -30,31 +30,9 @@ const App = new class AppManager {
     /** @type {WebSocket} */
     #socket = null;
     #lastSeenInterval;
-    connect() {
-      UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
-      this.#socket = new WebSocket("ws://" + location.host);
-      this.#socket.onmessage = event => {
-        const response = JSON.parse(event.data);
-        if (response.error)
-          this.onerror(response.error);
-        else if (response.type === "connection")
-          this.onconnect(response.data);
-        else
-          this.onmessage(response.type, response.data);
-      };
-      this.#socket.onclose = event => {
-        this.ondisconnect(event);
-      };
-    }
-    send(data) {
-      this.#socket.send(JSON.stringify(data));
-    }
-    disconnect() {
-      this.#socket.close();
-    }
-    /** @type {<K extends keyof SocketResponse>(type:K,data:SocketResponse[K])=>this} */
-    onmessage(type, data) {
-      if (type == "message") {
+    #messageListener=new Listeners(["message","activeContacts"]);
+    constructor(){
+      this.onmessage("message",data=>{
         const message = Message.from(data.message);
         console.log(message)
         UI.list.chatItems.find((chatItem, index) => {
@@ -66,7 +44,46 @@ const App = new class AppManager {
           }
           return false;
         });
-      } else if (type === "contact.update") { }
+      });
+      this.onmessage("activeContacts",data=>{
+        console.log(data.contacts);
+        UI.list.chatItems.find(/** @param {ChatItem} chatItem*/(chatItem)=>{
+          if(!chatItem.isGroup && data.contacts.includes(chatItem.id))
+            chatItem.chatArea.updateStatus(data.lastSeen);
+        });
+      });
+    }
+    connect(onopen=()=>{}) {
+      UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
+      this.#socket = new WebSocket("ws://" + location.host);
+      this.#socket.onopen=onopen;
+      this.#socket.onmessage = event => {
+        const response = JSON.parse(event.data);
+        if (response.error)
+          this.onerror(response.error);
+        else if (response.type === "connection")
+          this.onconnect(response.data);
+        else
+          this.#messageListener.trigger(response.type, response.data);
+      };
+      this.#socket.onclose = event => {
+        this.ondisconnect(event);
+      };
+    }
+    /** @param {{type:"userRefs",content:any}} data */
+    send(data) {
+      this.#socket.send(JSON.stringify(data));
+    }
+    disconnect() {
+      this.#socket.close();
+    }
+    /** @param {[user_id:string]} refs */
+    updateRefs(refs=[]){
+      this.#socket.send({})
+    }
+    /** @type {<K extends keyof SocketResponse>(type:K,action:SocketResponse[K])} */
+    onmessage(type, action) {
+      this.#messageListener.on(type, action);
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
@@ -217,15 +234,7 @@ const App = new class AppManager {
     })
       .then(async user => {
         App.session.currentUser = User.from(user);
-        App.session.currentUser.image = User.defaultImage;
         App.loadUser(App.session.currentUser);
-        App.socket.connect();
-      })
-      .then(() => {
-        App.populateFriendsList();
-        UI.container.prompts.style({ display: "none" });
-        UI.container.auth.unmount();
-        UI.container.chat.mount(UI.container.main);
       })
       .catch((ex) => {
         console.log(ex)
@@ -233,10 +242,13 @@ const App = new class AppManager {
         UI.container.auth.mount(UI.container.main);
       });
   }
-  logout() {
-    App.session.removeCurrentUser();
-    App.socket.disconnect();
-    window.location.reload();
+  async logout() {
+    const response=await App.request("user/logout",{method:"POST"});
+    if(response){
+      App.session.removeCurrentUser();
+      App.socket.disconnect();
+      App.popAlert(response.message);
+    }
   }
   /**
    * @param {HTMLFormElement} form
@@ -292,12 +304,15 @@ const App = new class AppManager {
    * @param {RequestInfo} object
    * @returns {Promise<{}>}
    */
-  request(url, object = null) {
+  request(url, object = null, allowReject = true) {
     return new Promise(function (resolve, reject) {
       fetch(url, object).then(async response => {
         if (!response.ok) {
           const error = await response.text();
-          reject(error);
+          if(allowReject)
+            reject(error);
+          else
+            resolve(null);
           App.popAlert(error);
         } else
           resolve(await response.json());
@@ -306,6 +321,16 @@ const App = new class AppManager {
   }
   /** @param {User} user */
   loadUser(user) {
+    App.socket.connect(()=>{
+      App.socket.send({
+        type:"userRefs",
+        content:user.contacts.map(contact=>contact.id)
+      });
+    });
+    App.populateFriendsList();
+    UI.container.prompts.style({ display: "none" });
+    UI.container.auth.unmount();
+    UI.container.chat.mount(UI.container.main);
     UI.container.chat.sub.userDPHolder.sub.image.attr({
       src: user.image
     });
@@ -421,11 +446,8 @@ UI.onInit(ui => {
           // App.auth();
           const user = await request.json();
           App.session.currentUser = User.from(user);
-          App.socket.connect();
-          App.populateFriendsList();
+          App.loadUser(App.session.currentUser);
           App.popAlert("Login successful!🙌");
-          container.auth.unmount();
-          container.chat.mount(UI.container.main);
         } else {
           App.popAlert(await request.text());
         }
@@ -476,11 +498,8 @@ UI.onInit(ui => {
           // App.auth();
           const user = await request.json();
           App.session.currentUser = User.from(user);
-          App.socket.connect();
-          App.populateFriendsList();
+          App.loadUser(App.session.currentUser);
           App.popAlert("Registration successful!😍");
-          container.auth.unmount();
-          container.chat.mount(UI.container.main);
         } else {
           App.popAlert(await request.text());
         }
@@ -510,7 +529,6 @@ UI.onInit(ui => {
   });
 
   const { actions, contactList, chatList, peopleSearchList } = container.chat.sub;
-
 
   actions.sub.findPeople.event({
     click() {
@@ -542,8 +560,19 @@ UI.onInit(ui => {
       }
     }
   });
+
+  const settingsMenu = new UIMenu("settingsMenu");
+  settingsMenu.addItem("logout", "Logout", () => {
+    App.logout();
+  });
   actions.sub.settings.event({
-    click() { }
+    click(event) {
+      console.log(settingsMenu);
+      if(!settingsMenu.mounted)
+        settingsMenu.mount(container.main, event);
+      else
+        settingsMenu.unmount();
+    }
   });
 
   chatList.sub.emptyArea.sub.startChat.event({
@@ -619,32 +648,6 @@ UI.onInit(ui => {
     }
   });
 
-  // demo code
-  const menu = new UIMenu("chat");
-  let itemCount = 0;
-  menu.addItem("delete", "Remove Last Item", () => {
-    if (itemCount > 0)
-      menu.removeItem("item" + --itemCount);
-  });
-  menu.addItem("insert", "Add Item", () => {
-    menu.addItem("item" + itemCount, "Item " + itemCount + " added", () => { });
-    itemCount++;
-  });
-  // or
-  menu.addItems([{
-    name: "close",
-    text: "Close",
-    action() {
-      menu.unmount();
-    }
-  }, {
-    name: "delete",
-    text: "Delete Menu",
-    action() {
-      menu.remove();
-    }
-  }]);
-
   container.chat.sub.messagesArea.event({
     /** @param {PointerEvent} event */
     contextmenu(event) {
@@ -685,7 +688,6 @@ UI.onInit(ui => {
   chatItems.on("unselect", function (index) {
     const chatItem = chatItems.get(index);
     chatItem.chatArea.scrolledTop = chatItem.chatArea.sub.rightMain.element.scrollTop;
-    chatItem.chatArea.elements.subText.handler = () => { };
     chatItem.chatArea.unmount();
     chatItem.removeAttr("active");
   });
@@ -696,22 +698,23 @@ UI.onInit(ui => {
     const { chatArea: { sub: { rightMain }, scrolledTop }, chatArea } = chatItem;
     chatItem.attr({ active: true });
     chatArea.mount(container.chat.sub.messagesArea);
-    chatArea.elements.subText.handler = () => {
-      if (chatItem.isGroup) chatArea.elements.subText.innerHTML = "Click for group info.";
-      else {
-        const otherUser = chatItem.participants.filter(user => !App.session.isCurrentUserId(user.id))[0];
-        App.request(`/user/getLastSeen?user=${otherUser.id}`, {
-          method: "GET"
-        })
-          .then(data => {
-            const lastSeenTime = App.date.format(data.lastSeen);
-            chatArea.elements.subText.innerHTML = lastSeenTime === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
-          })
-          .catch((ex) => {
-            console.log(ex);
-          });
-      }
-    };
+    // chatItem.update();
+    // chatArea.elements.subText.handler = () => {
+    //   if (chatItem.isGroup) chatArea.elements.subText.innerHTML = "Click for group info.";
+    //   else {
+    //     const otherUser = chatItem.participants.filter(user => !App.session.isCurrentUserId(user.id))[0];
+    //     App.request(`/user/getLastSeen?user=${otherUser.id}`, {
+    //       method: "GET"
+    //     })
+    //       .then(data => {
+    //         const lastSeenTime = App.date.format(data.lastSeen);
+    //         chatArea.elements.subText.innerHTML = lastSeenTime === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
+    //       })
+    //       .catch((ex) => {
+    //         console.log(ex);
+    //       });
+    //   }
+    // };
     rightMain.element.scroll({
       top: scrolledTop === 0 ? rightMain.element.scrollHeight : scrolledTop
     });
