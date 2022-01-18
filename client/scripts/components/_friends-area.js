@@ -19,6 +19,7 @@ class ListItem extends UIHandler.Component {
     time = new Date(time);
     const element = DOM.create("div", {
       class: "list-item",
+      dataOnline: false,
       cId: itemId,
     }, {}, events);
 
@@ -27,6 +28,9 @@ class ListItem extends UIHandler.Component {
     this.image = DOM.create("img", {
       src: imageSrc,
       alt: "User Image"
+    });
+    this.onlineDot = DOM.create("div", {
+      class: "online-dot"
     });
     this.mainText = DOM.create("div", {
       class: "main-text",
@@ -54,7 +58,8 @@ class ListItem extends UIHandler.Component {
         DOM.create("div", {
           class: "dp-holder",
           children: [
-            this.image  //img
+            this.image,  //img
+            this.onlineDot
           ]
         }),  //div.dp-holder
         DOM.create("div", {

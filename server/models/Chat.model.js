@@ -58,6 +58,11 @@ const chatSchema = new mongoose.Schema({
           required: true
         }
       },
+      hasAcceptedInvite: {
+        type: Boolean,
+        default: false,
+        required: true
+      }
     },
     _id: false
   }],

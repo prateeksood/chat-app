@@ -4,6 +4,7 @@
 class Session {
   /**@type {User} */
   #currentUser = null;
+  #onlineContacts = [];
   /** Returns id of currently logged in user */
   static currentUserID() {
     return localStorage.getItem("token");
@@ -26,5 +27,12 @@ class Session {
     if (this.#currentUser)
       return id === this.#currentUser.id;
     return false
+  }
+
+  get onlineContacts() {
+    return this.#onlineContacts;
+  }
+  set onlineContacts(onlineContacts) {
+    this.#onlineContacts = onlineContacts;
   }
 }

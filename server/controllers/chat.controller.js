@@ -108,4 +108,22 @@ module.exports = class ChatController {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
+  static async updateLastRead(request, response, next) {
+    try {
+
+      const { _id: currentUserId } = request.user;
+      const { message } = request.query;
+      const { chatID } = request.params;
+      let lastMessageId = message;
+      if (!lastMessageId) {
+        const chat = await ChatService.getChatById(chatID);
+        lastMessageId = chat.messages[0]._id;
+      }
+      await ChatService.findChatAndUpdate({ _id: chatID, "participants.user": currentUserId }, { "participants.$.meta.lastRead": { message: lastMessageId, time: new Date() } });
+      response.status(200).json({ message: `Last read message updated to : ${lastMessageId}` });
+    } catch (ex) {
+      console.log(ex);
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+  }
 }

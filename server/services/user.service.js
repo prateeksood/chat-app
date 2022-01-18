@@ -102,9 +102,20 @@ module.exports = class UserService {
     try {
       let foundUser;
       if (!returnPassword)
-        foundUser = await UserModel.findOne(params).select({ password: false }).lean();
+        foundUser = await UserModel.findOne(params)
+          .select({ password: false })
+          .populate([{
+            path: "contacts.user",
+            select: "_id name username lastSeen image"
+          }])
+          .lean();
       else
-        foundUser = await UserModel.findOne(params).lean();
+        foundUser = await UserModel.findOne(params)
+          .populate([{
+            path: "contacts.user",
+            select: "_id name username lastSeen image"
+          }])
+          .lean();
       return foundUser;
     } catch (ex) {
       throw ex;
