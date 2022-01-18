@@ -6,10 +6,46 @@ const mongoose = require("mongoose");
 module.exports = class ChatService {
   static async getAllChats() {
     try {
-      const foundChats = await ChatModel.find();
+      const foundChats = await ChatModel.find()
+        .populate([
+          {
+            path: "messages",
+            perDocumentLimit: 30,
+            populate: [
+              "createdAt",
+              {
+                path: "sender",
+                select: "_id username name image"
+              }, {
+                path: "receivedBy.user",
+                select: "_id username name image"
+              }, {
+                path: "readBy.user",
+                select: " _id username name image"
+              }, {
+                path: "deletedBy.user",
+                select: "_id username name image"
+              }, {
+                path: "reference",
+                populate: [{
+                  path: "sender",
+                  select: "_id username name image"
+                }]
+              }
+            ],
+            options: {
+              sort: { updatedAt: -1 }
+            }
+          }, {
+            path: "participants.user",
+            select: "_id name username image"
+          }
+        ])
+        .sort([
+          ["lastMessageAt", -1]
+        ]).lean();
       if (foundChats.length > 0)
-        return foundChats.map(chatDocument => chatDocument.toObject());
-      return null;
+        return foundChats;
     } catch (ex) {
       throw ex;
     }
@@ -18,11 +54,43 @@ module.exports = class ChatService {
   static async getChatById(chatId) {
     try {
       if (mongoose.isValidObjectId(chatId)) {
-        const foundChat = await ChatModel.findById(chatId);
-        if (foundChat) {
-          return foundChat.toObject();
-        }
-        return null;
+        const foundChat = await ChatModel.findById(chatId)
+          .populate([
+            {
+              path: "messages",
+              perDocumentLimit: 30,
+              populate: [
+                "createdAt",
+                {
+                  path: "sender",
+                  select: "_id username name image"
+                }, {
+                  path: "receivedBy.user",
+                  select: "_id username name image"
+                }, {
+                  path: "readBy.user",
+                  select: " _id username name image"
+                }, {
+                  path: "deletedBy.user",
+                  select: "_id username name image"
+                }, {
+                  path: "reference",
+                  populate: [{
+                    path: "sender",
+                    select: "_id username name image"
+                  }]
+                }
+              ],
+              options: {
+                sort: { updatedAt: -1 }
+              }
+            }, {
+              path: "participants.user",
+              select: "_id name username image"
+            }
+          ])
+          .lean();
+        return foundChat;
       } else {
         throw "Invalid Chat ID";
       }

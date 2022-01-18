@@ -58,7 +58,7 @@ socketServer.on("connection", function (socket, request) {
     socket.send(JSON.stringify({ error: "Kindly login to continue", data: null, type: null }));
     return;
   }
-  global.connections[user._id] = {userRefs:[], socket};
+  global.connections[user._id] = { userRefs: [], socket };
   console.log("Socked connected: ", request.url, "for", user._id);
   console.log("here", (new Date()))
   // console.log({ connection: global.connections });
@@ -76,13 +76,13 @@ socketServer.on("connection", function (socket, request) {
     try {
       /** @type {{type:"userRefs"|"kuch_aur",content:any}} */
       const data = JSON.parse(rawData.toString());
-      response.dataType=data.type;
-      switch(data.type){
+      response.dataType = data.type;
+      switch (data.type) {
         case "userRefs":
           // console.log(data.content);
-          global.connections[user._id].userRefs=[];
-          data.content.forEach(id=>{
-            if(typeof id==="string")
+          global.connections[user._id].userRefs = [];
+          data.content.forEach(id => {
+            if (typeof id === "string")
               global.connections[user._id].userRefs.push(id);
           });
           break;
@@ -97,22 +97,22 @@ socketServer.on("connection", function (socket, request) {
   });
 });
 
-setInterval(async function(){
-  const lastSeen=new Date();
-  for(let userId in global.connections){
-    const user=await UserService.findUserByIdAndUpdate(userId,{lastSeen});
+setInterval(async function () {
+  const lastSeen = new Date();
+  for (let userId in global.connections) {
+    const user = await UserService.findUserByIdAndUpdate(userId, { lastSeen });
     // user.contacts.filter(contact=>contact.user in global.connections)
-    const contacts=[];
-    // console.log(user.name,user.contacts.map(c=>[c.user,global.connections[c.user]?.userRefs]));
-    for(let contact of user.contacts){
-      if(contact.user in global.connections && global.connections[contact.user].userRefs.includes(userId))
+    const contacts = [];
+    // console.log(user.name, user.contacts.map(c => [c.user, global.connections[c.user]?.userRefs]));
+    for (let contact of user.contacts) {
+      if (contact.user in global.connections && global.connections[contact.user].userRefs.includes(userId))
         contacts.push(contact);
     }
     global.connections[userId].socket.send(JSON.stringify({
-      error:null,type:"activeContacts",data:{lastSeen,contacts}
+      error: null, type: "activeContacts", data: { contacts }
     }));
   }
-},10000);
+}, 10000);
 
 // server.on("socket",function(request,socket,head){
 //   socketServer.handleUpgrade(request,socket,head,soc=>{

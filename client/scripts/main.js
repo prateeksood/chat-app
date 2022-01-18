@@ -30,12 +30,22 @@ const App = new class AppManager {
     /** @type {WebSocket} */
     #socket = null;
     #lastSeenInterval;
-    #messageListener=new Listeners(["message","activeContacts"]);
-    constructor(){
-      this.onmessage("message",data=>{
+    #messageListener = new Listeners(["message", "activeContacts"]);
+    constructor () {
+      this.onmessage("message", data => {
         const message = Message.from(data.message);
-        console.log(message)
         UI.list.chatItems.find((chatItem, index) => {
+          if (App.data.chats.getSelected() === message.chatId) {
+
+            App.request(`/chat/${message.chatId}/updateLastRead?message=${message.id}`, {
+              method: "GET"
+            })
+              .then(data => {
+              })
+              .catch((ex) => {
+                console.log(ex);
+              });
+          }
           if (chatItem.id === message.chatId) {
             /** @type {ChatItem} */
             const chatItem = UI.list.chatItems.get(index);
@@ -45,18 +55,27 @@ const App = new class AppManager {
           return false;
         });
       });
-      this.onmessage("activeContacts",data=>{
-        console.log(data.contacts);
-        UI.list.chatItems.find(/** @param {ChatItem} chatItem*/(chatItem)=>{
-          if(!chatItem.isGroup && data.contacts.includes(chatItem.id))
-            chatItem.chatArea.updateStatus(data.lastSeen);
-        });
+      this.onmessage("activeContacts", data => {
+        App.session.onlineContacts = data.contacts;
+        console.log("Online contacts", App.session.onlineContacts);
+        UI.list.chatItems.find(chatItem => {
+          const onlineContacts = chatItem.participants.filter(participant => data.contacts.some(contact => contact.user === participant.id && contact.user !== App.session.currentUser))
+          if (onlineContacts.length > 0) {
+            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", true);
+            chatItem.chatArea.elements.subText.innerHTML = "Online";
+          }
+          else {
+            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", false);
+          }
+        })
+
+
       });
     }
-    connect(onopen=()=>{}) {
+    connect(onopen = () => { }) {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
       this.#socket = new WebSocket("ws://" + location.host);
-      this.#socket.onopen=onopen;
+      this.#socket.onopen = onopen;
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
         if (response.error)
@@ -78,7 +97,7 @@ const App = new class AppManager {
       this.#socket.close();
     }
     /** @param {[user_id:string]} refs */
-    updateRefs(refs=[]){
+    updateRefs(refs = []) {
       this.#socket.send({})
     }
     /** @type {<K extends keyof SocketResponse>(type:K,action:SocketResponse[K])} */
@@ -87,17 +106,17 @@ const App = new class AppManager {
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
-      this.#lastSeenInterval = setInterval(() => {
-        App.request("/user/updateLastSeen", {
-          method: "GET"
-        })
-          .then(data => {
+      // this.#lastSeenInterval = setInterval(() => {
+      //   App.request("/user/updateLastSeen", {
+      //     method: "GET"
+      //   })
+      //     .then(data => {
 
-          })
-          .catch((ex) => {
-            console.log(ex);
-          });
-      }, 10000);
+      //     })
+      //     .catch((ex) => {
+      //       console.log(ex);
+      //     });
+      // }, 10000);
       UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
@@ -243,8 +262,8 @@ const App = new class AppManager {
       });
   }
   async logout() {
-    const response=await App.request("user/logout",{method:"POST"});
-    if(response){
+    const response = await App.request("user/logout", { method: "POST" });
+    if (response) {
       App.session.removeCurrentUser();
       App.socket.disconnect();
       App.popAlert(response.message);
@@ -309,7 +328,7 @@ const App = new class AppManager {
       fetch(url, object).then(async response => {
         if (!response.ok) {
           const error = await response.text();
-          if(allowReject)
+          if (allowReject)
             reject(error);
           else
             resolve(null);
@@ -321,10 +340,10 @@ const App = new class AppManager {
   }
   /** @param {User} user */
   loadUser(user) {
-    App.socket.connect(()=>{
+    App.socket.connect(() => {
       App.socket.send({
-        type:"userRefs",
-        content:user.contacts.map(contact=>contact.id)
+        type: "userRefs",
+        content: user.contacts.map(contact => contact.id)
       });
     });
     App.populateFriendsList();
@@ -568,7 +587,7 @@ UI.onInit(ui => {
   actions.sub.settings.event({
     click(event) {
       console.log(settingsMenu);
-      if(!settingsMenu.mounted)
+      if (!settingsMenu.mounted)
         settingsMenu.mount(container.main, event);
       else
         settingsMenu.unmount();
@@ -699,22 +718,35 @@ UI.onInit(ui => {
     chatItem.attr({ active: true });
     chatArea.mount(container.chat.sub.messagesArea);
     // chatItem.update();
-    // chatArea.elements.subText.handler = () => {
-    //   if (chatItem.isGroup) chatArea.elements.subText.innerHTML = "Click for group info.";
-    //   else {
-    //     const otherUser = chatItem.participants.filter(user => !App.session.isCurrentUserId(user.id))[0];
-    //     App.request(`/user/getLastSeen?user=${otherUser.id}`, {
-    //       method: "GET"
-    //     })
-    //       .then(data => {
-    //         const lastSeenTime = App.date.format(data.lastSeen);
-    //         chatArea.elements.subText.innerHTML = lastSeenTime === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
-    //       })
-    //       .catch((ex) => {
-    //         console.log(ex);
-    //       });
-    //   }
-    // };
+    chatArea.elements.subText.handler = () => {
+      const onlineContacts = chatItem.participants.filter(participant => App.session.onlineContacts.some(contact => contact.user === participant.id && contact.user !== App.session.currentUser))
+      if (chatItem.isGroup) chatArea.elements.subText.innerHTML = `${App.session.onlineContacts.length} members online`;
+      else if (onlineContacts.length > 0) {
+        chatArea.elements.subText.innerHTML = "Online";
+      }
+      else {
+        const otherUser = chatItem.participants.filter(user => !App.session.isCurrentUserId(user.id))[0];
+        App.request(`/user/getLastSeen?user=${otherUser.id}`, {
+          method: "GET"
+        })
+          .then(data => {
+            const lastSeenTime = App.date.format(data.lastSeen);
+            chatArea.elements.subText.innerHTML = lastSeenTime === "just now" ? "Online" : `Last seen ${lastSeenTime} ago`;
+            // chatItem.chatArea.updateStatus(lastSeenTime);
+          })
+          .catch((ex) => {
+            console.log(ex);
+          });
+      }
+    };
+    App.request(`/chat/${chatItem.id}/updateLastRead`, {
+      method: "GET"
+    })
+      .then(data => {
+      })
+      .catch((ex) => {
+        console.log(ex);
+      });
     rightMain.element.scroll({
       top: scrolledTop === 0 ? rightMain.element.scrollHeight : scrolledTop
     });

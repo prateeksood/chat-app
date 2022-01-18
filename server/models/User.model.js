@@ -39,7 +39,8 @@ const userSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
       required: true
-    }
+    },
+    _id: false
   }],
   sentRequests: [{
     user: {

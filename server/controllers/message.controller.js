@@ -47,6 +47,10 @@ module.exports = class MessageController {
       const chat = await ChatService.findChatByIdAndUpdate(chatID, { messages: savedMessage._id }, "push");
       await ChatService.findChatByIdAndUpdate(chatID, { lastMessageAt: new Date() });
       chat.participants.forEach(async (user) => {
+        if (user.user.equals(sender) && !user.meta.hasAcceptedInvite) {
+          await UserService.findUserByIdAndUpdate(sender, { contacts: chat.participants.filter(participant => !participant.user.equals(sender)) }, "push");
+          await ChatService.findChatAndUpdate({ _id: chatID, "participants.user": sender }, { "participants.$.meta.hasAcceptedInvite": true });
+        }
         if (user.user in global.connections && !user.user.equals(sender)) {
           global.connections[user.user].socket.send(JSON.stringify({
             error: null, type: "message", data: { message: savedMessage }

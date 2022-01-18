@@ -10,6 +10,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 
 router.get("/", authMiddleware, ChatController.getChatByCurrentUserId);
 router.post("/create", authMiddleware, ChatController.createChat);
+router.get("/:chatID/updateLastRead", authMiddleware, ChatController.updateLastRead);
 router.get("/:chatID/search", authMiddleware, ChatController.searchMessagesInChat);
 router.get("/:chatID/messages", authMiddleware, MessageController.getMessagesByChatId);
 router.post("/:chatID/send", authMiddleware, MessageController.createNewMessage);
