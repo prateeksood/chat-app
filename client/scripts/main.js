@@ -74,7 +74,7 @@ const App = new class AppManager {
     }
     connect(onopen = () => { }) {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
-      this.#socket = new WebSocket("ws://" + location.host);
+      this.#socket = new WebSocket("wss://" + location.host);
       this.#socket.onopen = onopen;
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
