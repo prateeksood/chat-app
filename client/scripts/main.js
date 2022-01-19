@@ -319,6 +319,17 @@ const App = new class AppManager {
       }).catch(ex => App.popAlert(ex));
     });
   }
+  /** @param {Object<string,string|Blob|File>} object */
+  createRequestBody(object, createParams=true){
+    const formData=new FormData();
+    for(let obj in object){
+      formData.append(obj,object[obj],object[obj] instanceof Blob?object[obj].name:null);
+    }
+    if(createParams)
+      return new URLSearchParams(formData);
+    else
+      return formData;
+  }
   /** @param {User} user */
   loadUser(user) {
     App.socket.connect(()=>{
@@ -601,7 +612,7 @@ UI.onInit(ui => {
           const responseData = await request.json();
           peopleSearched.clear();
           responseData.forEach(user => {
-            peopleSearched.add(new ContactItem(User.from(user)));
+            peopleSearched.add(new UserItem(User.from(user)));
           });
         } else
           App.popAlert(await request.text());
@@ -662,7 +673,7 @@ UI.onInit(ui => {
   /** @type {UIHandler.ComponentList<ContactItem>} */
   const contacts = new UIHandler.ComponentList("contacts");
   UI.addList(contacts);
-  /** @type {UIHandler.ComponentList<ContactItem>} */
+  /** @type {UIHandler.ComponentList<UserItem>} */
   const peopleSearched = new UIHandler.ComponentList("peopleSearched");
   UI.addList(peopleSearched);
 

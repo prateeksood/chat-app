@@ -205,25 +205,37 @@ class UserItem extends ListItem {
     });
     this.profile = new ContactProfile(user);
 
-    // test
     this.menu = new UIMenu(user.id);
-    this.menu.addItem("remove", "Remove Contact", () => {
-      UI.list.contacts.delete(user.id);
-      this.menu.remove();
-    });
-    this.menu.addItem("chat", "Chat", () => {
-      const chat = App.data.chats.find(function (data) {
-        if (data.participants.length === 2) {
-          const participant = data.participants.find(participant => participant.id === user.id);
-          if (participant)
-            return true
-          else return false;
+    this.menu.addItem("chat", "Chat", async () => {
+      if(App.session.currentUser.hasContact(user.id)){
+        App.data.chats.forEach(data => {
+          if (data.participants.length === 2 && !data.isGroup) {
+            const participant = data.participants.some(participant => participant.id === user.id);
+            if (participant) {
+              const index = UI.list.chatItems.findIndex(({ id }) => id === data.id);
+              if (index >= 0)
+                UI.list.chatItems.select(index);
+            }
+          }
+        });
+      }else{
+        /** @type {ChatResponse} */
+        const response=await App.request("chat/create",{
+          method:"POST",
+          body:App.createRequestBody({
+            participants:[user.id]
+          })
+        });
+        if(response){
+          const chat=Chat.from(response);
+          App.data.chats.add(chat.id,chat);
+          this.menu.removeItem("chat");
         }
-      });
-      if (chat && UI.list.chatItems.has(chat.id)) {
-        UI.list.chatItems.select(chat.id);
-        this.menu.unmount();
       }
+      this.menu.unmount();
+    });
+    this.menu.addItem("report", "Report", () => {
+      App.popAlert("User reported!");
     });
   }
 }
