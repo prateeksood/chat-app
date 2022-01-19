@@ -74,7 +74,10 @@ const App = new class AppManager {
     }
     connect(onopen = () => { }) {
       UI.container.chat.sub.infoArea.sub.time.attr({ text: "Reconnecting..." });
-      this.#socket = new WebSocket("ws://" + location.host);
+      if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+        this.#socket = new WebSocket("ws://" + location.host);
+      else
+        this.#socket = new WebSocket("wss://" + location.host);
       this.#socket.onopen = onopen;
       this.#socket.onmessage = event => {
         const response = JSON.parse(event.data);
