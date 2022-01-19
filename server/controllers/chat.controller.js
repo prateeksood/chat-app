@@ -25,8 +25,8 @@ module.exports = class ChatController {
     try {
       /** @type {string[]} */
       let participants = [];
-      request.body.participants.forEach(user => {
-        participants.push(user._id);
+      request.body.participants.forEach(userId => {
+        participants.push(userId);
       })
       if (!participants.includes(adminId))
         participants.push(adminId);

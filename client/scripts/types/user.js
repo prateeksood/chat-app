@@ -55,6 +55,10 @@ class User {
       ));
     return this.image;
   }
+  /** @param {string} contactId */
+  hasContact(contactId){
+    return this.contacts.find(contact=>contact.id===contactId);
+  }
 };
 
 class Contact extends User{
