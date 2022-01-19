@@ -17,7 +17,7 @@ app.use(express.urlencoded({
   extended: true
 }));
 app.use(express.json());
-app.use("/", express.static(__dirname + "/../client"));
+app.use("/", express.static(__dirname + "/./client"));
 app.use("/resources/profilePictures", express.static(__dirname + "/./public/uploads/profilePictures"));
 
 app.get("/", function (request, response) {
