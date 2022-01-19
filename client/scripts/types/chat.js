@@ -49,6 +49,12 @@ class Chat {
   static get defaultImage() {
     return "resources/images/group.png"
   }
+  getOtherParticipant(){
+    if(this.isGroup)
+      return null;
+    else
+      return this.participants.filter(p=>!App.session.isCurrentUserId(p.id))[0];
+  }
 };
 
 class Message {

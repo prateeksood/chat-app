@@ -112,7 +112,7 @@ setInterval(async function () {
       error: null, type: "activeContacts", data: { contacts }
     }));
   }
-}, 10000);
+}, 60000);
 
 // server.on("socket",function(request,socket,head){
 //   socketServer.handleUpgrade(request,socket,head,soc=>{

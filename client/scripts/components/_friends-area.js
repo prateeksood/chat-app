@@ -2,6 +2,7 @@
 /// <reference path="../ui-handler.js"/>
 /// <reference path="../auto-updater.js"/>
 /// <reference path="_chat-area.js"/>
+/// <reference path="profile.js"/>
 /// <reference path="../types/types.d.ts"/>
 /// <reference path="../types/chat.js"/>
 
@@ -107,6 +108,20 @@ class ChatItem extends ListItem {
       this.toggleUnread();
       this.menu.unmount();
     });
+    if(!this.isGroup){
+      this.menu.addItem("profile", "Profile", () => {
+        const user=this.participants.filter(({id})=>!App.session.isCurrentUserId(id))[0];
+        const contact=App.session.currentUser.contacts.filter(({id})=>id===user.id)[0];
+        if(contact || user){
+          const profile=new ContactProfile(contact??user);
+          profile.mount(UI.container.main);
+        }else
+          App.popError("Contact not found");
+        // else{
+        //    const profile=new UserProfile(user);
+        // }
+      });
+    }
   }
   /** @param {Message} message */
   addMessage(message) {
@@ -119,6 +134,12 @@ class ChatItem extends ListItem {
   updateMessage(index, message) {
     this.chatArea.updateMessage(index, message);
     ChatItem.setText(this, message);
+  }
+  /** @param {string|Date} text */
+  updateStatus(text){
+    this.attr({dataOnline:true});
+    setTimeout(()=>this.attr({dataOnline:false}),60000);
+    this.chatArea.updateStatus(text);
   }
   /** @param {boolean} [value] */
   toggleUnread(value) {
@@ -149,7 +170,7 @@ class ChatItem extends ListItem {
       };
     }
   }
-};
+}
 
 class ContactItem extends ListItem {
   /** @type {Profile} */
@@ -211,7 +232,7 @@ class UserItem extends ListItem {
     this.profile = new ContactProfile(user);
 
     this.menu = new UIMenu(user.id);
-    this.menu.addItem("chat", "Chat", async () => {
+    this.menu.addItem("chat", "Start Chat", async () => {
       if(App.session.currentUser.hasContact(user.id)){
         App.data.chats.forEach(data => {
           if (data.participants.length === 2 && !data.isGroup) {

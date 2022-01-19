@@ -58,14 +58,26 @@ const App = new class AppManager {
       this.onmessage("activeContacts", data => {
         App.session.onlineContacts = data.contacts;
         console.log("Online contacts", App.session.onlineContacts);
-        UI.list.chatItems.find(chatItem => {
+        App.data.chats.forEach(chat => {
+          const otherParticipant=chat.getOtherParticipant();
+          if(otherParticipant && data.contacts.includes(otherParticipant.id)){
+            UI.list.chatItems.some(/** @param {ChatItem} chatItem */ chatItem=>{
+              if(chatItem.id===chat.id){
+                chatItem.updateStatus(new Date());
+                return true;
+              }
+            });
+          }
+        });
+        return;
+        UI.list.chatItems.find(/** @param {ChatItem} chatItem */ chatItem => {
           const onlineContacts = chatItem.participants.filter(participant => data.contacts.some(contact => contact.user === participant.id && contact.user !== App.session.currentUser))
           if (onlineContacts.length > 0) {
-            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", true);
-            chatItem.chatArea.elements.subText.innerHTML = "Online";
+            chatItem.attr({dataOnline:true});
+            chatItem.chatArea.updateStatus("Online");
           }
           else {
-            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", false);
+            chatItem.attr({dataOnline:false});
           }
         })
 
@@ -375,6 +387,10 @@ const App = new class AppManager {
     const component = new UINotification(content.join("<br/>"));
     component.mount(UI.container.notifications);
   }
+  popError(...content) {
+    const component = new UINotification(content.join("<br/>"),[],"error");
+    component.mount(UI.container.notifications);
+  }
   popConfirm(title, content) {
     UI.container.prompts.style({ display: "initial" });
     const component = new Popup(title, content, [{
@@ -682,7 +698,7 @@ UI.onInit(ui => {
     /** @param {PointerEvent} event */
     contextmenu(event) {
       event.preventDefault();
-      menu.mount(container.chat, event);
+      // menu.mount(container.chat, event);
     }
   });
 
