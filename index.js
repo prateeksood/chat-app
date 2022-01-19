@@ -19,6 +19,7 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.use("/", express.static(__dirname + "/./client"));
 app.use("/resources/profilePictures", express.static(__dirname + "/./public/uploads/profilePictures"));
+app.use("/resources/illustrations", express.static(__dirname + "/./public/Resources/illustrations"));
 
 app.get("/", function (request, response) {
   response.sendFile(__dirname + "/../index.html");
