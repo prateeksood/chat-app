@@ -1,7 +1,6 @@
-.container.profile{
+.container.info-area{
   flex-direction:column;
   padding-bottom:1em;
-  left:0px;
   width:400px;
   max-width:100%;
   box-shadow:0px 0px 0.5em #2223;
@@ -10,17 +9,26 @@
   overflow:auto;
   /* direction:rtl; */
 }
-.container.profile[state=close]{
+.container.info-area.profile{
+  left:0px;
+}
+.container.info-area.message-info{
+  right:0px;
+}
+.container.info-area.profile[state=close]{
   left:-400px;
 }
-.container.profile .row{
+.container.info-area.message-info[state=close]{
+  right:-400px;
+}
+.container.info-area .row{
   display:flex;
   flex-direction:column;
   align-items:center;
   padding:1em 2em;
   /* direction:ltr; */
 }
-.container.profile .row.actions{
+.container.info-area .row.actions{
   position:sticky;
   top:0px;
   flex-direction:row;
@@ -30,22 +38,22 @@
   border-bottom:1px solid #ddd;
   z-index:1;
 }
-.container.profile .row.actions h3{
+.container.info-area .row.actions h3{
   margin-left:2.5em;
   width:100%;
   font-weight:500;
   text-align:center;
   color:#444;
 }
-.container.profile .row.field{
+.container.info-area .row.field{
   flex-direction:row;
   align-items:flex-start;
   flex-wrap:wrap;
 }
-.container.profile .row.field:hover{
+.container.info-area.profile .row.field:hover{
   background-color:#fafafa;
 }
-.container.profile .picture-container{
+.container.info-area .picture-container{
   position:relative;
   display:flex;
   flex-direction:row;
@@ -54,7 +62,7 @@
   width:12em;
   height:12em;
 }
-.container.profile.profile .dp-holder{
+.container.info-area .picture-container .dp-holder{
   margin:0px;
   padding:0px;
   width:100%;
@@ -64,34 +72,34 @@
   background-size:cover;
   background-repeat:no-repeat;
 }
-.container.profile .picture-container button.edit{
+.container.info-area .picture-container button.edit{
   position:absolute;
   bottom:0.4em;
   right:0.5em;
   background-color:#fff;
 }
-.container.profile .picture-container button.edit:hover{
+.container.info-area .picture-container button.edit:hover{
   background-color:#f8f8f8;
 }
-.container.profile.profile .username{
+.container.info-area .username{
   font-weight:500;
   color:#444;
 }
-.container.profile.profile .display-name{
+.container.info-area .display-name{
   font-weight:500;
 }
-.container.profile.profile .field :is(label, .description){
+.container.info-area .field :is(label, .description){
   font-size:0.9em;
   color:#888;
 }
-.container.profile.profile .field label{
+.container.info-area .field label{
   width:100%;
   font-weight:500;
 }
-.container.profile.profile .field .description{
+.container.info-area .field .description{
   margin-top:0.25em;
 }
-.container.profile.profile .field input{
+.container.info-area .field input{
   padding:0.5em 0px 0.3em;
   width:100%;
   font-size:medium;
@@ -100,26 +108,40 @@
   border-bottom-width:2px;
   background-color:transparent;
 }
-.container.profile.profile .field input{
+.container.info-area .field input{
   width:calc(100% - 2.5em);
 }
-.container.profile.profile .field input:focus{
+.container.info-area .field input:focus{
   border-color:#666;
 }
-.container.profile.profile .field .icon{
+.container.info-area .field .icon{
   margin-left:0.5em;
   width:2em;
   height:2em;
   overflow:hidden;
 }
-.container.profile.profile .field[state=open] input{
+.container.info-area .field[state=open] input{
   width:calc(100% - 5em);
 }
-.container.profile.profile .field .icon:not(.edit),
-.container.profile.profile .field:is([state=open], [state=process]) .icon.edit{
+.container.info-area .field .icon:not(.edit),
+.container.info-area .field:is([state=open], [state=process]) .icon.edit{
   display:none;
 }
-.container.profile.profile .field[state=open] .icon:is(.accept, .cancel),
-.container.profile.profile .field[state=process] .icon.processing{
+.container.info-area .field[state=open] .icon:is(.accept, .cancel),
+.container.info-area .field[state=process] .icon.processing{
   display:flex;
+}
+
+.container.info-area .field .text-content{
+  padding:0.5em 0px 0.3em;
+  width:100%;
+  font-size:medium;
+  outline:none;
+  border:0px solid transparent;
+  border-bottom-width:2px;
+  background-color:transparent;
+}
+.container.info-area .field .list-item{
+  padding-right:0px;
+  padding-left:0px;
 }

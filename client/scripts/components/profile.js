@@ -14,7 +14,7 @@ class Profile extends UIHandler.Component{
   /** @param {User} user */
   constructor(user){
     const element=DOM.create("div",{
-      class:"container absolute profile",
+      class:"container absolute info-area profile",
       state:"close",
       children:[
         Profile.createActionsRow(()=>{
@@ -226,7 +226,7 @@ class ContactProfile extends UIHandler.Component{
   /** @param {Contact} user */
   constructor(user){
     const element=DOM.create("div",{
-      class:"container absolute profile",
+      class:"container absolute info-area profile",
       state:"close",
       children:[
         ContactProfile.createActionsRow(()=>{

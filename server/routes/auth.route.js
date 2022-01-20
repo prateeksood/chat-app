@@ -14,10 +14,10 @@ router.post("/", authMiddleware, async (request, response) => {
         httpOnly: true
       }).status(200).json(currentUser);
     } catch (ex) {
-      response.status(401).send("User not found");
+      response.status(401).send({message:"User not found"});
     }
   } else {
-    response.status(401).send("Invalid Token, Access Denied");
+    response.status(401).send({message:"Invalid Token, Access Denied"});
   }
 });
 

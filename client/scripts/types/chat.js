@@ -8,7 +8,7 @@ class Chat {
   isGroup = false;
   /**
    * @param {string} id
-   * @param {User[]} participants
+   * @param {Participant[]} participants
    * @param {Message[]} messages
    */
   constructor (id, participants = [], messages = []) {
@@ -16,14 +16,14 @@ class Chat {
     this.participants = participants;
     this.messages = messages;
     this.createdAt = Date.now();
-    const participant = App.session.isCurrentUserId(participants[0].id) ? participants[1] : participants[0];
+    const participant = App.session.isCurrentUserId(participants[0].id) ? participants[1] ?? participants[0] : participants[0];
     this.image = participant.image;
     this.title = participant.name;
   }
   /** @param {ChatResponse} chatResponse */
   static from(chatResponse) {
     const { _id, participants, messages } = chatResponse;
-    const users = participants.map(participant => User.from(participant.user));
+    const users = participants.map(participant => Participant.from(participant));
     const chat = new Chat(
       _id,
       users,
@@ -40,7 +40,7 @@ class Chat {
       chat.image = chatResponse.image ?? Chat.defaultImage;
     } else {
       const participant = App.session.isCurrentUserId(users[0].id) ?
-        users[1] : users[0];
+        users[1] ?? users[0] : users[0];
       chat.title = participant.name;
       chat.image = participant.image ?? User.defaultImage;
     }
@@ -55,7 +55,19 @@ class Chat {
     else
       return this.participants.filter(p=>!App.session.isCurrentUserId(p.id))[0];
   }
-};
+  getMessageInfo(messageId){
+    /** @type {{message:Message,readBy:Participant[],receivedBy:Participant[]}} */
+    const info={message:null,readBy:[],receivedBy:[]};
+    this.messages.some(message=>{
+      if(message.id===messageId){
+        info.readBy=this.participants.filter(participant=>participant.lastRead.time>=message.createdAt);
+        info.message=message;
+        return true;
+      }
+    });
+    return info;
+  }
+}
 
 class Message {
   /** @type {{userId:string,time:Date}[]} */
@@ -89,4 +101,30 @@ class Message {
     message.readBy = messageResponse.readBy ?? [];
     return message;
   }
-};
+}
+
+class Participant extends User{
+  /** @param {User} user */
+  constructor(user,since=Date.now()){
+    super(user.id,user.username,user.name);
+    this.lastseen=user.lastseen;
+    this.since=since;
+    this.gender=user.gender;
+    this.image=user.image;
+    /** @type {{messageId:string,time:Date}} */
+    this.lastRead={messageId:null,time:null}
+    /** @type {{messageId:string,time:Date}} */
+    this.lastReceived={messageId:null,time:null};
+    this.hasAcceptedInvite=false;
+  }
+  /** @param {ParticipantResponse} response */
+  static from(response){
+    const participant=new Participant(User.from(response.user),response.since);
+    participant.hasAcceptedInvite=response.meta.hasAcceptedInvite;
+    participant.lastRead=response.meta.lastRead;
+    participant.lastReceived=response.meta.lastReceived;
+    participant.lastRead.time=new Date(participant.lastRead.time);
+    participant.lastReceived.time=new Date(participant.lastReceived.time);
+    return participant;
+  }
+}

@@ -12,7 +12,7 @@ interface DataListAction<DataType>{
 }
 interface DataGroupAction<DataType>{
   add(item:DataType,id:String):void,
-  remove(id:String):void,
+  remove(id:String,item:DataType):void,
   update(id:String,new_item:DataType):void,
   select(item:DataType,id:String,extra:{triggeredBy:DataType}):void,
   unselect(item:DataType,id:String,extra:{triggeredBy:DataType}):void

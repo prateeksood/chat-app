@@ -18,9 +18,21 @@ class MessageComponent extends UIHandler.Component {
           html: message.content
         }) // div.content
       ]
-    }, {}, {
+    }, {/* no styles */}, {
       click() {
         element.toggleAttribute("active");
+      },
+      contextmenu(event) {
+        const chat=App.data.chats.get(message.chatId);
+        const [chatMessage]=chat.messages.filter(({id})=>id===message.id);
+        const menu=new UIMenu(chatMessage.id);
+        menu.addItem("info","Info",function(){
+          const info=chat.getMessageInfo(chatMessage.id);
+          const messageInfo=new MessageComponent.MessageInfo(info.message,info.readBy,info.receivedBy);
+          messageInfo.mount(UI.container.main);
+          menu.unmount();
+        });
+        menu.mount(UI.container.main,event);
       }
     }); //div.message-container
 
@@ -109,3 +121,138 @@ class MessageComponent extends UIHandler.Component {
     });// div.icon
   }
 }
+
+MessageComponent.MessageInfo=class MessageInfo extends UIHandler.Component{
+  static buttons={
+    edit:"edit",
+    accept:"accept-outline",
+    cancel:"cancel-outline",
+    processing:"in-progress",
+    close:"cancel"
+  };
+  /**
+   * @param {Message} message
+   * @param {Participant[]} readBy
+   * @param {Participant[]} receivedBy
+  */
+  constructor(message, readBy, receivedBy){
+    const element=DOM.create("div",{
+      class:"container absolute info-area message-info",
+      state:"close",
+      children:[
+        MessageInfo.createActionsRow(()=>{
+          this.attr({state:"close"});
+          setTimeout(()=>this.unmount(),150);
+        }),
+        MessageInfo.createFieldRow("createdAt","Created at",App.date.stringify(message.createdAt)),
+        MessageInfo.createFieldRow("readBy","Read by",
+          readBy.map(function({id,image,name,username,lastRead}){
+            return [id,image,name,username,lastRead.time];
+          })
+        ),MessageInfo.createFieldRow("recievedBy","Recieved by",
+          readBy.map(function({id,image,name,username,lastReceived}){
+            return [id,image,name,username,lastReceived.time];
+          })
+        )
+      ]
+    });
+    super(message.id,element);
+  }
+  /** @param {UIHandler.Component} parent */
+  mount(parent){
+    super.mount(parent);
+    setTimeout(()=>this.attr({state:"open"}),10);
+  }
+  /**
+   * @param {EventListener} clickListener
+   * @param {string} text Container Title
+   */
+  static createActionsRow(clickListener,text="Message Details"){
+    return DOM.create("div",{
+      class:"row actions",
+      children:[
+        DOM.create("h3",{text}),
+        MessageInfo.createButton("close",clickListener)
+      ]
+    });
+  }
+  /**
+   * @param {string} fieldName
+   * @param {string} text
+   * @param {string|[itemId: string, imageSrc: string, mainText: string, subText: string, time: number | Date][]} values */
+  static createFieldRow(fieldName,text,values){
+    const textContents=typeof values === "string" ? [DOM.create("div",{
+      class:"text-content",
+      text:values
+    })] : values.map(value=>{
+      const listItem=new ListItem(...value);
+      return listItem.element;
+    });
+    const rowField=DOM.create("div",{
+      class:"row field",
+      children:[
+        DOM.create("label",{
+          for:fieldName,
+          text
+        }), // label
+        ...textContents
+      ]
+    });
+    return rowField;
+  }
+  /**
+   * @param {keyof Profile.buttons} type
+   * @param {EventListener} clickListener
+   */
+  static createButton(type,clickListener=null,size=32){
+    return DOM.create("button",{
+      class:"icon "+type,
+      children:[
+        DOM.createNS("svg",{
+          "viewBox":"0 0 "+size+" "+size,
+          children:[
+            DOM.createNS("use",{
+              "xlink:href": "#"+MessageInfo.buttons[type]
+            }) // use
+          ]
+        }) // svg
+      ]
+    },{/* No styles */},{
+      click:clickListener
+    }); // button.icon.edit
+  }
+  /** @param {keyof Profile.buttons} type */
+  static createIcon(type,size=32){
+    return DOM.create("div",{
+      class:"icon "+type,
+      children:[
+        DOM.createNS("svg",{
+          "viewBox":"0 0 "+size+" "+size,
+          children:[
+            DOM.createNS("use",{
+              "xlink:href": "#"+MessageInfo.buttons[type]
+            }) // use
+          ]
+        }) // svg
+      ]
+    }); // button.icon.edit
+  }
+  /**
+   * @param {HTMLButtonElement} button
+   * @param {keyof Profile.buttons} type */
+  static changeButtonType(button,type,size=32){
+    button.innerHTML="";
+    DOM.attr(button,{
+      children:[
+        DOM.createNS("svg",{
+          "viewBox":"0 0 "+size+" "+size,
+          children:[
+            DOM.createNS("use",{
+              "xlink:href": "#"+MessageInfo.buttons[type]
+            }) // use
+          ]
+        })
+      ]
+    });
+  }
+};

@@ -233,8 +233,9 @@ class DataGroup {
   }
   /** @param {String} id */
   remove(id) {
+    const data=this.#group.get(id);
     if (this.#group.delete(id))
-      this.#listener.trigger("remove", id);
+      this.#listener.trigger("remove", id, data);
   }
   /**
    * @param {string} id
