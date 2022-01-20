@@ -156,13 +156,14 @@ module.exports = class ChatService {
             select: "_id name username image"
           }
         ])
+        .sort([
+          ["lastMessageAt", -1],
+          ["updatedAt", -1]
+        ])
         .skip(skips)
         .limit(pageSize)
-        .sort([
-          ["lastMessageAt", -1]
-        ]).lean();
-      if (foundChats) return foundChats;
-      return null;
+        .lean();
+      return foundChats;
     } catch (ex) {
       throw ex;
     }

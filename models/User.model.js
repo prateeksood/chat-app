@@ -86,6 +86,11 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
+userSchema.post('validate', doc => {
+  doc.username = sanitize(doc.username);
+  doc.email = sanitize(doc.email);
+  doc.password = sanitize(doc.password);
+  doc.name = sanitize(doc.name);
+});
 
 module.exports = mongoose.model("User", userSchema);

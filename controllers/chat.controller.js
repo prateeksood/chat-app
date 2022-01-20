@@ -76,6 +76,7 @@ module.exports = class ChatController {
    * @param {import("express").NextFunction} next
    */
   static async getChatByCurrentUserId(request, response, next) {
+
     try {
       const { pageSize, skips } = request.query;
       const { _id: currentUserId } = request.user;
