@@ -49,19 +49,19 @@ class Chat {
   static get defaultImage() {
     return "resources/images/group.png"
   }
-  getOtherParticipant(){
-    if(this.isGroup)
+  getOtherParticipant() {
+    if (this.isGroup)
       return null;
     else
-      return this.participants.filter(p=>!App.session.isCurrentUserId(p.id))[0];
+      return this.participants.filter(p => !App.session.isCurrentUserId(p.id))[0];
   }
-  getMessageInfo(messageId){
+  getMessageInfo(messageId) {
     /** @type {{message:Message,readBy:Participant[],receivedBy:Participant[]}} */
-    const info={message:null,readBy:[],receivedBy:[]};
-    this.messages.some(message=>{
-      if(message.id===messageId){
-        info.readBy=this.participants.filter(participant=>participant.lastRead.time>=message.createdAt);
-        info.message=message;
+    const info = { message: null, readBy: [], receivedBy: [] };
+    this.messages.some(message => {
+      if (message.id === messageId) {
+        info.readBy = this.participants.filter(participant => participant.lastRead.time >= message.createdAt);
+        info.message = message;
         return true;
       }
     });
@@ -103,28 +103,28 @@ class Message {
   }
 }
 
-class Participant extends User{
+class Participant extends User {
   /** @param {User} user */
-  constructor(user,since=Date.now()){
-    super(user.id,user.username,user.name);
-    this.lastseen=user.lastseen;
-    this.since=since;
-    this.gender=user.gender;
-    this.image=user.image;
+  constructor (user, since = Date.now()) {
+    super(user.id, user.username, user.name);
+    this.lastseen = user.lastseen;
+    this.since = since;
+    this.gender = user.gender;
+    this.image = user.image;
     /** @type {{messageId:string,time:Date}} */
-    this.lastRead={messageId:null,time:null}
+    this.lastRead = { messageId: null, time: null }
     /** @type {{messageId:string,time:Date}} */
-    this.lastReceived={messageId:null,time:null};
-    this.hasAcceptedInvite=false;
+    this.lastReceived = { messageId: null, time: null };
+    this.hasAcceptedInvite = false;
   }
   /** @param {ParticipantResponse} response */
-  static from(response){
-    const participant=new Participant(User.from(response.user),response.since);
-    participant.hasAcceptedInvite=response.meta.hasAcceptedInvite;
-    participant.lastRead=response.meta.lastRead;
-    participant.lastReceived=response.meta.lastReceived;
-    participant.lastRead.time=new Date(participant.lastRead.time);
-    participant.lastReceived.time=new Date(participant.lastReceived.time);
+  static from(response) {
+    const participant = new Participant(User.from(response.user), response.since);
+    participant.hasAcceptedInvite = response.meta?.hasAcceptedInvite ?? false;
+    participant.lastRead = response.meta?.lastRead ?? {};
+    participant.lastReceived = response.meta?.lastReceived ?? {};
+    participant.lastRead.time = new Date(participant.lastRead?.time);
+    participant.lastReceived.time = new Date(participant.lastReceived?.time);
     return participant;
   }
 }

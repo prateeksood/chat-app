@@ -1,6 +1,6 @@
 /** @typedef {import("./models.helper").Message} Message */
 const mongoose = require("mongoose");
-
+const { sanitize } = require("../helpers/helper");
 /** @type {mongoose.Schema<Message, mongoose.Model<Message,Message,Message,Message>, Message>} */
 const messageSchema = new mongoose.Schema({
   chat: {
@@ -64,5 +64,7 @@ const messageSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
+messageSchema.post('validate', doc => {
+  doc.content = sanitize(doc.content);
+});
 module.exports = mongoose.model("Message", messageSchema);

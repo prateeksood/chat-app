@@ -1,6 +1,5 @@
 /** @typedef {import("./models.helper").Chat} Chat */
 const mongoose = require('mongoose');
-
 /** @type {mongoose.Schema<Chat, mongoose.Model<Chat, Chat, Chat, Chat>, Chat>} */
 const chatSchema = new mongoose.Schema({
   title: {
@@ -73,6 +72,8 @@ const chatSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
+chatSchema.post('validate', doc => {
+  doc.title = sanitize(doc.title);
+});
 
 module.exports = mongoose.model('Chat', chatSchema);

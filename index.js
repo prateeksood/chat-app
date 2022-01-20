@@ -10,15 +10,16 @@ const userRoute = require("./routes/user.route");
 const contactRoute = require("./routes/contact.route");
 const UserService = require("./services/user.service");
 const { createContact } = require("./controllers/contact.controller");
-
+const { sanitize } = require("./helpers/helper");
 const app = express();
 
 app.use(express.urlencoded({
   extended: true
 }));
 app.use(express.json());
-app.use("/", express.static(__dirname + "/../client"));
+app.use("/", express.static(__dirname + "/./client"));
 app.use("/resources/profilePictures", express.static(__dirname + "/./public/uploads/profilePictures"));
+app.use("/resources/illustrations", express.static(__dirname + "/./public/resources/illustrations"));
 
 app.get("/", function (request, response) {
   response.sendFile(__dirname + "/../index.html");
