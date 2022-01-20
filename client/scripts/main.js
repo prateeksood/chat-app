@@ -34,6 +34,7 @@ const App = new class AppManager {
     constructor () {
       this.onmessage("message", data => {
         const message = Message.from(data.message);
+        App.data.chats.get(message.chatId).messages.push(message);
         UI.list.chatItems.find((chatItem, index) => {
           if (App.data.chats.getSelected() === message.chatId) {
 
@@ -56,16 +57,28 @@ const App = new class AppManager {
         });
       });
       this.onmessage("activeContacts", data => {
-        App.session.onlineContacts = data.contacts;
         console.log("Online contacts", App.session.onlineContacts);
-        UI.list.chatItems.find(chatItem => {
+        App.data.chats.forEach(chat => {
+          const otherParticipant=chat.getOtherParticipant();
+          if(otherParticipant && data.contacts.includes(otherParticipant.id)){
+            UI.list.chatItems.some(/** @param {ChatItem} chatItem */ chatItem=>{
+              if(chatItem.id===chat.id){
+                chatItem.updateStatus(new Date());
+                return true;
+              }
+            });
+          }
+        });
+        return;
+        App.session.onlineContacts = data.contacts;
+        UI.list.chatItems.find(/** @param {ChatItem} chatItem */ chatItem => {
           const onlineContacts = chatItem.participants.filter(participant => data.contacts.some(contact => contact.user === participant.id && contact.user !== App.session.currentUser))
           if (onlineContacts.length > 0) {
-            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", true);
-            chatItem.chatArea.elements.subText.innerHTML = "Online";
+            chatItem.attr({dataOnline:true});
+            chatItem.chatArea.updateStatus("Online");
           }
           else {
-            document.querySelector(`div[c-id="${chatItem.id}"]`).setAttribute("data-online", false);
+            chatItem.attr({dataOnline:false});
           }
         })
 
@@ -332,17 +345,20 @@ const App = new class AppManager {
             reject(error);
           else
             resolve(null);
-          App.popAlert(error);
+          App.popError(error[0]==="{" ? JSON.parse(error).message : error);
         } else
           resolve(await response.json());
-      }).catch(ex => App.popAlert(ex));
+      }).catch(ex => App.popError(ex));
     });
   }
   /** @param {Object<string,string|Blob|File>} object */
   createRequestBody(object, createParams=true){
     const formData=new FormData();
     for(let obj in object){
-      formData.append(obj,object[obj],object[obj] instanceof Blob?object[obj].name:null);
+      if(object[obj] instanceof Blob)
+        formData.append(obj,object[obj],object[obj].name);
+      else
+        formData.append(obj,typeof object[obj] === "string" ? object[obj] : JSON.stringify(object[obj]));
     }
     if(createParams)
       return new URLSearchParams(formData);
@@ -373,6 +389,10 @@ const App = new class AppManager {
 
   popAlert(...content) {
     const component = new UINotification(content.join("<br/>"));
+    component.mount(UI.container.notifications);
+  }
+  popError(...content) {
+    const component = new UINotification(content.join("<br/>"),[],"error");
     component.mount(UI.container.notifications);
   }
   popConfirm(title, content) {
@@ -682,7 +702,7 @@ UI.onInit(ui => {
     /** @param {PointerEvent} event */
     contextmenu(event) {
       event.preventDefault();
-      menu.mount(container.chat, event);
+      // menu.mount(container.chat, event);
     }
   });
 
@@ -769,8 +789,17 @@ UI.onInit(ui => {
   App.data.chats.on("add", function (chat) {
     chatItems.add(new ChatItem(chat));
   });
-  App.data.chats.on("remove", function (id) {
+  App.data.chats.on("remove", function (id, data) {
+    const otherUser=data.getOtherParticipant();
     chatItems.remove(id);
+    if(otherUser){
+      App.socket.send({
+        type: "userRefs",
+        content: App.session.currentUser.contacts
+          .filter(contact => contact.id !== otherUser.id)
+          .map(contact => contact.id)
+      });
+    }
   });
   App.data.chats.on("select", function (chat) {
     chatItems.has((chatItem, index) => {

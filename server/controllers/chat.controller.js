@@ -24,14 +24,12 @@ module.exports = class ChatController {
     }
     try {
       /** @type {string[]} */
-      let participants = [];
-      request.body.participants.forEach(userId => {
-        participants.push(userId);
-      })
+      let participants = JSON.parse(request.body.participants);
       if (!participants.includes(adminId))
         participants.push(adminId);
       participants = participants.filter(participant => participants.indexOf(participant) === participants.lastIndexOf(participant));
-      if (participants && participants.length < 1) {
+      console.log(participants);
+      if (participants.length < 1) {
         response.status(400).json({ message: "Atleast two participant IDs are required" });
         return;
       }

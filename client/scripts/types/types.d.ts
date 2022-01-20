@@ -10,6 +10,22 @@ interface ChatUserResponse {
   user: UserResponse;
 }
 
+interface ParticipantResponse {
+  since: Date;
+  user: UserResponse;
+  meta: {
+    lastRead:{
+      message: String,
+      time: Date
+    },
+    lastReceived:{
+      message: String,
+      time: Date
+    },
+    hasAcceptedInvite: Boolean
+  };
+}
+
 interface MessageResponse{
   _id: String;
   chat: String;

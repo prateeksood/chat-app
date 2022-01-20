@@ -53,6 +53,10 @@ class DataList {
     return this.#list.find(predicate);
   }
   /** @param {(value: DataType, index: number, obj: DataType[])} predicate */
+  some(predicate) {
+    return this.#list.some(predicate);
+  }
+  /** @param {(value: DataType, index: number, obj: DataType[])} predicate */
   findIndex(predicate) {
     return this.#list.findIndex(predicate);
   }
@@ -229,8 +233,9 @@ class DataGroup {
   }
   /** @param {String} id */
   remove(id) {
+    const data=this.#group.get(id);
     if (this.#group.delete(id))
-      this.#listener.trigger("remove", id);
+      this.#listener.trigger("remove", id, data);
   }
   /**
    * @param {string} id
