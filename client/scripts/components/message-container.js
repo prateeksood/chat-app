@@ -150,7 +150,7 @@ MessageComponent.MessageInfo=class MessageInfo extends UIHandler.Component{
             return [id,image,name,username,lastRead.time];
           })
         ),MessageInfo.createFieldRow("recievedBy","Recieved by",
-          readBy.map(function({id,image,name,username,lastReceived}){
+          receivedBy.map(function({id,image,name,username,lastReceived}){
             return [id,image,name,username,lastReceived.time];
           })
         )
