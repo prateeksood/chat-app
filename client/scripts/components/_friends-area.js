@@ -108,14 +108,14 @@ class ChatItem extends ListItem {
       this.toggleUnread();
       this.menu.unmount();
     });
-    if(!this.isGroup){
+    if (!this.isGroup) {
       this.menu.addItem("profile", "Profile", () => {
-        const user=this.participants.filter(({id})=>!App.session.isCurrentUserId(id))[0];
-        const contact=App.session.currentUser.contacts.filter(({id})=>id===user.id)[0];
-        if(contact || user){
-          const profile=new ContactProfile(contact??user);
+        const user = this.participants.filter(({ id }) => !App.session.isCurrentUserId(id))[0];
+        const contact = App.session.currentUser.contacts.filter(({ id }) => id === user.id)[0];
+        if (contact || user) {
+          const profile = new ContactProfile(contact ?? user);
           profile.mount(UI.container.main);
-        }else
+        } else
           App.popError("Contact not found");
         // else{
         //    const profile=new UserProfile(user);
@@ -125,6 +125,8 @@ class ChatItem extends ListItem {
   }
   /** @param {Message} message */
   addMessage(message) {
+    console.log(message);
+    message.content = sanitize(message.content);
     this.chatArea.addMessage(message);
     ChatItem.setText(this, message);
   }
@@ -136,9 +138,9 @@ class ChatItem extends ListItem {
     ChatItem.setText(this, message);
   }
   /** @param {string|Date} text */
-  updateStatus(text){
-    this.attr({dataOnline:true});
-    setTimeout(()=>this.attr({dataOnline:false}),60000);
+  updateStatus(text) {
+    this.attr({ dataOnline: true });
+    setTimeout(() => this.attr({ dataOnline: false }), 60000);
     this.chatArea.updateStatus(text);
   }
   /** @param {boolean} [value] */
@@ -233,7 +235,7 @@ class UserItem extends ListItem {
 
     this.menu = new UIMenu(user.id);
     this.menu.addItem("chat", "Start Chat", async () => {
-      if(App.session.currentUser.hasContact(user.id)){
+      if (App.session.currentUser.hasContact(user.id)) {
         App.data.chats.forEach(data => {
           if (data.participants.length === 2 && !data.isGroup) {
             const participant = data.participants.some(participant => participant.id === user.id);
@@ -244,17 +246,17 @@ class UserItem extends ListItem {
             }
           }
         });
-      }else{
+      } else {
         /** @type {ChatResponse} */
-        const response=await App.request("chat/create",{
-          method:"POST",
-          body:App.createRequestBody({
-            participants:[user.id]
+        const response = await App.request("chat/create", {
+          method: "POST",
+          body: App.createRequestBody({
+            participants: [user.id]
           })
         });
-        if(response){
-          const chat=Chat.from(response);
-          App.data.chats.add(chat.id,chat);
+        if (response) {
+          const chat = Chat.from(response);
+          App.data.chats.add(chat.id, chat);
           this.menu.removeItem("chat");
         }
       }

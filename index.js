@@ -22,9 +22,11 @@ app.use("/resources/profilePictures", express.static(__dirname + "/./public/uplo
 app.use("/resources/illustrations", express.static(__dirname + "/./public/resources/illustrations"));
 
 app.get("/", function (request, response) {
-  response.sendFile(__dirname + "/../index.html");
+  response.sendFile(__dirname + "/./client/index.html");
 });
-
+app.get("/loader", function (request, response) {
+  response.sendFile(__dirname + "/./client/loader.html");
+});
 app.use('/auth', authRoute);
 app.use('/message', messageRoute);
 app.use('/chat', chatRoute);

@@ -17,6 +17,7 @@
 
 
 const UI = new UIHandler();
+const loader = new Loader();
 const App = new class AppManager {
   #timeout = null;
   session = new Session();  // session.js
@@ -70,19 +71,6 @@ const App = new class AppManager {
           }
         });
         return;
-        App.session.onlineContacts = data.contacts;
-        UI.list.chatItems.find(/** @param {ChatItem} chatItem */ chatItem => {
-          const onlineContacts = chatItem.participants.filter(participant => data.contacts.some(contact => contact.user === participant.id && contact.user !== App.session.currentUser))
-          if (onlineContacts.length > 0) {
-            chatItem.attr({ dataOnline: true });
-            chatItem.chatArea.updateStatus("Online");
-          }
-          else {
-            chatItem.attr({ dataOnline: false });
-          }
-        })
-
-
       });
     }
     connect(onopen = () => { }) {
@@ -122,17 +110,6 @@ const App = new class AppManager {
     }
     onconnect(data) {
       console.log("Socket connected: ", data);
-      // this.#lastSeenInterval = setInterval(() => {
-      //   App.request("/user/updateLastSeen", {
-      //     method: "GET"
-      //   })
-      //     .then(data => {
-
-      //     })
-      //     .catch((ex) => {
-      //       console.log(ex);
-      //     });
-      // }, 10000);
       UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
@@ -272,16 +249,20 @@ const App = new class AppManager {
         App.loadUser(App.session.currentUser);
       })
       .catch((ex) => {
-        console.log(ex)
+        console.log(ex);
         UI.container.chat.unmount();
         UI.container.auth.mount(UI.container.main);
       });
   }
   async logout() {
+    UI.container.loader.mount(UI.container.main);
     const response = await App.request("user/logout", { method: "POST" });
     if (response) {
       App.session.removeCurrentUser();
       App.socket.disconnect();
+      UI.container.auth.mount(UI.container.main);
+      UI.container.chat.unmount();
+      UI.container.loader.unmount();
       App.popAlert(response.message);
     }
   }
@@ -848,10 +829,11 @@ UI.onInit(ui => {
 });
 
 window.addEventListener("load", async function () {
-
+  // loader.mount(UI.container.main);
   await App.auth();
-  // const data = generateData();
   UI.init();
+  if (UI.container.loader.mounted)
+    UI.container.loader.unmount();
 });
 
 function isTrue() {
