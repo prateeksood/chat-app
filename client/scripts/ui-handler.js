@@ -1,7 +1,9 @@
 /// <reference path="dom.js"/>
 /// <reference path="listener.js"/>
+/// <reference path="data-manager.js"/>
 /// <reference path="ui-handler.d.ts"/>
 
+/** @class UIHandler */
 class UIHandler {
   #listener = new Listener();
   /** All components are stored here
