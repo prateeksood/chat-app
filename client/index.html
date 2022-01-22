@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat App</title>
   <link rel="stylesheet" href="styles/index.css" />
+  <link rel="stylesheet" href="styles/loader.css">
   <link rel="stylesheet" href="styles/prompt.css" />
   <link rel="stylesheet" href="styles/login.css" />
   <link rel="stylesheet" href="styles/chat.css" />
@@ -14,6 +15,7 @@
   <link rel="stylesheet" href="styles/components/context-menu.css" />
   <script type="text/javascript" src="data/sample-users.js"></script>
   <script type="text/javascript" src="data/sample-messages.js"></script>
+  <script type="text/javascript" src="./helpers/sanitize.js"></script>
   <script type="text/javascript" src="scripts/dom.js"></script>
   <script type="text/javascript" src="scripts/listener.js"></script>
   <script type="text/javascript" src="scripts/sessions.js"></script>
@@ -22,6 +24,7 @@
   <script type="text/javascript" src="scripts/types/user.js"></script>
   <script type="text/javascript" src="scripts/types/chat.js"></script>
   <script type="text/javascript" src="scripts/auto-updater.js"></script>
+  <script type="text/javascript" src="scripts/components/loader.js"></script>
   <script type="text/javascript" src="scripts/components/popup.js"></script>
   <script type="text/javascript" src="scripts/components/profile.js"></script>
   <script type="text/javascript" src="scripts/components/message-container.js"></script>
@@ -69,6 +72,13 @@
     <g id="send-filled" fill="currentColor">
       <path
         d="M27.45,15.11l-22-11a1,1,0,0,0-1.08.12,1,1,0,0,0-.33,1L6.69,15H18v2H6.69L4,26.74A1,1,0,0,0,5,28a1,1,0,0,0,.45-.11l22-11a1,1,0,0,0,0-1.78Z" />
+    </g>
+    <g id="chat-box" fill="#fff">
+      <path class="chat-box"
+        d="M408,64H104a56.16,56.16,0,0,0-56,56V312a56.16,56.16,0,0,0,56,56h40v80l93.72-78.14a8,8,0,0,1,5.13-1.86H408a56.16,56.16,0,0,0,56-56V120A56.16,56.16,0,0,0,408,64Z" />
+      <!-- <circle class="circle" cx="160" cy="216" r="32" />
+      <circle class="circle" cx="256" cy="216" r="32" />
+      <circle class="circle" cx="352" cy="216" r="32" /> -->
     </g>
     <g id="send-alt-filled" fill="currentColor">
       <path
@@ -128,7 +138,7 @@
     </g>
   </svg>
   <div class="container" c-id="main">
-    <div class="container absolute" c-id="chat" c-unmount="false">
+    <!-- <div class="container absolute" c-id="chat" c-unmount="false">
       <aside id="left-section" c-id="sideBar" c-parent-id="chat">
         <div class="top-bar" id="left-top-bar">
           <button class="dp-holder" c-id="userDPHolder" c-parent-id="chat">
@@ -154,7 +164,8 @@
         </div>
         <div class="left-main chat-list" c-id="chatList" c-parent-id="chat">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="chatList">
-            <input type="text" name="query" c-id="searchBarInput" c-parent-id="chatList" minlength="1" placeholder="Search chat" autocomplete="off"/>
+            <input type="text" name="query" c-id="searchBarInput" c-parent-id="chatList" minlength="1"
+              placeholder="Search chat" autocomplete="off" />
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area" c-id="emptyArea" c-parent-id="chatList">
@@ -167,7 +178,8 @@
         </div>
         <div class="left-main" c-id="contactList" c-parent-id="chat" c-unmount="true">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="contactList">
-            <input type="text" name="query" c-id="searchBarInput" c-parent-id="contactList" minlength="1" placeholder="Search contact" autocomplete="off"/>
+            <input type="text" name="query" c-id="searchBarInput" c-parent-id="contactList" minlength="1"
+              placeholder="Search contact" autocomplete="off" />
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="contactList">
@@ -180,7 +192,7 @@
         </div>
         <div class="left-main" c-id="peopleSearchList" c-parent-id="chat" c-unmount="true">
           <form action="#" class="search-bar" c-id="searchBar" c-parent-id="peopleSearchList">
-            <input type="text" name="query" minlength="4" placeholder="Username" autocomplete="off"/>
+            <input type="text" name="query" minlength="4" placeholder="Username" autocomplete="off" />
             <button type="search" name="submit">Search</button>
           </form>
           <div class="list-area user-list" c-id="emptyArea" c-parent-id="peopleSearchList">
@@ -192,8 +204,8 @@
           </div>
         </div>
         <div class="bottom-bar info-area" c-id="infoArea" c-parent-id="chat" c-unmount="true">
-          <div class="line" c-id="content" c-parent-id="infoArea">Unable to connect to the server, please check your internet connection.</div>
-          <!-- <div class="line illustration"></div> -->
+          <div class="line" c-id="content" c-parent-id="infoArea">Unable to connect to the server, please check your
+            internet connection.</div>
           <div class="line" c-id="buttonLine" c-parent-id="infoArea">
             <button c-id="button" c-parent-id="infoArea">Try again</button>
           </div>
@@ -220,8 +232,8 @@
           </div>
         </div>
       </section>
-    </div>
-    <div class="container absolute auth" c-id="auth" c-unmount="true">
+    </div> -->
+    <!-- <div class="container absolute auth" c-id="auth" c-unmount="true">
       <div class="form-holder" active="login" c-id="formHolder" c-parent-id="auth">
         <form c-id="registerForm" c-parent-id="auth" c-unmount="true">
           <h2>Register</h2>
@@ -260,10 +272,16 @@
           </p>
         </form>
       </div>
-    </div>
+    </div> -->
+    <page-loader message="Almost There"></page-loader>
+    <chat-element style="display: none;"></chat-element>
+    <auth-element style="display: none;"></auth-element>
     <div class="container absolute prompt" c-id="prompts"></div>
     <div class="container absolute notification" c-id="notifications"></div>
   </div>
+  <script src="./custom-components/chat-element.js"></script>
+  <script src="./custom-components/auth-element.js"></script>
+  <script src="./custom-components/page-loader.js"></script>
 </body>
 
 </html>
