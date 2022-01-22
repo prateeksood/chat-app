@@ -52,6 +52,10 @@ class DataList {
   find(predicate) {
     return this.#list.find(predicate);
   }
+  /** @param {keyof DataType} property */
+  findByProperty(property, value) {
+    return this.#list.find(data=>data[property]===value);
+  }
   /** @param {(value: DataType, index: number, obj: DataType[])} predicate */
   some(predicate) {
     return this.#list.some(predicate);

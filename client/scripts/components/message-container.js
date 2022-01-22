@@ -1,6 +1,7 @@
 /// <reference path="../dom.js"/>
 /// <reference path="../listener.js"/>
 /// <reference path="../ui-handler.js"/>
+/// <reference path="../main.js"/>
 
 /** @extends {UIHandler.Component<HTMLDivElement>} */
 class MessageComponent extends UIHandler.Component {
@@ -8,27 +9,30 @@ class MessageComponent extends UIHandler.Component {
   /** @type {string} */
   sender=null;
   isSent=false;
-  /** @param {Message} message */
+  /** @param {Message} message Note: be aware! It can be temporary id */
   constructor (message) {
+    const content=DOM.create("div", {
+      class: "content",
+      html: message.content
+    });
     const element = DOM.create("div", {
       class: "message-container",
       children: [
-        DOM.create("div", {
-          class: "content",
-          html: message.content
-        }) // div.content
+        content // div.content
       ]
     }, {/* no styles */}, {
       click() {
         element.toggleAttribute("active");
       },
-      contextmenu(event) {
+      contextmenu: event => {
         const chat=App.data.chats.get(message.chatId);
-        const [chatMessage]=chat.messages.filter(({id})=>id===message.id);
+        const [chatMessage]=chat.messages.filter(({id})=>id===this.id);
+        if(!chatMessage)
+          return;
         const menu=new UIMenu(chatMessage.id);
-        menu.addItem("info","Info",function(){
+        menu.addItem("info","Info",()=>{
           const info=chat.getMessageInfo(chatMessage.id);
-          const messageInfo=new MessageComponent.MessageInfo(info.message,info.readBy,info.receivedBy);
+          const messageInfo=new MessageComponent.MessageInfo(this,info.message,info.readBy,info.receivedBy);
           messageInfo.mount(UI.container.main);
           menu.unmount();
         });
@@ -51,6 +55,7 @@ class MessageComponent extends UIHandler.Component {
     };
     this.messageInfonull;
     this.sent=message.id.includes("temp_")?false:true;
+    this.contentElement=content;
   }
   /** @param {boolean} value */
   set sent(value){
@@ -131,28 +136,38 @@ MessageComponent.MessageInfo=class MessageInfo extends UIHandler.Component{
     close:"cancel"
   };
   /**
+   * @param {MessageComponent} component
    * @param {Message} message
    * @param {Participant[]} readBy
    * @param {Participant[]} receivedBy
   */
-  constructor(message, readBy, receivedBy){
+  constructor(component, message, readBy, receivedBy){
+    const messageGroup=DOM.create("div", {
+      class: `message-group${App.session.isCurrentUserId(message.sender._id) ? " sent" : ""}`,
+      html: component.element.outerHTML
+    });
     const element=DOM.create("div",{
       class:"container absolute info-area message-info",
       state:"close",
       children:[
         MessageInfo.createActionsRow(()=>{
-          this.attr({state:"close"});
-          setTimeout(()=>this.unmount(),150);
+          this.unmount();
         }),
-        MessageInfo.createFieldRow("createdAt","Created at",App.date.stringify(message.createdAt)),
+        MessageInfo.createFieldRow("content","Message", messageGroup.outerHTML),
+        // MessageInfo.createFieldRow("createdAt","Sent by",App.date.stringify(message.sender.name)),
+        // MessageInfo.createFieldRow("createdAt","Sent at",App.date.stringify(message.createdAt)),
+        MessageInfo.createFieldRow("readBy","Sender",[
+          [message.sender._id, User.defaultImage, message.sender.name, message.sender.username, message.createdAt]
+        ]),
         MessageInfo.createFieldRow("readBy","Read by",
-          readBy.map(function({id,image,name,username,lastRead}){
+          readBy.length>0 ? readBy.map(function({id,image,name,username,lastRead}){
             return [id,image,name,username,lastRead.time];
-          })
-        ),MessageInfo.createFieldRow("recievedBy","Recieved by",
-          receivedBy.map(function({id,image,name,username,lastReceived}){
+          }) : "Nobody"
+        ),
+        MessageInfo.createFieldRow("recievedBy","Recieved by",
+          receivedBy.length>0 ? receivedBy.map(function({id,image,name,username,lastReceived}){
             return [id,image,name,username,lastReceived.time];
-          })
+          }) : "Nobody"
         )
       ]
     });
@@ -162,6 +177,10 @@ MessageComponent.MessageInfo=class MessageInfo extends UIHandler.Component{
   mount(parent){
     super.mount(parent);
     setTimeout(()=>this.attr({state:"open"}),10);
+  }
+  unmount(){
+    this.attr({state:"close"});
+    setTimeout(()=>super.unmount(),150);
   }
   /**
    * @param {EventListener} clickListener
@@ -183,7 +202,7 @@ MessageComponent.MessageInfo=class MessageInfo extends UIHandler.Component{
   static createFieldRow(fieldName,text,values){
     const textContents=typeof values === "string" ? [DOM.create("div",{
       class:"text-content",
-      text:values
+      html:values
     })] : values.map(value=>{
       const listItem=new ListItem(...value);
       return listItem.element;

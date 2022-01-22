@@ -41,12 +41,7 @@ const App = new class AppManager {
 
             App.request(`/chat/${message.chatId}/updateLastRead?message=${message.id}`, {
               method: "GET"
-            })
-              .then(data => {
-              })
-              .catch((ex) => {
-                console.log(ex);
-              });
+            });
           }
           if (chatItem.id === message.chatId) {
             /** @type {ChatItem} */
@@ -266,13 +261,11 @@ const App = new class AppManager {
       App.popAlert(response.message);
     }
   }
-  /**
-   * @param {HTMLFormElement} form
-   * @param {Chat} chat */
-  async sendMessage(form, chat) {
+  /** @param {HTMLFormElement} form */
+  async sendMessage(form) {
     const formData = new FormData(form);
     const date = new Date();
-    const tempMessage = new Message("temp_" + date.getTime(), chat.id, {
+    const tempMessage = new Message("temp_" + date.getTime(), form.elements.namedItem("chatId").value, {
       ...App.session.currentUser,
       _id: App.session.currentUser.id
     }, formData.get("content"), date);
@@ -292,15 +285,13 @@ const App = new class AppManager {
         body: new URLSearchParams(formData)
       }).then(/** @param {MessageResponse} data */data => {
         const message = Message.from(data);
+        App.data.chats.get(message.chatId).messages.push(message);
         const messageIndex = chatItem.chatArea.messages.findIndex(component => component.id === tempMessage.id);
         if (messageIndex >= 0)
           chatItem.updateMessage(messageIndex, message);
         else
           chatItem.addMessage(message);
-      }).catch(ex => {
-        let n = new UINotification("failed to send message <br/>" + ex, [], "error");
-        n.mount(UI.container.notifications);
-      });
+      }).catch(ex => App.popError("failed to send message", ex));
     }
   }
 

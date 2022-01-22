@@ -64,7 +64,8 @@ class ChatArea extends UIHandler.Component {
   updateMessage(index, message) {
     const component = this.#messages.get(index);
     component.sent = true;
-    component
+    component.id = message.id;
+    component.contentElement.innerHTML = message.content;
     // this.#messages.update(index,component);
   }
   getMessageCount() {
@@ -142,6 +143,12 @@ class ChatArea extends UIHandler.Component {
       method: "POST",
       children: [
         DOM.create("input", {
+          type: "hidden",
+          name: "chatId",
+          value: chat.id,
+          disabled: true
+        }),
+        DOM.create("input", {
           type: "text",
           name: "content",
           placeholder: "Type a message...",
@@ -165,7 +172,7 @@ class ChatArea extends UIHandler.Component {
     }, {/* No styles */ }, {
       submit(event) {
         event.preventDefault();
-        App.sendMessage(event.currentTarget, chat);
+        App.sendMessage(event.currentTarget);
         event.currentTarget.reset();
       } // onsubmit
     });
