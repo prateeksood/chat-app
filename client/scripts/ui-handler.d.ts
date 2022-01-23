@@ -10,6 +10,13 @@ class UIHandler{
     [id:string]: ComponentList<Component>;
     chatItems: ComponentList<ChatItem>;
   }
+  container:{
+    [id:string]: Component<HTMLElement>,
+    main: Component<HTMLDivElement>,
+    chat: Component<HTMLDivElement>,
+    auth: Component<HTMLDivElement>,
+    loader: Component<HTMLDivElement>
+  }
 }
 
 interface ComponentLists{

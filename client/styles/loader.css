@@ -19,9 +19,13 @@
   align-items: center;
 }
 .loader .loading-message{
-  color: #fff;
+  color: #999;
   font-weight: 600;
-  font-size: 2em;
+  /* font-size: 2em; */
+}
+.loader svg{
+  width:7em;
+  height:7em;
 }
 .loader .chat-box{
   fill:none;

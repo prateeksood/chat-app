@@ -13,26 +13,26 @@
   <link rel="stylesheet" href="styles/chat.css" />
   <link rel="stylesheet" href="styles/profile.css" />
   <link rel="stylesheet" href="styles/components/context-menu.css" />
-  <script type="text/javascript" src="data/sample-users.js"></script>
-  <script type="text/javascript" src="data/sample-messages.js"></script>
-  <script type="text/javascript" src="./helpers/sanitize.js"></script>
-  <script type="text/javascript" src="scripts/dom.js"></script>
-  <script type="text/javascript" src="scripts/listener.js"></script>
-  <script type="text/javascript" src="scripts/sessions.js"></script>
-  <script type="text/javascript" src="scripts/data-manager.js"></script>
-  <script type="text/javascript" src="scripts/ui-handler.js"></script>
-  <script type="text/javascript" src="scripts/types/user.js"></script>
-  <script type="text/javascript" src="scripts/types/chat.js"></script>
-  <script type="text/javascript" src="scripts/auto-updater.js"></script>
-  <script type="text/javascript" src="scripts/components/loader.js"></script>
-  <script type="text/javascript" src="scripts/components/popup.js"></script>
-  <script type="text/javascript" src="scripts/components/profile.js"></script>
-  <script type="text/javascript" src="scripts/components/message-container.js"></script>
-  <script type="text/javascript" src="scripts/components/_chat-area.js"></script>
-  <script type="text/javascript" src="scripts/components/_friends-area.js"></script>
-  <script type="text/javascript" src="scripts/components/context-menu.js"></script>
-  <script type="text/javascript" src="scripts/populate-db.js"></script>
-  <script type="text/javascript" src="scripts/main.js"></script>
+  <script type="text/javascript" defer src="data/sample-users.js"></script>
+  <script type="text/javascript" defer src="data/sample-messages.js"></script>
+  <script type="text/javascript" defer src="./helpers/sanitize.js"></script>
+  <script type="text/javascript" defer src="scripts/dom.js"></script>
+  <script type="text/javascript" defer src="scripts/listener.js"></script>
+  <script type="text/javascript" defer src="scripts/sessions.js"></script>
+  <script type="text/javascript" defer src="scripts/data-manager.js"></script>
+  <script type="text/javascript" defer src="scripts/ui-handler.js"></script>
+  <script type="text/javascript" defer src="scripts/types/user.js"></script>
+  <script type="text/javascript" defer src="scripts/types/chat.js"></script>
+  <script type="text/javascript" defer src="scripts/auto-updater.js"></script>
+  <script type="text/javascript" defer src="scripts/components/loader.js"></script>
+  <script type="text/javascript" defer src="scripts/components/popup.js"></script>
+  <script type="text/javascript" defer src="scripts/components/profile.js"></script>
+  <script type="text/javascript" defer src="scripts/components/message-container.js"></script>
+  <script type="text/javascript" defer src="scripts/components/_chat-area.js"></script>
+  <script type="text/javascript" defer src="scripts/components/_friends-area.js"></script>
+  <script type="text/javascript" defer src="scripts/components/context-menu.js"></script>
+  <script type="text/javascript" defer src="scripts/populate-db.js"></script>
+  <script type="text/javascript" defer src="scripts/main.js"></script>
 </head>
 
 <body>
@@ -138,7 +138,7 @@
     </g>
   </svg>
   <div class="container" c-id="main">
-    <!-- <div class="container absolute" c-id="chat" c-unmount="false">
+    <div class="container absolute" c-id="chat" c-unmount="true">
       <aside id="left-section" c-id="sideBar" c-parent-id="chat">
         <div class="top-bar" id="left-top-bar">
           <button class="dp-holder" c-id="userDPHolder" c-parent-id="chat">
@@ -232,8 +232,8 @@
           </div>
         </div>
       </section>
-    </div> -->
-    <!-- <div class="container absolute auth" c-id="auth" c-unmount="true">
+    </div>
+    <div class="container absolute auth" c-id="auth" c-unmount="true">
       <div class="form-holder" active="login" c-id="formHolder" c-parent-id="auth">
         <form c-id="registerForm" c-parent-id="auth" c-unmount="true">
           <h2>Register</h2>
@@ -272,16 +272,31 @@
           </p>
         </form>
       </div>
-    </div> -->
-    <page-loader message="Almost There"></page-loader>
-    <chat-element style="display: none;"></chat-element>
-    <auth-element style="display: none;"></auth-element>
+    </div>
+    <div class="loader-container" c-id="loader">
+      <div class="loader">
+        <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path class="chat-box"
+              d="m113.28204,32l-79.89743,0a14.76,13.845 0 0 0 -14.71795,13.80556l0,47.33333a14.76,13.845 0 0 0 14.71795,13.80556l10.51282,0l0,19.72222l24.63154,-19.26368a2.10256,1.97222 0 0 1 1.34827,-0.45854l43.4048,0a14.76,13.845 0 0 0 14.71795,-13.80556l0,-47.33333a14.76,13.845 0 0 0 -14.71795,-13.80556z" />
+            <circle class="circle" cx="48.10256" cy="69.47222" r="7.70634" id="svg_2" stroke="null" />
+            <circle class="circle" cx="73.33333" cy="69.47222" r="7.70635" id="svg_3" stroke="null" />
+            <circle class="circle" cx="98.5641" cy="69.47222" r="7.70635" id="svg_4" stroke="null" />
+          </g>
+        </svg>
+        <div class="loading-message">Almost There</div>
+      </div>
+    </div>
+
+    <!-- <page-loader message="Almost There"></page-loader> -->
+    <!-- <chat-element style="display: none;"></chat-element>
+    <auth-element style="display: none;"></auth-element> -->
     <div class="container absolute prompt" c-id="prompts"></div>
     <div class="container absolute notification" c-id="notifications"></div>
   </div>
-  <script src="./custom-components/chat-element.js"></script>
+  <!-- <script src="./custom-components/chat-element.js"></script>
   <script src="./custom-components/auth-element.js"></script>
-  <script src="./custom-components/page-loader.js"></script>
+  <script src="./custom-components/page-loader.js"></script> -->
 </body>
 
 </html>
