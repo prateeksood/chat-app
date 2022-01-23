@@ -104,18 +104,17 @@ const App = new class AppManager {
       this.#messageListener.on(type, action);
     }
     onconnect(data) {
-      console.log("Socket connected: ", data);
+      // console.log("Socket connected: ", data);
       UI.container.chat.sub.infoArea.unmount();
     }
     ondisconnect(data) {
-      console.log("Socket connection disconnected", data);
+      // console.log("Socket connection disconnected", data);
       clearInterval(this.#lastSeenInterval);
       App.connectionInfo("Unable to connect to the server, please check your internet connection.", () => {
         this.connect();
-      });
+      }, false);
     }
     onerror(error) {
-      console.log(error);
       App.connectionInfo(error, () => {
         this.connect();
       });
@@ -242,11 +241,14 @@ const App = new class AppManager {
       .then(async user => {
         App.session.currentUser = User.from(user);
         App.loadUser(App.session.currentUser);
+        if (UI.container.loader.mounted)
+          UI.container.loader.unmount();
       })
-      .catch((ex) => {
-        console.log(ex);
+      .catch(() => {
         UI.container.chat.unmount();
         UI.container.auth.mount(UI.container.main);
+        if (UI.container.loader.mounted)
+          UI.container.loader.unmount();
       });
   }
   async logout() {
@@ -323,7 +325,11 @@ const App = new class AppManager {
           App.popError(error[0] === "{" ? JSON.parse(error).message : error);
         } else
           resolve(await response.json());
-      }).catch(ex => App.popError(ex));
+      }).catch(ex =>{
+        if (allowReject)
+          reject(ex);
+        App.popError(ex.message);
+      });
     });
   }
   /** @param {Object<string,string|Blob|File>} object */
@@ -390,12 +396,14 @@ const App = new class AppManager {
   /**
    * @param {string} text
    * @param {()} action */
-  connectionInfo(text, action = () => { }) {
+  connectionInfo(text, action = () => { }, set_timeout = true) {
     clearTimeout(this.#timeout);
     const { infoArea } = UI.container.chat.sub;
     infoArea.mount(UI.container.chat.sub.sideBar);
     infoArea.sub.content.attr({ text });
     infoArea.sub.button.event({ click: action });
+    if(!set_timeout)
+      return;
     let seconds = 10;
     this.#timeout = setInterval(() => {
       infoArea.sub.time.attr({ text: "Retrying to connect in " + seconds + "s" });
@@ -816,15 +824,12 @@ UI.onInit(ui => {
   // Populate db with dummy data
   // populate();
   // createChats();
-
 });
 
 window.addEventListener("load", async function () {
   // loader.mount(UI.container.main);
   await App.auth();
   UI.init();
-  if (UI.container.loader.mounted)
-    UI.container.loader.unmount();
 });
 
 function isTrue() {
