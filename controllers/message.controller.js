@@ -64,4 +64,26 @@ module.exports = class MessageController {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
     }
   }
+
+  /**
+   * @param {import("express").Request} request
+   * @param {import("express").Response} response
+   * @param {import("express").NextFunction} next
+   */
+  static async deleteMessageByMessageId(request, response, next) {
+    try {
+      const { messageID } = request.params;
+      const { _id: currentUser } = request.user;
+      if (!MessageService.isValidId(messageID)) {
+        response.status(400).json({ message: "Invalid chat id" });
+        return
+      }
+
+      const updatedMessage = await MessageService.findMessageByIdAndUpdate(messageID, { deletedBy: { user: currentUser } }, "push");
+      response.status(200).json(updatedMessage);
+    } catch (ex) {
+      response.status(500).json({ message: `Something went wrong: ${ex.message}` });
+    }
+
+  }
 }

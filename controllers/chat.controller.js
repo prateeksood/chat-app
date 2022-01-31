@@ -79,12 +79,14 @@ module.exports = class ChatController {
 
     try {
       const { pageSize, skips } = request.query;
+      console.log(skips)
       const { _id: currentUserId } = request.user;
-      const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId }, { pageSize, skips });
+      const foundChats = await ChatService.getChatsByParams({ "participants.user": currentUserId }, { pageSize, skips }, currentUserId);
       foundChats.forEach(async chat => {
         const lastMessageId = chat.messages[0];
         await ChatService.findChatAndUpdate({ _id: chat._id, "participants.user": currentUserId }, { "participants.$.meta.lastReceived": { message: lastMessageId, time: new Date() } });
       })
+      console.log(foundChats)
       response.status(200).json(foundChats);
     } catch (ex) {
       response.status(500).json({ message: `Something went wrong: ${ex.message}` });
@@ -115,7 +117,7 @@ module.exports = class ChatController {
       const { chatID } = request.params;
       let lastMessageId = message;
       if (!lastMessageId) {
-        const chat = await ChatService.getChatById(chatID);
+        const chat = await ChatService.getChatById(chatID, currentUserId);
         lastMessageId = chat.messages[0]._id;
       }
       await ChatService.findChatAndUpdate({ _id: chatID, "participants.user": currentUserId }, { "participants.$.meta.lastRead": { message: lastMessageId, time: new Date() } });
