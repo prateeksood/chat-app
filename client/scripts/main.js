@@ -201,16 +201,26 @@ const App = new class AppManager {
       method: "GET"
     }).then(/** @param {ChatResponse[]} data */data => {
       // const profilePicturesUri = "/resources/profilePictures";
+      document.querySelector(".left-main")?.querySelector(".local-loader")?.remove();
       data.forEach(chatResponse => {
         const chat = Chat.from(chatResponse);
         App.data.chats.add(chat.id, chat);
-      });
-    });
+      })
+    })
+      .catch(ex => {
+        console.log(ex);
+      })
+      .finally(() => {
+        document.querySelector(".left-main")?.querySelector(".local-loader")?.remove();
+      })
   }
   async fetchMessages(chatId) {
     let skips = 0;
     UI.list.chatItems.find((chatItem, index) => {
       if (chatItem.id === chatId) {
+        const messageLoader = new LocalLoader();
+        const rightMain = document.querySelector(".right-main");
+        rightMain.prepend(messageLoader.element)
         /** @type {ChatItem} */
         const chatItem = UI.list.chatItems.get(index);
         skips = chatItem.chatArea.getMessageCount();
@@ -227,7 +237,10 @@ const App = new class AppManager {
             console.log(ex)
             UI.container.chat.unmount();
             UI.container.auth.mount(UI.container.main);
-          });
+          })
+          .finally(() => {
+            rightMain?.querySelector(".local-loader")?.remove();
+          })
         return true;
       }
       return false;
@@ -325,7 +338,7 @@ const App = new class AppManager {
           App.popError(error[0] === "{" ? JSON.parse(error).message : error);
         } else
           resolve(await response.json());
-      }).catch(ex =>{
+      }).catch(ex => {
         if (allowReject)
           reject(ex);
         App.popError(ex.message);
@@ -402,7 +415,7 @@ const App = new class AppManager {
     infoArea.mount(UI.container.chat.sub.sideBar);
     infoArea.sub.content.attr({ text });
     infoArea.sub.button.event({ click: action });
-    if(!set_timeout)
+    if (!set_timeout)
       return;
     let seconds = 10;
     this.#timeout = setInterval(() => {
@@ -424,36 +437,44 @@ UI.onInit(ui => {
   const chatObserver = new IntersectionObserver(elements => {
     const lastChat = elements[0];
     if (!lastChat.isIntersecting) return;
+    const chatLoader = new LocalLoader();
+    const leftMain = document.querySelector(".left-main");
+    if (leftMain.querySelector(".local-loader"))
+      leftMain.querySelector(".local-loader").remove()
+    leftMain.append(chatLoader.element)
     App.populateFriendsList();
   }, {
     rootMargin: "150px"
   });
 
   const unobserveLastChat = (chat) => {
-    const observedChat = document.querySelector(".list-item:nth-last-child(2)");
+    const observedChat = document.querySelector(".list-item:nth-last-of-type(2)");
     if (observedChat)
       chatObserver.unobserve(observedChat);
   }
   const observeLastChat = () => {
-    const toBeObservedChat = document.querySelector(".list-item:last-child");
+    const toBeObservedChat = document.querySelector(".list-item:nth-last-of-type(1)");
     chatObserver.observe(toBeObservedChat);
   }
   const messageObserver = new IntersectionObserver(elements => {
     const lastMessage = elements[0];
     if (!lastMessage.isIntersecting) return;
     const currentChatId = App.data.chats.getSelected();
+    // const messageLoader = new localLoader();
+    // messageLoader.mount(UI.container.chat.sub.messagesArea);
     App.fetchMessages(currentChatId);
     messageObserver.unobserve(lastMessage.target);
+    // messageLoader.unmount();
   }, {
     // rootMargin: "150px"
   });
   const unobserveLastMessage = () => {
-    const observedMessage = document.querySelector(".message-container:nth-child(2)");
+    const observedMessage = document.querySelector(".message-container:nth-of-type(2)");
     if (observedMessage)
       messageObserver.unobserve(observedMessage);
   }
   const observeLastMessage = () => {
-    const toBeObservedMessage = document.querySelector(".message-container");
+    const toBeObservedMessage = document.querySelector(".message-container:nth-of-type(1)");
     messageObserver.observe(toBeObservedMessage);
   }
 

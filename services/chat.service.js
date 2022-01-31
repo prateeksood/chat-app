@@ -34,7 +34,7 @@ module.exports = class ChatService {
               }
             ],
             options: {
-              sort: { updatedAt: -1 }
+              sort: { createdAt: -1 }
             }
           }, {
             path: "participants.user",
@@ -51,7 +51,7 @@ module.exports = class ChatService {
     }
   }
 
-  static async getChatById(chatId) {
+  static async getChatById(chatId, currentUserId) {
     try {
       if (mongoose.isValidObjectId(chatId)) {
         const foundChat = await ChatModel.findById(chatId)
@@ -59,6 +59,7 @@ module.exports = class ChatService {
             {
               path: "messages",
               perDocumentLimit: 30,
+              match: { "deletedBy.user": { $ne: currentUserId } },
               populate: [
                 "createdAt",
                 {
@@ -82,7 +83,7 @@ module.exports = class ChatService {
                 }
               ],
               options: {
-                sort: { updatedAt: -1 }
+                sort: { createdAt: -1 }
               }
             }, {
               path: "participants.user",
@@ -114,9 +115,10 @@ module.exports = class ChatService {
    * 
    * @param {{}} params 
    * @param {{}} options 
+   * @param {String} currentUserId
    * @returns {Chat[]}
    */
-  static async getChatsByParams(params, options = {}) {
+  static async getChatsByParams(params, options = {}, currentUserId) {
     const skips = Number(options.skips || 0);
     const pageSize = Number(options.pageSize || 10);
     try {
@@ -126,6 +128,7 @@ module.exports = class ChatService {
           {
             path: "messages",
             perDocumentLimit: 30,
+            match: { "deletedBy.user": { $ne: currentUserId } },
             populate: [
               "createdAt",
               {
@@ -149,7 +152,7 @@ module.exports = class ChatService {
               }
             ],
             options: {
-              sort: { updatedAt: -1 }
+              sort: { createdAt: -1 }
             }
           }, {
             path: "participants.user",
